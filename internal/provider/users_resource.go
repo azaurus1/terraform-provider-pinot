@@ -123,6 +123,24 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
+	user, err := r.client.GetUser(state.Username, state.Component)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get user", err.Error())
+		return
+	}
+
+	state.Username = user.Username
+	state.Password = user.Password
+	state.Component = user.Component
+	state.Role = user.Role
+
+	// set state to populated data
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 }
 
 func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -130,13 +148,6 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// get user
-	getUser, err := r.client.GetUser(plan.Username, plan.Component)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to get user", err.Error())
 		return
 	}
 
@@ -152,7 +163,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var passwordChanged = false
 	var user goPinotModel.User
 
-	if getUser.Password != plan.Password {
+	if state.Password != plan.Password {
 		passwordChanged = true
 		user = goPinotModel.User{
 			Username:  plan.Username,
@@ -163,7 +174,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	} else {
 		user = goPinotModel.User{
 			Username:  plan.Username,
-			Password:  getUser.Password,
+			Password:  state.Password,
 			Component: plan.Component,
 			Role:      plan.Role,
 		}
