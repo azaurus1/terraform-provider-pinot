@@ -76,6 +76,7 @@ func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 						"password": schema.StringAttribute{
 							Description: "The password of the user.",
 							Computed:    true,
+							// Sensitive:   true,
 						},
 						"component": schema.StringAttribute{
 							Description: "The component of the user.",

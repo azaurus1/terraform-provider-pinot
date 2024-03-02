@@ -114,5 +114,7 @@ func (p *pinotProvider) DataSources(_ context.Context) []func() datasource.DataS
 
 // Resources defines the resources implemented in the provider.
 func (p *pinotProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		NewUserResource,
+	}
 }
