@@ -10,11 +10,11 @@ provider "pinot" {
   controller_url     = "http://localhost:9000"
 }
 
-resource "pinot_user" "edu" {
+resource "pinot_user" "test" {
     username = "edu"
-    password = "password"
+    password = "password1"
     component = "BROKER"
-    role = "ADMIN"
+    role = "USER"
 }
 
 data "pinot_users" "edu" {}
