@@ -125,7 +125,57 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 }
 
-func (r *userResource) Update(_ context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan userResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// get user from state
+	// compare for password change
+
+	var state userResourceModel
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var passwordChanged bool
+	if state.Password != plan.Password {
+		passwordChanged = true
+	}
+
+	// Generate API request from plan
+	// Convert plan into []byte
+
+	user := goPinotModel.User{
+		Username:  plan.Username,
+		Password:  plan.Password,
+		Component: plan.Component,
+		Role:      plan.Role,
+	}
+
+	userBytes, err := json.Marshal(user)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	_, err = r.client.UpdateUser(plan.Username, plan.Component, passwordChanged, userBytes)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to update user", err.Error())
+		return
+	}
+
+	// set state to populated data
+	diags = resp.State.Set(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 }
 
 func (r *userResource) Delete(_ context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
