@@ -133,7 +133,13 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	// get user from state
+	// get user
+	getUser, err := r.client.GetUser(plan.Username, plan.Component)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get user", err.Error())
+		return
+	}
+
 	// compare for password change
 
 	var state userResourceModel
@@ -143,20 +149,29 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	var passwordChanged bool
-	if state.Password != plan.Password {
+	var passwordChanged = false
+	var user goPinotModel.User
+
+	if getUser.Password != plan.Password {
 		passwordChanged = true
+		user = goPinotModel.User{
+			Username:  plan.Username,
+			Password:  plan.Password,
+			Component: plan.Component,
+			Role:      plan.Role,
+		}
+	} else {
+		user = goPinotModel.User{
+			Username:  plan.Username,
+			Password:  getUser.Password,
+			Component: plan.Component,
+			Role:      plan.Role,
+		}
+
 	}
 
 	// Generate API request from plan
 	// Convert plan into []byte
-
-	user := goPinotModel.User{
-		Username:  plan.Username,
-		Password:  plan.Password,
-		Component: plan.Component,
-		Role:      plan.Role,
-	}
 
 	userBytes, err := json.Marshal(user)
 	if err != nil {
@@ -178,5 +193,24 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 }
 
-func (r *userResource) Delete(_ context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state userResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	_, err := r.client.DeleteUser(state.Username, state.Component)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to delete user", err.Error())
+		return
+	}
+
+	// set state to populated data
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }

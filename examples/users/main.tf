@@ -11,14 +11,14 @@ provider "pinot" {
 }
 
 resource "pinot_user" "test" {
-    username = "edu"
-    password = "password1"
+    username = "liam"
+    password = "password"
     component = "BROKER"
-    role = "USER"
+    role = "ADMIN"
 }
 
 data "pinot_users" "edu" {}
 
-output "edu_users" {
-  value = data.pinot_users.edu
-}
+# output "edu_users" {
+#   value = data.pinot_users.edu
+# }
