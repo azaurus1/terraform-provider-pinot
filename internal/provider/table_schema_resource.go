@@ -10,6 +10,11 @@ import (
 	"google.golang.org/appengine/log"
 )
 
+var (
+	_ resource.Resource              = &tableSchemaResource{}
+	_ resource.ResourceWithConfigure = &tableSchemaResource{}
+)
+
 type tableSchemaResource struct {
 	client *pinot.PinotAPIClient
 }
