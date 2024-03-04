@@ -14,11 +14,15 @@ resource "pinot_user" "test" {
     username = "liam"
     password = "password"
     component = "BROKER"
-    role = "ADMIN"
+    role = "USER"
+
+    lifecycle {
+    ignore_changes = [password]
+  }
 }
 
 data "pinot_users" "edu" {}
 
-# output "edu_users" {
-#   value = data.pinot_users.edu
-# }
+output "edu_users" {
+  value = data.pinot_users.edu
+}
