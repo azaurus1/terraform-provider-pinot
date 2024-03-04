@@ -26,31 +26,8 @@ func NewTableSchemaResource() resource.Resource {
 }
 
 type tableSchemaResourceModel struct {
-	Name                          types.String         `json:"schemaName" tfsdk:"schema_name"`
-	EnableColumnBasedNullHandling types.Bool           `json:"enableColumnBasedNullHandling" tfsdk:"enable_column_based_null_handling"`
-	DimensionFieldSpec            []dimensionFieldSpec `json:"dimensionFieldSpecs" tfsdk:"dimension_field_specs"`
-	MetricFieldSpec               []metricFieldSpec    `json:"metricFieldSpecs" tfsdk:"metric_field_specs"`
-	DateTimeFieldSpec             []dateTimeFieldSpec  `json:"dateTimeFieldSpecs" tfsdk:"date_time_field_specs"`
-}
-
-type dimensionFieldSpec struct {
-	Name     types.String `json:"name" tfsdk:"name"`
-	DataType types.String `json:"dataType" tfsdk:"data_type"`
-	NotNull  types.Bool   `json:"notNull" tfsdk:"not_null"`
-}
-
-type metricFieldSpec struct {
-	Name     types.String `json:"name" tfsdk:"name"`
-	DataType types.String `json:"dataType" tfsdk:"data_type"`
-	NotNull  types.Bool   `json:"notNull" tfsdk:"not_null"`
-}
-
-type dateTimeFieldSpec struct {
-	Name        types.String `json:"name" tfsdk:"name"`
-	DataType    types.String `json:"dataType" tfsdk:"data_type"`
-	NotNull     types.Bool   `json:"notNull" tfsdk:"not_null"`
-	Format      types.String `json:"format" tfsdk:"format"`
-	Granularity types.String `json:"granularity" tfsdk:"granularity"`
+	SchemaName types.String `tfsdk:"schema_name"`
+	Schema     types.String `tfsdk:"schema"`
 }
 
 func (t *tableSchemaResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -82,88 +59,9 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Description: "The name of the schema.",
 				Required:    true,
 			},
-			"enable_column_based_null_handling": schema.BoolAttribute{
-				Description: "Enable column based null handling.",
-				Optional:    true,
-			},
-			"dimension_field_specs": schema.ListNestedAttribute{
-				Description: "The dimension field specs.",
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "The name of the dimension field.",
-							Required:    true,
-							Computed:    true,
-						},
-						"data_type": schema.StringAttribute{
-							Description: "The data type of the dimension field.",
-							Required:    true,
-							Computed:    true,
-						},
-						"not_null": schema.BoolAttribute{
-							Description: "The not null of the dimension field.",
-							Optional:    true,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"metric_field_specs": schema.ListNestedAttribute{
-				Description: "The metric field specs.",
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "The name of the metric field.",
-							Required:    true,
-							Computed:    true,
-						},
-						"data_type": schema.StringAttribute{
-							Description: "The data type of the metric field.",
-							Required:    true,
-							Computed:    true,
-						},
-						"not_null": schema.BoolAttribute{
-							Description: "The not null of the metric field.",
-							Optional:    true,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"date_time_field_specs": schema.ListNestedAttribute{
-				Description: "The date time field specs.",
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "The name of the date time field.",
-							Required:    true,
-							Computed:    true,
-						},
-						"data_type": schema.StringAttribute{
-							Description: "The data type of the date time field.",
-							Required:    true,
-							Computed:    true,
-						},
-						"not_null": schema.BoolAttribute{
-							Description: "The not null of the date time field.",
-							Optional:    true,
-							Computed:    true,
-						},
-						"format": schema.StringAttribute{
-							Description: "The format of the date time field.",
-							Optional:    true,
-							Computed:    true,
-						},
-						"granularity": schema.StringAttribute{
-							Description: "The granularity of the date time field.",
-							Optional:    true,
-							Computed:    true,
-						},
-					},
-				},
+			"schema": schema.StringAttribute{
+				Description: "The schema definition.",
+				Required:    true,
 			},
 		},
 	}
@@ -180,13 +78,14 @@ func (t *tableSchemaResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	pinotModelSchema, err := toPinotSchemaModel(*t)
+	var pinotSchema model.Schema
+	err := json.Unmarshal([]byte(plan.Schema.ValueString()), &pinotSchema)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to convert to pinot schema model", err.Error())
+		resp.Diagnostics.AddError("Create Failed: Unable to unmarshal schema", err.Error())
 		return
 	}
 
-	_, err = t.client.CreateSchema(pinotModelSchema)
+	_, err = t.client.CreateSchema(pinotSchema)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create schema", err.Error())
 		return
@@ -210,24 +109,13 @@ func (t *tableSchemaResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	tableSchema, err := t.client.GetSchema(state.Name.String())
+	tableSchema, err := t.client.GetSchema(state.SchemaName.String())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to get schema", err.Error())
 		return
 	}
 
-	resourceModel, err := fromPinotSchemaModel(*tableSchema)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to convert to resource model", err.Error())
-		return
-
-	}
-
-	state.Name = resourceModel.Name
-	state.EnableColumnBasedNullHandling = resourceModel.EnableColumnBasedNullHandling
-	state.DimensionFieldSpec = resourceModel.DimensionFieldSpec
-	state.MetricFieldSpec = resourceModel.MetricFieldSpec
-	state.DateTimeFieldSpec = resourceModel.DateTimeFieldSpec
+	state.SchemaName = types.StringValue(tableSchema.SchemaName)
 
 	diagnostics = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diagnostics...)
@@ -246,13 +134,15 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	schemaToUpdate, err := toPinotSchemaModel(*t)
+	var pinotSchema model.Schema
+	err := json.Unmarshal([]byte(plan.Schema.ValueString()), &pinotSchema)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to convert to pinot schema model", err.Error())
+		resp.Diagnostics.AddWarning(plan.Schema.String(), "")
+		resp.Diagnostics.AddError("Update Failed: Unable to unmarshal schema", plan.Schema.String())
 		return
 	}
 
-	_, err = t.client.UpdateSchema(schemaToUpdate)
+	_, err = t.client.UpdateSchema(pinotSchema)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update schema", err.Error())
 		return
@@ -274,13 +164,7 @@ func (t *tableSchemaResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	schemaToDelete, err := toPinotSchemaModel(*t)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to convert to pinot schema model", err.Error())
-		return
-	}
-
-	_, err = t.client.DeleteSchema(schemaToDelete.SchemaName)
+	_, err := t.client.DeleteSchema(state.SchemaName.String())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete schema", err.Error())
 		return
@@ -291,38 +175,4 @@ func (t *tableSchemaResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func toPinotSchemaModel(tfModel tableSchemaResource) (model.Schema, error) {
-
-	var pinotSchemaModel model.Schema
-
-	outBytes, err := json.Marshal(tfModel)
-	if err != nil {
-		return pinotSchemaModel, err
-	}
-
-	err = json.Unmarshal(outBytes, &pinotSchemaModel)
-	if err != nil {
-		return pinotSchemaModel, err
-	}
-
-	return pinotSchemaModel, nil
-}
-
-func fromPinotSchemaModel(pinotModel model.Schema) (tableSchemaResourceModel, error) {
-
-	var tfModel tableSchemaResourceModel
-
-	outBytes, err := json.Marshal(pinotModel)
-	if err != nil {
-		return tfModel, err
-	}
-
-	err = json.Unmarshal(outBytes, &tfModel)
-	if err != nil {
-		return tfModel, err
-	}
-
-	return tfModel, nil
 }
