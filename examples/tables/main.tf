@@ -17,4 +17,5 @@ data "pinot_tables" "edu" {}
 
 output "edu_tables" {
   value = data.pinot_tables.edu
+  
 }
