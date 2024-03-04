@@ -7,14 +7,14 @@ terraform {
 }
 
 provider "pinot" {
-  controller_url     = "http://localhost:9000"
+  controller_url = "http://localhost:9000"
 }
 
 resource "pinot_user" "test" {
-    username = "liam"
-    password = "password"
-    component = "BROKER"
-    role = "ADMIN"
+  username  = "test"
+  password  = "password"
+  component = "BROKER"
+  role      = "ADMIN"
 }
 
 data "pinot_users" "edu" {}
