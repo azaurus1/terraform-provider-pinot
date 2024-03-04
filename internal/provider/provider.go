@@ -109,6 +109,7 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 func (p *pinotProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewUsersDataSource,
+		NewTablesDataSource,
 	}
 }
 
