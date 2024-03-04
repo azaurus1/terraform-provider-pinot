@@ -11,7 +11,7 @@ provider "pinot" {
 }
 
 resource "pinot_user" "test" {
-    username = "liam"
+    username = "test"
     password = "password"
     component = "BROKER"
     role = "ADMIN"
