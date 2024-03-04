@@ -122,6 +122,9 @@ type TierConfig struct {
 	ServerTag           types.String `tfsdk:"server_tag"`
 }
 
+// Everything Above here set as JsonTypes?
+// And then when we are setting the state we use jsonTypes.NewExactValue?
+
 type tablesModel struct {
 	TableName        types.String         `tfsdk:"table_name"`
 	TableType        types.String         `tfsdk:"table_type"`
