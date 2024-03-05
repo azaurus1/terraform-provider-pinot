@@ -37,6 +37,7 @@ type pinotProvider struct {
 
 type pinotProviderModel struct {
 	ControllerURL string `tfsdk:"controller_url"`
+	AuthToken string `tfsdk:"auth_token"`
 }
 
 // Metadata returns the provider type name.
@@ -53,6 +54,9 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 				Description: "The URL of the Pinot controller.",
 				Required:    true,
 			},
+			"auth_token" : schema.StringAttribute{
+				Description: "The auth token for the Pinot controller.",
+				Required:    false,
 		},
 	}
 }
@@ -79,6 +83,18 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
+	// if config.AuthToken == "" {
+	// 	resp.Diagnostics.AddAttributeError(
+	// 		path.Root("controller_url"),
+	// 		"The auth_token must be set.",
+	// 		"The provider cannot create the Pinot API client without a valid auth token.",
+	// 	)
+	// }
+
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
+
 	controllerURL := os.Getenv("PINOT_CONTROLLER_URL")
 
 	if !(config.ControllerURL == "") {
@@ -89,6 +105,17 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
+	authToken := os.Getenv("PINOT_AUTH_TOKEN")
+
+	if !(config.AuthToken == "") {
+		authToken = config.AuthToken
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+
 	if controllerURL == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
@@ -98,6 +125,16 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
+
+	// if authToken = "" {
+	// 	resp.Diagnostics.AddAttributeError(
+	// 		path.Root("auth_token"),
+	// 		"Missing Auth Token",
+	// 		"The provider cannot create the Controller API client as there is a missing or empty value for the Auth Token. "+
+	// 			"Set the token value in the configuration or use the PINOT_AUTH_TOKEN environment variable. "+
+	// 			"If either is already set, ensure the value is not empty.",
+	// 	)
+	// }
 
 	pinot := goPinotAPI.NewPinotAPIClient(controllerURL)
 
