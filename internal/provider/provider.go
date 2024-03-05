@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 )
@@ -37,7 +39,7 @@ type pinotProvider struct {
 
 type pinotProviderModel struct {
 	ControllerURL string `tfsdk:"controller_url"`
-	AuthToken string `tfsdk:"auth_token"`
+	AuthToken types.String `tfsdk:"auth_token"`
 }
 
 // Metadata returns the provider type name.
@@ -56,7 +58,8 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 			},
 			"auth_token" : schema.StringAttribute{
 				Description: "The auth token for the Pinot controller.",
-				Required:    false,
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -105,15 +108,15 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	authToken := os.Getenv("PINOT_AUTH_TOKEN")
+	// authToken := os.Getenv("PINOT_AUTH_TOKEN")
 
-	if !(config.AuthToken == "") {
-		authToken = config.AuthToken
-	}
+	// if !(config.AuthToken == "") {
+	// 	authToken = config.AuthToken
+	// }
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
 
 
 	if controllerURL == "" {
@@ -126,7 +129,7 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
-	// if authToken = "" {
+	// if authToken == "" {
 	// 	resp.Diagnostics.AddAttributeError(
 	// 		path.Root("auth_token"),
 	// 		"Missing Auth Token",
