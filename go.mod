@@ -1,6 +1,6 @@
 module terraform-provider-pinot
 
-go 1.21.4
+go 1.22
 
 require (
 	github.com/azaurus1/go-pinot-api v0.1.0
@@ -9,6 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.22.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-testing v1.6.0
+	google.golang.org/appengine v1.6.8
 )
 
 require (
@@ -73,7 +74,6 @@ require (
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
 	google.golang.org/grpc v1.61.1 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect

@@ -117,5 +117,6 @@ func (p *pinotProvider) DataSources(_ context.Context) []func() datasource.DataS
 func (p *pinotProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewUserResource,
+		NewTableSchemaResource,
 	}
 }

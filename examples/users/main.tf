@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "pinot" {
-  controller_url     = "http://localhost:9000"
+  controller_url = "http://localhost:9000"
 }
 
 resource "pinot_user" "test" {
