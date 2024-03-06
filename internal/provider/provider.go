@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 )
@@ -39,7 +37,7 @@ type pinotProvider struct {
 
 type pinotProviderModel struct {
 	ControllerURL string `tfsdk:"controller_url"`
-	AuthToken types.String `tfsdk:"auth_token"`
+	AuthToken     string `tfsdk:"auth_token"`
 }
 
 // Metadata returns the provider type name.
@@ -56,7 +54,7 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 				Description: "The URL of the Pinot controller.",
 				Required:    true,
 			},
-			"auth_token" : schema.StringAttribute{
+			"auth_token": schema.StringAttribute{
 				Description: "The auth token for the Pinot controller.",
 				Optional:    true,
 			},
@@ -86,17 +84,17 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	// if config.AuthToken == "" {
-	// 	resp.Diagnostics.AddAttributeError(
-	// 		path.Root("controller_url"),
-	// 		"The auth_token must be set.",
-	// 		"The provider cannot create the Pinot API client without a valid auth token.",
-	// 	)
-	// }
+	if config.AuthToken == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("controller_url"),
+			"The auth_token must be set.",
+			"The provider cannot create the Pinot API client without a valid auth token.",
+		)
+	}
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	controllerURL := os.Getenv("PINOT_CONTROLLER_URL")
 
@@ -108,16 +106,15 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	// authToken := os.Getenv("PINOT_AUTH_TOKEN")
+	authToken := os.Getenv("PINOT_AUTH_TOKEN")
 
-	// if !(config.AuthToken == "") {
-	// 	authToken = config.AuthToken
-	// }
+	if !(config.AuthToken == "") {
+		authToken = config.AuthToken
+	}
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if controllerURL == "" {
 		resp.Diagnostics.AddAttributeError(
@@ -129,17 +126,17 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
-	// if authToken == "" {
-	// 	resp.Diagnostics.AddAttributeError(
-	// 		path.Root("auth_token"),
-	// 		"Missing Auth Token",
-	// 		"The provider cannot create the Controller API client as there is a missing or empty value for the Auth Token. "+
-	// 			"Set the token value in the configuration or use the PINOT_AUTH_TOKEN environment variable. "+
-	// 			"If either is already set, ensure the value is not empty.",
-	// 	)
-	// }
+	if authToken == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("auth_token"),
+			"Missing Auth Token",
+			"The provider cannot create the Controller API client as there is a missing or empty value for the Auth Token. "+
+				"Set the token value in the configuration or use the PINOT_AUTH_TOKEN environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
 
-	pinot := goPinotAPI.NewPinotAPIClient(controllerURL)
+	pinot := goPinotAPI.NewPinotAPIClient(controllerURL, authToken)
 
 	resp.DataSourceData = pinot
 	resp.ResourceData = pinot
