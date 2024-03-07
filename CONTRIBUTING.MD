@@ -19,12 +19,16 @@ See the terraform provider tutorial testing section for more information: [Provi
 
 If this is something you think you can fix, then [fork terraform-provider-pinot] and create a branch with a descriptive name.
 
-#### 2. Implement your fix or feature
+#### 2. Setting up your environment
+Ensure that you have a terraformrc set up, see here for more information: [link](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-provider#prepare-terraform-for-local-provider-install)
+
+
+#### 3. Implement your fix or feature
 At this point, you're ready to make your changes. Feel free to ask for help.
 
-Be sure to also run `go generate` in the project root to generate documentation for your features.
+Be sure to also run `go generate` in the project root to generate documentation, once you have completed your implementation.
 
-#### 3. Create a Pull Request
+#### 4. Create a Pull Request
 At this point, if your changes look good and tests are passing, you are ready to create a pull request.
 
 ## Merging a PR (maintainers only)
@@ -33,5 +37,3 @@ A PR can only be merged into main by a maintainer if:
 2. The PR is up to date with the default branch. 
 
 Any maintainer is allowed to merge a PR if these conditions ae met.
-
-## 
