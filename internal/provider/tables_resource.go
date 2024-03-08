@@ -3,12 +3,14 @@ package provider
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 	"github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -159,7 +161,11 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, err := r.client.DeleteTable(state.TableName.String())
+	log := fmt.Sprintf("Deleting table: %s", state.TableName)
+
+	tflog.Info(ctx, log)
+
+	_, err := r.client.DeleteTable(state.TableName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Delete Failed: Unable to delete table", err.Error())
 		return
