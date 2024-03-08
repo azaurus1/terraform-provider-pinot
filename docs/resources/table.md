@@ -19,3 +19,4 @@ description: |-
 
 - `table` (String) The table definition.
 - `table_name` (String) The name of the table.
+- `table_type` (String) The table type.

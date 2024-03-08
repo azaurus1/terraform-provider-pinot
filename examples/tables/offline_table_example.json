@@ -1,5 +1,5 @@
 {
-  "tableName": "ethereum_mainnet_block_headers",
+  "tableName": "offline_ethereum_mainnet_block_headers",
   "tableType": "OFFLINE",
   "segmentsConfig": {
     "timeType": "MILLISECONDS",
