@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 )
@@ -36,8 +37,8 @@ type pinotProvider struct {
 }
 
 type pinotProviderModel struct {
-	ControllerURL string `tfsdk:"controller_url"`
-	AuthToken     string `tfsdk:"auth_token"`
+	ControllerURL types.String `tfsdk:"controller_url"`
+	AuthToken     types.String `tfsdk:"auth_token"`
 }
 
 // Metadata returns the provider type name.
@@ -52,7 +53,7 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 		Attributes: map[string]schema.Attribute{
 			"controller_url": schema.StringAttribute{
 				Description: "The URL of the Pinot controller.",
-				Required:    true,
+				Optional:    true,
 			},
 			"auth_token": schema.StringAttribute{
 				Description: "The auth token for the Pinot controller.",
@@ -72,7 +73,7 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	if config.ControllerURL == "" {
+	if config.ControllerURL.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("controller_url"),
 			"The controller_url must be set.",
@@ -84,7 +85,7 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	if config.AuthToken == "" {
+	if config.AuthToken.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("controller_url"),
 			"The auth_token must be set.",
@@ -98,8 +99,8 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	controllerURL := os.Getenv("PINOT_CONTROLLER_URL")
 
-	if !(config.ControllerURL == "") {
-		controllerURL = config.ControllerURL
+	if !(config.ControllerURL.IsNull()) {
+		controllerURL = config.ControllerURL.ValueString()
 	}
 
 	if resp.Diagnostics.HasError() {
@@ -108,8 +109,8 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	authToken := os.Getenv("PINOT_AUTH_TOKEN")
 
-	if !(config.AuthToken == "") {
-		authToken = config.AuthToken
+	if !(config.AuthToken.IsNull()) {
+		authToken = config.AuthToken.ValueString()
 	}
 
 	if resp.Diagnostics.HasError() {
