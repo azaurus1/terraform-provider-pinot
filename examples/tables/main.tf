@@ -10,12 +10,15 @@ provider "pinot" {
   controller_url     = "http://localhost:9000"
 }
 
-# resource "pinot_table" "test" {
+resource "pinot_table" "test" {
+  table_name = "blockHeader"
+  table      = file("table_example.json")
+}
+
+# data "pinot_tables" "edu" {
 # }
 
-data "pinot_tables" "edu" {}
-
-output "edu_tables" {
-  value = data.pinot_tables.edu
+# output "edu_tables" {
+#   value = data.pinot_tables.edu
   
-}
+# }

@@ -1,0 +1,62 @@
+{
+    "tableName": "blockHeader",
+    "tableType": "OFFLINE",
+    "segmentsConfig": {
+      "timeColumnName": "time",
+      "timeType": "MILLISECONDS",
+      "replication": "1",
+      "segmentAssignmentStrategy": "BalanceNumSegmentAssignmentStrategy",
+      "segmentPushType": "APPEND",
+      "minimizeDataMovement": true
+    },
+    "tenants": {
+      "broker": "DefaultTenant",
+      "server": "DefaultTenant"
+    },
+    "tableIndexConfig": {
+      "loadMode": "MMAP"
+    },
+    "metadata": {
+      "customConfigs": {
+        "customKey": "customValue"
+      }
+    },
+    "fieldConfigList": [
+      {
+        "name": "blockNumber",
+        "encodingType": "RAW",
+        "indexType": "SORTED",
+        "indexTypes": ["SORTED"],
+        "timestampConfig": {
+          "granulatities": ["DAY"]
+        },
+        "indexes": {
+          "inverted": {
+            "enabled": "false"
+          }
+        }
+      }
+    ],
+    "ingestionConfig": {
+      "segmentTimeValueCheckType": "EPOCH",
+      "transformConfigs": [
+        {
+          "columnName": "blockNumber",
+          "transformFunction": "fromEpochDays(DaysSinceEpoch)"
+        }
+      ],
+      "continueOnError": true,
+      "rowTimeValueCheck": true
+    },
+    "tierConfigs": [
+      {
+        "name": "hotTier",
+        "segmentSelectorType": "time",
+        "segmentAge": "3130d",
+        "storageType": "pinot_server",
+        "serverTag": "DefaultTenant_OFFLINE"
+      }
+    ],
+    "isDimTable": false
+  }
+  

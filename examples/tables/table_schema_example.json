@@ -1,0 +1,20 @@
+{
+    "schemaName": "blockHeader",
+    "dimensionFieldSpecs": [
+      {
+        "name": "blockNumber",
+        "dataType": "LONG",
+        "singleValueField": true
+      }
+    ],
+    "metricFieldSpecs": [],
+    "dateTimeFieldSpecs": [
+      {
+        "name": "time",
+        "dataType": "LONG",
+        "format": "1:MILLISECONDS:EPOCH",
+        "granularity": "1:MILLISECONDS"
+      }
+    ]
+  }
+  
