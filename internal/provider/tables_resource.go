@@ -29,6 +29,7 @@ type tableResource struct {
 type tableResourceModel struct {
 	TableName types.String `tfsdk:"table_name"`
 	Table     types.String `tfsdk:"table"`
+	TableType types.String `tfsdk:"table_type"`
 }
 
 func (r *tableResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -62,6 +63,10 @@ func (r *tableResource) Schema(_ context.Context, req resource.SchemaRequest, re
 			},
 			"table": schema.StringAttribute{
 				Description: "The table definition.",
+				Required:    true,
+			},
+			"table_type": schema.StringAttribute{
+				Description: "The table type.",
 				Required:    true,
 			},
 		},
@@ -112,7 +117,15 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	state.TableName = types.StringValue(table.OFFLINE.TableName)
+	// if table.OFFLINE is not nil, set the state to populated data
+	if table.OFFLINE.TableName != "" {
+		state.TableName = types.StringValue(table.OFFLINE.TableName)
+	}
+
+	// if table.REALTIME is not nil, set the state to populated data
+	if table.REALTIME.TableName != "" {
+		state.TableName = types.StringValue(table.REALTIME.TableName)
+	}
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
