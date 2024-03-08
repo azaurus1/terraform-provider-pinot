@@ -16,6 +16,7 @@ description: |-
 provider "pinot" {
   # example configuration here
   controller_url = "http://localhost:9000"
+  auth_token     = "YWRtaW46dmVyeXNlY3JldA"
 }
 ```
 
@@ -25,3 +26,7 @@ provider "pinot" {
 ### Required
 
 - `controller_url` (String) The URL of the Pinot controller.
+
+### Optional
+
+- `auth_token` (String) The auth token for the Pinot controller.
