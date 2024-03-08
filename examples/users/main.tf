@@ -12,12 +12,12 @@ provider "pinot" {
 }
 
 resource "pinot_user" "test" {
-    username = "liam"
-    password = "password"
-    component = "BROKER"
-    role = "USER"
+  username  = "liam"
+  password  = "password"
+  component = "BROKER"
+  role      = "USER"
 
-    lifecycle {
+  lifecycle {
     ignore_changes = [password]
   }
 }
