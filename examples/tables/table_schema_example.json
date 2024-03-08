@@ -1,20 +1,42 @@
 {
-    "schemaName": "blockHeader",
-    "dimensionFieldSpecs": [
-      {
-        "name": "blockNumber",
-        "dataType": "LONG",
-        "singleValueField": true
-      }
-    ],
-    "metricFieldSpecs": [],
-    "dateTimeFieldSpecs": [
-      {
-        "name": "time",
-        "dataType": "LONG",
-        "format": "1:MILLISECONDS:EPOCH",
-        "granularity": "1:MILLISECONDS"
-      }
-    ]
-  }
-  
+  "schemaName": "ethereum_mainnet_block_headers",
+  "enableColumnBasedNullHandling": false,
+  "dimensionFieldSpecs": [
+    {
+      "name": "number",
+      "dataType": "LONG",
+      "notNull": false
+    },
+    {
+      "name": "hash",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "parent_hash",
+      "dataType": "STRING",
+      "notNull": false
+    },
+    {
+      "name": "logs_bloom",
+      "dataType": "STRING",
+      "notNull": false
+    }
+  ],
+  "metricFieldSpecs": [
+    {
+      "name": "gas_used",
+      "dataType": "LONG",
+      "notNull": false
+    }
+  ],
+  "dateTimeFieldSpecs": [
+    {
+      "name": "timestamp",
+      "dataType": "LONG",
+      "notNull": false,
+      "format": "1:MILLISECONDS:EPOCH",
+      "granularity": "1:MILLISECONDS"
+    }
+  ]
+}
