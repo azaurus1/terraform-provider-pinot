@@ -137,7 +137,10 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
-	pinot := goPinotAPI.NewPinotAPIClient(controllerURL, authToken)
+	pinot := goPinotAPI.NewPinotAPIClient(
+		goPinotAPI.ControllerUrl(controllerURL),
+		goPinotAPI.AuthToken(authToken),
+	)
 
 	resp.DataSourceData = pinot
 	resp.ResourceData = pinot
