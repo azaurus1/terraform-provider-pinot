@@ -109,7 +109,7 @@ func (t *tableSchemaResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	tableSchema, err := t.client.GetSchema(state.SchemaName.String())
+	tableSchema, err := t.client.GetSchema(state.SchemaName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to get schema", err.Error())
 		return
@@ -164,13 +164,13 @@ func (t *tableSchemaResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := t.client.DeleteSchema(state.SchemaName.String())
+	_, err := t.client.DeleteSchema(state.SchemaName.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete schema", err.Error())
 		return
 	}
 
-	diagnostics = resp.State.Set(ctx, nil)
+	resp.State.RemoveResource(ctx)
 	resp.Diagnostics.Append(diagnostics...)
 	if resp.Diagnostics.HasError() {
 		return
