@@ -20,6 +20,8 @@ github.com/azaurus1/go-pinot-api v0.1.5-0.20240312170618-946e1ebabcb3 h1:MUO6/XF
 github.com/azaurus1/go-pinot-api v0.1.5-0.20240312170618-946e1ebabcb3/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
 github.com/azaurus1/go-pinot-api v0.1.5-0.20240313083242-aed39a4025dc h1:7lAK2XBu8lpY/+8ISg0FET4amGOeNiItSp+yvhmJ+UU=
 github.com/azaurus1/go-pinot-api v0.1.5-0.20240313083242-aed39a4025dc/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
+github.com/azaurus1/go-pinot-api v0.1.5-0.20240315010733-84469b9bf04d h1:zZ3TFC4H4olE2m0+/W/EfR+lwC+8lniG8nnrcoocN4U=
+github.com/azaurus1/go-pinot-api v0.1.5-0.20240315010733-84469b9bf04d/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
