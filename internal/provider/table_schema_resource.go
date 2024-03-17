@@ -115,7 +115,14 @@ func (t *tableSchemaResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	schemaBytes, err := json.Marshal(tableSchema)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to marshal schema", err.Error())
+		return
+	}
+
 	state.SchemaName = types.StringValue(tableSchema.SchemaName)
+	state.Schema = types.StringValue(string(schemaBytes))
 
 	diagnostics = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diagnostics...)
