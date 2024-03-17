@@ -16,8 +16,10 @@ github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/azaurus1/go-pinot-api v0.1.5-0.20240312170618-946e1ebabcb3 h1:MUO6/XFt6+mpekt2/dTPri4/qUGbTZhuV9foVPRZVh0=
-github.com/azaurus1/go-pinot-api v0.1.5-0.20240312170618-946e1ebabcb3/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
+github.com/azaurus1/go-pinot-api v0.1.5-0.20240315100034-296928d1842b h1:DQGo0iYjLgXTB/aNSBEq9+EEcXzOoNmfe/XXaUz/RtI=
+github.com/azaurus1/go-pinot-api v0.1.5-0.20240315100034-296928d1842b/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
+github.com/azaurus1/go-pinot-api v0.1.5-0.20240317100041-1179e537c50d h1:3z7Qs0GfIvsr5KmU67SjRVjrZIy+VVwQl0ik5K/XzSw=
+github.com/azaurus1/go-pinot-api v0.1.5-0.20240317100041-1179e537c50d/go.mod h1:7WldcdBEA0ceY36yhiYrDmSt4h9cvMPAJw6BSZtQFjI=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
@@ -86,8 +88,6 @@ github.com/hashicorp/terraform-json v0.21.0 h1:9NQxbLNqPbEMze+S6+YluEdXgJmhQykRy
 github.com/hashicorp/terraform-json v0.21.0/go.mod h1:qdeBs11ovMzo5puhrRibdD6d2Dq6TyE/28JiU4tIQxk=
 github.com/hashicorp/terraform-plugin-docs v0.18.0 h1:2bINhzXc+yDeAcafurshCrIjtdu1XHn9zZ3ISuEhgpk=
 github.com/hashicorp/terraform-plugin-docs v0.18.0/go.mod h1:iIUfaJpdUmpi+rI42Kgq+63jAjI8aZVTyxp3Bvk9Hg8=
-github.com/hashicorp/terraform-plugin-framework v1.6.0 h1:hMPWoCiNGR+yzoDlXtZ/meGlUOCn8r1OFuPG84MkhWg=
-github.com/hashicorp/terraform-plugin-framework v1.6.0/go.mod h1:QRG6J+m5QBJum+lzKi0Ci2CB8a/xflS3T/aWoz8WD4Y=
 github.com/hashicorp/terraform-plugin-framework v1.6.1 h1:hw2XrmUu8d8jVL52ekxim2IqDc+2Kpekn21xZANARLU=
 github.com/hashicorp/terraform-plugin-framework v1.6.1/go.mod h1:aJI+n/hBPhz1J+77GdgNfk5svW12y7fmtxe/5L5IuwI=
 github.com/hashicorp/terraform-plugin-go v0.22.0 h1:1OS1Jk5mO0f5hrziWJGXXIxBrMe2j/B8E+DVGw43Xmc=

@@ -3,7 +3,7 @@ module terraform-provider-pinot
 go 1.22
 
 require (
-	github.com/azaurus1/go-pinot-api v0.1.5-0.20240312170618-946e1ebabcb3
+	github.com/azaurus1/go-pinot-api v0.1.5-0.20240317100041-1179e537c50d
 	github.com/hashicorp/terraform-plugin-docs v0.18.0
 	github.com/hashicorp/terraform-plugin-framework v1.6.1
 	github.com/hashicorp/terraform-plugin-log v0.9.0
