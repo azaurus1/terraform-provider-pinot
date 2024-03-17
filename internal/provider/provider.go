@@ -154,6 +154,7 @@ func (p *pinotProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewSegmentsDataSource,
 		NewTenantsDataSource,
 		NewClustersDataSource,
+		NewInstancesDataSource,
 	}
 }
 
