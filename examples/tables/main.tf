@@ -17,6 +17,7 @@ locals {
   kafka_zk     = "kafka:2181"
   config_raw = jsondecode(file("realtime_table_example.json"))
 
+  ## Convert the keys to snake_case
   segments_config = {
     for key, value in local.config_raw["segmentsConfig"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
@@ -27,10 +28,20 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
+  metadata = {
+    for key, value in try(local.config_raw["metadata"], null) :
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }
+
   table_index_config = {
     for key, value in local.config_raw["tableIndexConfig"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
+
+  segment_partition_config = try({
+    for key, value in local.table_index_config["segment_partition_config"]:
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }, null)
 
   ingestion_config = {
     for key, value in local.config_raw["ingestionConfig"] :
@@ -42,31 +53,26 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
-  kafka_config = {
+  kafka_overrides_secrets = sensitive({
     "stream.kafka.broker.list": local.kafka_broker,
     "stream.kafka.zk.broker.url": local.kafka_zk
+  })
+
+  kafka_overrides = {
+    "stream.kafka.broker.list": local.kafka_broker,
+    "stream.kafka.zk.broker.url": local.kafka_zk
+    "stream.kafka.topic.name": "ethereum_mainnet_block_headers"
   }
 
   parsed_stream_ingestion_config = {
     column_major_segment_builder_enabled = true
-    stream_config_maps = [for value in local.stream_ingestion_config["stream_config_maps"] :merge(value, local.kafka_config)]
+    stream_config_maps = [
+      for value in local.stream_ingestion_config["stream_config_maps"] :merge(value, local.kafka_overrides_secrets, local.kafka_overrides)
+    ]
   }
 
 
 }
-
-#resource "pinot_schema" "offline_table_schema" {
-#  schema_name = "offline_ethereum_mainnet_block_headers"
-#  schema      = file("offline_table_schema_example.json")
-#
-#}
-#
-#resource "pinot_table" "offline_table" {
-#  table_name = "offline_ethereum_mainnet_block_headers"
-#  table_type = "OFFLINE"
-#  table      = file("offline_table_example.json")
-#  depends_on = [pinot_schema.offline_table_schema]
-#}
 
 resource "pinot_schema" "realtime_table_schema" {
   schema_name = "realtime_ethereum_mainnet_block_headers"
@@ -89,7 +95,8 @@ resource "pinot_table" "realtime_table" {
   })
 
   table_index_config = merge(local.table_index_config, {
-    optimize_dictionary = true
+    optimize_dictionary = false
+    segment_partition_config = local.segment_partition_config
   })
 
   ingestion_config = merge(local.ingestion_config, {
@@ -99,14 +106,13 @@ resource "pinot_table" "realtime_table" {
     stream_ingestion_config = local.parsed_stream_ingestion_config
   })
 
+  metadata = local.metadata
+
+  is_dim_table = local.config_raw["isDimTable"]
+
   depends_on = [pinot_schema.realtime_table_schema]
 }
 
-# data "pinot_tables" "edu" {
-# }
-#
-# output "edu_tables" {
-#   value = local.parsed_stream_ingestion_config
-#   sensitive = true
-# }
-#
+output "d" {
+  value = local.metadata
+}

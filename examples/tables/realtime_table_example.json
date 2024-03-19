@@ -5,9 +5,8 @@
     "timeColumnName": "timestamp",
     "timeType": "MILLISECONDS",
     "replication": "{{ .PinotSegmentsReplication }}",
-    "segmentAssignmentStrategy": "BalanceNumSegmentAssignmentStrategy",
-    "segmentPushType": "APPEND",
-    "minimizeDataMovement": true
+    "retentionTimeUnit": "DAYS",
+    "retentionTimeValue": "7"
   },
   "tenants": {
     "broker": "{{ .PinotTenantBroker }}",
@@ -36,10 +35,6 @@
     "noDictionarySizeRatioThreshold": 0,
     "sortedColumn": [
       "number"
-    ],
-    "noDictionaryColumns": [
-      "metric1",
-      "metric2"
     ]
   },
   "metadata": {
@@ -71,7 +66,7 @@
         {
           "streamType": "kafka",
           "stream.kafka.consumer.type": "high-level",
-          "stream.kafka.topic.name": "ethereum_mainnet_block_headers",
+          "stream.kafka.topic.name": "{{ .KafkaTopic }}",
           "stream.kafka.decoder.class.name": "org.apache.pinot.plugin.stream.kafka.KafkaJSONMessageDecoder",
           "stream.kafka.consumer.factory.class.name": "org.apache.pinot.plugin.stream.kafka20.KafkaConsumerFactory",
           "stream.kafka.broker.list": "kafka:9092",
