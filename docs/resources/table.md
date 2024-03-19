@@ -17,6 +17,146 @@ description: |-
 
 ### Required
 
-- `table` (String) The table definition.
+- `table` (String, Sensitive) The table definition.
 - `table_name` (String) The name of the table.
 - `table_type` (String) The table type.
+
+### Optional
+
+- `ingestion_config` (Attributes) ingestion configuration for the table i.e kafka (see [below for nested schema](#nestedatt--ingestion_config))
+- `is_dim_table` (Boolean) is dimension table
+- `metadata` (Attributes) metadata for the table (see [below for nested schema](#nestedatt--metadata))
+- `segments_config` (Attributes) The segments configuration for the table. (see [below for nested schema](#nestedatt--segments_config))
+- `table_index_config` (Attributes) The table index configuration for the table. (see [below for nested schema](#nestedatt--table_index_config))
+- `tenants` (Attributes) The tenants configuration for the table. (see [below for nested schema](#nestedatt--tenants))
+- `tier_configs` (Attributes List) tier configurations for the table (see [below for nested schema](#nestedatt--tier_configs))
+- `upsert_config` (Attributes) The upsert configuration for the table. (see [below for nested schema](#nestedatt--upsert_config))
+
+<a id="nestedatt--ingestion_config"></a>
+### Nested Schema for `ingestion_config`
+
+Optional:
+
+- `continue_on_error` (Boolean) continue after error ingesting.
+- `row_time_value_check` (Boolean) row time value check.
+- `segment_time_value_check` (Boolean) segment time value check.
+- `stream_ingestion_config` (Attributes) stream ingestion configurations (see [below for nested schema](#nestedatt--ingestion_config--stream_ingestion_config))
+
+<a id="nestedatt--ingestion_config--stream_ingestion_config"></a>
+### Nested Schema for `ingestion_config.stream_ingestion_config`
+
+Optional:
+
+- `stream_config_maps` (List of Map of String) stream configuration
+
+
+
+<a id="nestedatt--metadata"></a>
+### Nested Schema for `metadata`
+
+Optional:
+
+- `custom_configs` (Map of String) custom configs
+
+
+<a id="nestedatt--segments_config"></a>
+### Nested Schema for `segments_config`
+
+Required:
+
+- `replication` (String) The replication count for the segments.
+- `time_column_name` (String) The time column name for the segments.
+- `time_type` (String) The time type for the segments.
+
+Optional:
+
+- `retention_time_unit` (String) The retention time unit for the segments.
+- `retention_time_value` (String) The retention time value for the segments.
+
+
+<a id="nestedatt--table_index_config"></a>
+### Nested Schema for `table_index_config`
+
+Optional:
+
+- `aggregate_metrics` (Boolean) The aggregate metrics for the table.
+- `column_min_max_value_generator_mode` (String) The column min max value generator mode for the table.
+- `create_inverted_index_during_segment_generation` (Boolean) The create inverted index during segment generation for the table.
+- `enable_default_star_tree` (Boolean) The enable default star tree for the table.
+- `enable_dynamic_star_tree` (Boolean) The enable dynamic star tree for the table.
+- `load_mode` (String) The load mode for the table.
+- `no_dictionary_size_ratio_threshold` (Number) The no dictionary size ration threshold for the table.
+- `null_handling_enabled` (Boolean) The null handling enabled for the table.
+- `optimize_dictionary` (Boolean) The optimize dictionary for the table.
+- `optimize_dictionary_for_metrics` (Boolean) The optimize dictionary for metrics for the table.
+- `segment_name_generator_type` (String) The segment name generator type for the table.
+- `segment_partition_config` (Attributes) The segment partition configuration for the table. (see [below for nested schema](#nestedatt--table_index_config--segment_partition_config))
+- `sorted_column` (List of String) The sorted column for the table.
+- `star_tree_index_configs` (Attributes List) The star tree index configurations for the table. (see [below for nested schema](#nestedatt--table_index_config--star_tree_index_configs))
+
+<a id="nestedatt--table_index_config--segment_partition_config"></a>
+### Nested Schema for `table_index_config.segment_partition_config`
+
+Optional:
+
+- `column_partition_map` (Map of Map of String) The column partition map for the segment partition config.
+
+
+<a id="nestedatt--table_index_config--star_tree_index_configs"></a>
+### Nested Schema for `table_index_config.star_tree_index_configs`
+
+Required:
+
+- `max_leaf_records` (Number) The max leaf records for the star tree index.
+
+Optional:
+
+- `aggregation_configs` (Attributes List) The aggregation configurations for the star tree index. (see [below for nested schema](#nestedatt--table_index_config--star_tree_index_configs--aggregation_configs))
+- `dimensions_split_order` (List of String) The dimensions split order for the star tree index.
+- `function_column_pairs` (List of String) The function column pairs for the star tree index.
+- `skip_star_node_creation_for_dim_names` (List of String) The skip star node creation for dim names for the star tree index.
+
+<a id="nestedatt--table_index_config--star_tree_index_configs--aggregation_configs"></a>
+### Nested Schema for `table_index_config.star_tree_index_configs.aggregation_configs`
+
+Required:
+
+- `aggregate_function` (String) The aggregate function for the star tree index.
+- `column_name` (String) The column name for the star tree index.
+- `compression_codec` (String) The compression codec for the star tree index.
+
+
+
+
+<a id="nestedatt--tenants"></a>
+### Nested Schema for `tenants`
+
+Optional:
+
+- `broker` (String) The broker for the tenants.
+- `server` (String) The server for the tenants.
+- `tag_override_config` (Map of String) The tag override config for the tenants.
+
+
+<a id="nestedatt--tier_configs"></a>
+### Nested Schema for `tier_configs`
+
+Required:
+
+- `name` (String) name of the tier
+- `segment_age` (String) segment age
+- `segment_selector_type` (String) segment selector type
+- `server_tag` (String) server tag
+- `storage_type` (String) storage type
+
+
+<a id="nestedatt--upsert_config"></a>
+### Nested Schema for `upsert_config`
+
+Required:
+
+- `mode` (String) The upsert mode for the table.
+
+Optional:
+
+- `partial_upsert_strategies` (Map of String) The partial upsert strategies for the table.
