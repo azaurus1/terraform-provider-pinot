@@ -2,6 +2,20 @@ package models
 
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
+type TableResourceModel struct {
+	TableName        types.String      `tfsdk:"table_name"`
+	Table            types.String      `tfsdk:"table"`
+	TableType        types.String      `tfsdk:"table_type"`
+	SegmentsConfig   *SegmentsConfig   `tfsdk:"segments_config"`
+	TenantsConfig    *TenantsConfig    `tfsdk:"tenants"`
+	TableIndexConfig *TableIndexConfig `tfsdk:"table_index_config"`
+	UpsertConfig     *UpsertConfig     `tfsdk:"upsert_config"`
+	IngestionConfig  *IngestionConfig  `tfsdk:"ingestion_config"`
+	TierConfigs      []*TierConfig     `tfsdk:"tier_configs"`
+	IsDimTable       types.Bool        `tfsdk:"is_dim_table"`
+	Metadata         *Metadata         `tfsdk:"metadata"`
+}
+
 type TenantsConfig struct {
 	Broker            types.String   `tfsdk:"broker"`
 	Server            types.String   `tfsdk:"server"`
@@ -9,15 +23,11 @@ type TenantsConfig struct {
 }
 
 type SegmentsConfig struct {
-	TimeType                      types.String `tfsdk:"time_type"`
-	Replication                   types.String `tfsdk:"replication"`
-	TimeColumnName                types.String `tfsdk:"time_column_name"`
-	SegmentAssignmentStrategy     types.String `tfsdk:"segment_assignment_strategy"`
-	SegmentPushType               types.String `tfsdk:"segment_push_type"`
-	MinimizeDataMovement          types.Bool   `tfsdk:"minimize_data_movement"`
-	RetentionTimeUnit             types.String `tfsdk:"retention_time_unit"`
-	RetentionTimeValue            types.String `tfsdk:"retention_time_value"`
-	DeletedSegmentRetentionPeriod types.String `tfsdk:"deleted_segment_retention_period"`
+	TimeType           types.String `tfsdk:"time_type"`
+	Replication        types.String `tfsdk:"replication"`
+	TimeColumnName     types.String `tfsdk:"time_column_name"`
+	RetentionTimeUnit  types.String `tfsdk:"retention_time_unit"`
+	RetentionTimeValue types.String `tfsdk:"retention_time_value"`
 }
 
 type UpsertConfig struct {
@@ -25,12 +35,12 @@ type UpsertConfig struct {
 	PartialUpsertStrategy types.MapType `tfsdk:"partial_upsert_strategy"`
 }
 
+type SegmentPartitionConfig struct {
+	ColumnPartitionMap map[string]map[string]string `tfsdk:"column_partition_map"`
+}
+
 type TableIndexConfig struct {
-	InvertedIndexColumns                       []string                `tfsdk:"inverted_index_columns"`
 	SortedColumn                               []string                `tfsdk:"sorted_column"`
-	NoDictionaryColumns                        []string                `tfsdk:"no_dictionary_columns"`
-	VarLengthDictionaryColumns                 []string                `tfsdk:"var_length_dictionary_columns"`
-	RangeIndexColumns                          []string                `tfsdk:"range_index_columns"`
 	LoadMode                                   types.String            `tfsdk:"load_mode"`
 	NullHandlingEnabled                        types.Bool              `tfsdk:"null_handling_enabled"`
 	CreateInvertedIndexDuringSegmentGeneration types.Bool              `tfsdk:"create_inverted_index_during_segment_generation"`
@@ -41,7 +51,9 @@ type TableIndexConfig struct {
 	NoDictionarySizeRatioThreshold             types.Float64           `tfsdk:"no_dictionary_size_ratio_threshold"`
 	ColumnMinMaxValueGeneratorMode             types.String            `tfsdk:"column_min_max_value_generator_mode"`
 	SegmentNameGeneratorType                   types.String            `tfsdk:"segment_name_generator_type"`
+	AggregateMetrics                           types.Bool              `tfsdk:"aggregate_metrics"`
 	StarTreeIndexConfigs                       []*StarTreeIndexConfigs `tfsdk:"star_tree_index_configs"`
+	SegmentPartitionConfig                     *SegmentPartitionConfig `tfsdk:"segment_partition_config"`
 }
 
 type AggregationConfig struct {
