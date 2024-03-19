@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	pinot "github.com/azaurus1/go-pinot-api"
 	"github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -25,9 +24,27 @@ func NewTableSchemaResource() resource.Resource {
 
 }
 
+type fieldSpec struct {
+	Name     string `tfsdk:"name"`
+	DataType string `tfsdk:"data_type"`
+	NotNull  bool   `tfsdk:"not_null"`
+}
+
+type dateTimeFieldSpec struct {
+	Name        string `tfsdk:"name"`
+	DataType    string `tfsdk:"data_type"`
+	NotNull     bool   `tfsdk:"not_null"`
+	Format      string `tfsdk:"format"`
+	Granularity string `tfsdk:"granularity"`
+}
+
 type tableSchemaResourceModel struct {
-	SchemaName types.String `tfsdk:"schema_name"`
-	Schema     types.String `tfsdk:"schema"`
+	SchemaName                    types.String        `tfsdk:"schema_name"`
+	EnableColumnBasedNullHandling types.Bool          `tfsdk:"enable_column_based_null_handling"`
+	DimensionFieldSpecs           []fieldSpec         `tfsdk:"dimension_field_specs"`
+	MetricFieldSpecs              []fieldSpec         `tfsdk:"metric_field_specs"`
+	DateTimeFieldSpecs            []dateTimeFieldSpec `tfsdk:"date_time_field_specs"`
+	PrimaryKeyColumns             []string            `tfsdk:"primary_key_columns"`
 }
 
 func (t *tableSchemaResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -59,9 +76,82 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Description: "The name of the schema.",
 				Required:    true,
 			},
-			"schema": schema.StringAttribute{
-				Description: "The schema definition.",
-				Required:    true,
+			"enable_column_based_null_handling": schema.BoolAttribute{
+				Description: "Whether to enable column based null handling.",
+				Optional:    true,
+			},
+			"dimension_field_specs": schema.ListNestedAttribute{
+				Description: "The dimension field specs.",
+				Optional:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "The name of the dimension.",
+							Required:    true,
+						},
+						"data_type": schema.StringAttribute{
+							Description: "The data type of the dimension.",
+							Required:    true,
+						},
+						"not_null": schema.BoolAttribute{
+							Description: "Whether the dimension is not null.",
+							Optional:    true,
+						},
+					},
+				},
+			},
+			"metric_field_specs": schema.ListNestedAttribute{
+				Description: "The dimension field specs.",
+				Optional:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "The name of the dimension.",
+							Required:    true,
+						},
+						"data_type": schema.StringAttribute{
+							Description: "The data type of the dimension.",
+							Required:    true,
+						},
+						"not_null": schema.BoolAttribute{
+							Description: "Whether the dimension is not null.",
+							Optional:    true,
+						},
+					},
+				},
+			},
+			"date_time_field_specs": schema.ListNestedAttribute{
+				Description: "The dimension field specs.",
+				Optional:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "The name of the dimension.",
+							Required:    true,
+						},
+						"data_type": schema.StringAttribute{
+							Description: "The data type of the dimension.",
+							Required:    true,
+						},
+						"not_null": schema.BoolAttribute{
+							Description: "Whether the dimension is not null.",
+							Optional:    true,
+						},
+						"format": schema.StringAttribute{
+							Description: "The format of the date time.",
+							Optional:    true,
+						},
+						"granularity": schema.StringAttribute{
+							Description: "The granularity of the date time.",
+							Optional:    true,
+						},
+					},
+				},
+			},
+			"primary_key_columns": schema.ListAttribute{
+				Description: "The primary key columns.",
+				Optional:    true,
+				ElementType: types.StringType,
 			},
 		},
 	}
@@ -78,14 +168,15 @@ func (t *tableSchemaResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	var pinotSchema model.Schema
-	err := json.Unmarshal([]byte(plan.Schema.ValueString()), &pinotSchema)
-	if err != nil {
-		resp.Diagnostics.AddError("Create Failed: Unable to unmarshal schema", err.Error())
-		return
+	pinotSchema := model.Schema{
+		SchemaName:          plan.SchemaName.ValueString(),
+		DimensionFieldSpecs: toPinotModelFieldSpec(plan.DimensionFieldSpecs),
+		MetricFieldSpecs:    toPinotModelFieldSpec(plan.MetricFieldSpecs),
+		DateTimeFieldSpecs:  toDateTimeFieldSpecs(plan.DateTimeFieldSpecs),
+		PrimaryKeyColumns:   plan.PrimaryKeyColumns,
 	}
 
-	_, err = t.client.CreateSchema(pinotSchema)
+	_, err := t.client.CreateSchema(pinotSchema)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create schema", err.Error())
 		return
@@ -115,14 +206,7 @@ func (t *tableSchemaResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	schemaBytes, err := json.Marshal(tableSchema)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to marshal schema", err.Error())
-		return
-	}
-
-	state.SchemaName = types.StringValue(tableSchema.SchemaName)
-	state.Schema = types.StringValue(string(schemaBytes))
+	setState(&state, tableSchema)
 
 	diagnostics = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diagnostics...)
@@ -141,15 +225,15 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	var pinotSchema model.Schema
-	err := json.Unmarshal([]byte(plan.Schema.ValueString()), &pinotSchema)
-	if err != nil {
-		resp.Diagnostics.AddWarning(plan.Schema.String(), "")
-		resp.Diagnostics.AddError("Update Failed: Unable to unmarshal schema", plan.Schema.String())
-		return
+	pinotSchema := model.Schema{
+		SchemaName:          plan.SchemaName.ValueString(),
+		DimensionFieldSpecs: toPinotModelFieldSpec(plan.DimensionFieldSpecs),
+		MetricFieldSpecs:    toPinotModelFieldSpec(plan.MetricFieldSpecs),
+		DateTimeFieldSpecs:  toDateTimeFieldSpecs(plan.DateTimeFieldSpecs),
+		PrimaryKeyColumns:   plan.PrimaryKeyColumns,
 	}
 
-	_, err = t.client.UpdateSchema(pinotSchema)
+	_, err := t.client.UpdateSchema(pinotSchema)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update schema", err.Error())
 		return
@@ -182,4 +266,66 @@ func (t *tableSchemaResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func toPinotModelFieldSpec(fieldSpecs []fieldSpec) []model.FieldSpec {
+
+	var pinotFieldSpecs []model.FieldSpec
+	for _, fs := range fieldSpecs {
+		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
+			Name:     fs.Name,
+			DataType: fs.DataType,
+		})
+	}
+	return pinotFieldSpecs
+}
+
+func toDateTimeFieldSpecs(fieldSpecs []dateTimeFieldSpec) []model.FieldSpec {
+	var pinotFieldSpecs []model.FieldSpec
+	for _, fs := range fieldSpecs {
+		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
+			Name:        fs.Name,
+			DataType:    fs.DataType,
+			Format:      fs.Format,
+			Granularity: fs.Granularity,
+		})
+	}
+	return pinotFieldSpecs
+}
+
+func setState(state *tableSchemaResourceModel, schema *model.Schema) {
+
+	dimensionFieldSpecs := make([]fieldSpec, len(schema.DimensionFieldSpecs))
+	for i, fs := range schema.DimensionFieldSpecs {
+		dimensionFieldSpecs[i] = fieldSpec{
+			Name:     fs.Name,
+			DataType: fs.DataType,
+		}
+	}
+
+	metricFieldSpecs := make([]fieldSpec, len(schema.MetricFieldSpecs))
+	for i, fs := range schema.MetricFieldSpecs {
+		metricFieldSpecs[i] = fieldSpec{
+			Name:     fs.Name,
+			DataType: fs.DataType,
+		}
+	}
+
+	dateTimeFieldSpecs := make([]dateTimeFieldSpec, len(schema.DateTimeFieldSpecs))
+	for i, fs := range schema.DateTimeFieldSpecs {
+		dateTimeFieldSpecs[i] = dateTimeFieldSpec{
+			Name:        fs.Name,
+			DataType:    fs.DataType,
+			Format:      fs.Format,
+			Granularity: fs.Granularity,
+		}
+	}
+
+	state.SchemaName = types.StringValue(schema.SchemaName)
+	state.EnableColumnBasedNullHandling = types.BoolValue(false)
+	state.DimensionFieldSpecs = dimensionFieldSpecs
+	state.MetricFieldSpecs = metricFieldSpecs
+	state.DateTimeFieldSpecs = dateTimeFieldSpecs
+	state.PrimaryKeyColumns = schema.PrimaryKeyColumns
+
 }
