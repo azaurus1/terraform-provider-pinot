@@ -4,6 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"log"
+	"strconv"
+	"terraform-provider-pinot/internal/converter"
 	"terraform-provider-pinot/internal/models"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
@@ -26,20 +31,6 @@ func NewTableResource() resource.Resource {
 
 type tableResource struct {
 	client *goPinotAPI.PinotAPIClient
-}
-
-type tableResourceModel struct {
-	TableName        types.String             `tfsdk:"table_name"`
-	Table            types.String             `tfsdk:"table"`
-	TableType        types.String             `tfsdk:"table_type"`
-	SegmentsConfig   *models.SegmentsConfig   `tfsdk:"segments_config"`
-	TenantsConfig    *models.TenantsConfig    `tfsdk:"tenants"`
-	TableIndexConfig *models.TableIndexConfig `tfsdk:"table_index_config"`
-	UpsertConfig     *models.UpsertConfig     `tfsdk:"upsert_config"`
-	IngestionConfig  *models.IngestionConfig  `tfsdk:"ingestion_config"`
-	TierConfigs      []*models.TierConfig     `tfsdk:"tier_configs"`
-	IsDimTable       types.Bool               `tfsdk:"is_dim_table"`
-	Metadata         *models.Metadata         `tfsdk:"metadata"`
 }
 
 func (r *tableResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -104,22 +95,6 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 						Description: "The retention time value for the segments.",
 						Optional:    true,
 					},
-					"deleted_segment_retention_period": schema.StringAttribute{
-						Description: "The deleted segment retention period for the segments.",
-						Optional:    true,
-					},
-					"segment_assignment_strategy": schema.StringAttribute{
-						Description: "The segment assignment strategy for the segments.",
-						Optional:    true,
-					},
-					"segment_push_type": schema.StringAttribute{
-						Description: "The segment push type for the segments.",
-						Optional:    true,
-					},
-					"minimize_data_movement": schema.BoolAttribute{
-						Description: "The minimize data movement for the segments.",
-						Optional:    true,
-					},
 				},
 			},
 			"tenants": schema.SingleNestedAttribute{
@@ -145,28 +120,8 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description: "The table index configuration for the table.",
 				Optional:    true,
 				Attributes: map[string]schema.Attribute{
-					"inverted_index_columns": schema.ListAttribute{
-						Description: "The inverted index columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
 					"sorted_column": schema.ListAttribute{
 						Description: "The sorted column for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"no_dictionary_columns": schema.ListAttribute{
-						Description: "The no dictionary columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"var_length_dictionary_columns": schema.ListAttribute{
-						Description: "The var length dictionary columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"range_index_columns": schema.ListAttribute{
-						Description: "The range index columns for the table.",
 						Optional:    true,
 						ElementType: types.StringType,
 					},
@@ -256,6 +211,26 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					"segment_name_generator_type": schema.StringAttribute{
 						Description: "The segment name generator type for the table.",
 						Optional:    true,
+					},
+					"aggregate_metrics": schema.BoolAttribute{
+						Description: "The aggregate metrics for the table.",
+						Optional:    true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"segment_partition_config": schema.SingleNestedAttribute{
+						Description: "The segment partition configuration for the table.",
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"column_partition_map": schema.MapAttribute{
+								Description: "The column partition map for the segment partition config.",
+								Optional:    true,
+								ElementType: types.MapType{
+									ElemType: types.StringType,
+								},
+							},
+						},
 					},
 				},
 			},
@@ -352,7 +327,7 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 
 func (r *tableResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
-	var plan tableResourceModel
+	var plan models.TableResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 
 	resp.Diagnostics.Append(diags...)
@@ -388,7 +363,7 @@ func (r *tableResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 
-	var state tableResourceModel
+	var state models.TableResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -410,27 +385,7 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		table = tableResponse.REALTIME
 	}
 
-	tableBytes, err := json.Marshal(table)
-	if err != nil {
-		resp.Diagnostics.AddError("Read Failed: Unable to marshal table", err.Error())
-		return
-	}
-
-	state.TableName = types.StringValue(table.TableName)
-	state.Table = types.StringValue(string(tableBytes))
-	//state.SegmentsConfig.Replication = types.StringValue(table.SegmentsConfig.Replication)
-	state.TableType = types.StringValue(table.TableType)
-	state.TenantsConfig = &models.TenantsConfig{
-		Broker: types.StringValue(table.Tenants.Broker),
-		Server: types.StringValue(table.Tenants.Server),
-	}
-
-	//state.SegmentsConfig.Replication = types.StringValue(table.SegmentsConfig.Replication)
-	//state.SegmentsConfig.TimeType = types.StringValue(table.SegmentsConfig.TimeType)
-	//state.SegmentsConfig.TimeColumnName = types.StringValue(table.SegmentsConfig.TimeColumnName)
-	//state.SegmentsConfig.SegmentAssignmentStrategy = types.StringValue(table.SegmentsConfig.SegmentAssignmentStrategy)
-	//state.SegmentsConfig.SegmentPushType = types.StringValue(table.SegmentsConfig.SegmentPushType)
-	//state.SegmentsConfig.MinimizeDataMovement = types.BoolValue(table.SegmentsConfig.MinimizeDataMovement)
+	converter.SetStateFromTable(&state, &table)
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
@@ -442,7 +397,8 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 }
 
 func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan tableResourceModel
+
+	var plan models.TableResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -456,7 +412,17 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	_, err = r.client.UpdateTable(plan.TableName.String(), []byte(plan.Table.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Overriding table config: %s", plan.TableName))
+
+	overriddenTableBytes, err := json.Marshal(override(&plan))
+	if err != nil {
+		resp.Diagnostics.AddError("Update Failed: Unable to marshal table", err.Error())
+		return
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("Updating table: %s", plan.TableName))
+
+	_, err = r.client.UpdateTable(plan.TableName.ValueString(), overriddenTableBytes)
 	if err != nil {
 		resp.Diagnostics.AddError("Update Failed: Unable to update table", err.Error())
 		return
@@ -472,16 +438,14 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 }
 
 func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state tableResourceModel
+	var state models.TableResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	log := fmt.Sprintf("Deleting table: %s", state.TableName)
-
-	tflog.Info(ctx, log)
+	tflog.Info(ctx, fmt.Sprintf("Deleting table: %s", state.TableName))
 
 	_, err := r.client.DeleteTable(state.TableName.ValueString())
 	if err != nil {
@@ -497,7 +461,7 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	}
 }
 
-func override(plan *tableResourceModel) *model.Table {
+func override(plan *models.TableResourceModel) *model.Table {
 
 	table := model.Table{
 		TableName:        plan.TableName.ValueString(),
@@ -520,26 +484,58 @@ func override(plan *tableResourceModel) *model.Table {
 	return &table
 }
 
-func overrideTableConfigs(plan *tableResourceModel) model.TableIndexConfig {
+func overrideTableConfigs(plan *models.TableResourceModel) model.TableIndexConfig {
 	return model.TableIndexConfig{
-		EnableDefaultStarTree:                      plan.TableIndexConfig.EnableDefaultStarTree.ValueBool(),
-		StarTreeIndexConfigs:                       overrideStarTreeConfigs(plan),
-		TierOverwrites:                             overrideTierOverwrites(plan),
-		EnableDynamicStarTreeCreation:              plan.TableIndexConfig.EnableDynamicStarTree.ValueBool(),
-		NullHandlingEnabled:                        plan.TableIndexConfig.NullHandlingEnabled.ValueBool(),
-		OptimizeDictionary:                         plan.TableIndexConfig.OptimizeDictionary.ValueBool(),
-		OptimizeDictionaryForMetrics:               plan.TableIndexConfig.OptimizeDictionaryForMetrics.ValueBool(),
-		NoDictionarySizeRatioThreshold:             plan.TableIndexConfig.NoDictionarySizeRatioThreshold.ValueFloat64(),
 		CreateInvertedIndexDuringSegmentGeneration: plan.TableIndexConfig.CreateInvertedIndexDuringSegmentGeneration.ValueBool(),
-		LoadMode: plan.TableIndexConfig.LoadMode.ValueString(),
+		SortedColumn:                   plan.TableIndexConfig.SortedColumn,
+		StarTreeIndexConfigs:           overrideStarTreeConfigs(plan),
+		EnableDefaultStarTree:          plan.TableIndexConfig.EnableDefaultStarTree.ValueBool(),
+		EnableDynamicStarTreeCreation:  plan.TableIndexConfig.EnableDynamicStarTree.ValueBool(),
+		LoadMode:                       plan.TableIndexConfig.LoadMode.ValueString(),
+		ColumnMinMaxValueGeneratorMode: plan.TableIndexConfig.ColumnMinMaxValueGeneratorMode.ValueString(),
+		NullHandlingEnabled:            plan.TableIndexConfig.NullHandlingEnabled.ValueBool(),
+		AggregateMetrics:               plan.TableIndexConfig.AggregateMetrics.ValueBool(),
+		OptimizeDictionary:             plan.TableIndexConfig.OptimizeDictionary.ValueBool(),
+		OptimizeDictionaryForMetrics:   plan.TableIndexConfig.OptimizeDictionaryForMetrics.ValueBool(),
+		NoDictionarySizeRatioThreshold: plan.TableIndexConfig.NoDictionarySizeRatioThreshold.ValueFloat64(),
+		SegmentNameGeneratorType:       plan.TableIndexConfig.SegmentNameGeneratorType.ValueString(),
+		SegmentPartitionConfig:         overrideSegmentPartitionConfig(plan),
 	}
 
 }
 
-func overrideStarTreeConfigs(plan *tableResourceModel) []model.StarTreeIndexConfig {
-	var starTreeConfigs []model.StarTreeIndexConfig
+func overrideSegmentPartitionConfig(plan *models.TableResourceModel) *model.SegmentPartitionConfig {
+
+	if plan.TableIndexConfig.SegmentPartitionConfig == nil {
+		return nil
+	}
+
+	columnPartitionMap := make(map[string]model.ColumnPartitionMapConfig, 1)
+	for key, value := range plan.TableIndexConfig.SegmentPartitionConfig.ColumnPartitionMap {
+
+		numPartitions, err := strconv.Atoi(value["numPartitions"])
+		if err != nil {
+			log.Panic(err)
+		}
+
+		columnPartitionMap[key] = model.ColumnPartitionMapConfig{
+			FunctionName: value["functionName"],
+			// convert to int
+			NumPartitions: numPartitions,
+		}
+	}
+	return &model.SegmentPartitionConfig{ColumnPartitionMap: columnPartitionMap}
+}
+
+func overrideStarTreeConfigs(plan *models.TableResourceModel) []*model.StarTreeIndexConfig {
+
+	if plan.TableIndexConfig.StarTreeIndexConfigs == nil {
+		return nil
+	}
+
+	var starTreeConfigs []*model.StarTreeIndexConfig
 	for _, starConfig := range plan.TableIndexConfig.StarTreeIndexConfigs {
-		starTreeConfigs = append(starTreeConfigs, model.StarTreeIndexConfig{
+		starTreeConfigs = append(starTreeConfigs, &model.StarTreeIndexConfig{
 			MaxLeafRecords:                    int(starConfig.MaxLeafRecords.ValueInt64()),
 			DimensionsSplitOrder:              starConfig.DimensionsSplitOrder,
 			FunctionColumnPairs:               starConfig.FunctionColumnPairs,
@@ -549,37 +545,34 @@ func overrideStarTreeConfigs(plan *tableResourceModel) []model.StarTreeIndexConf
 	return starTreeConfigs
 }
 
-func overrideSegmentsConfig(plan *tableResourceModel) model.TableSegmentsConfig {
+func overrideSegmentsConfig(plan *models.TableResourceModel) model.TableSegmentsConfig {
+
 	return model.TableSegmentsConfig{
-		TimeType:                  plan.SegmentsConfig.TimeType.ValueString(),
-		Replication:               plan.SegmentsConfig.Replication.ValueString(),
-		TimeColumnName:            plan.SegmentsConfig.TimeColumnName.ValueString(),
-		SegmentAssignmentStrategy: plan.SegmentsConfig.SegmentAssignmentStrategy.ValueString(),
-		SegmentPushType:           plan.SegmentsConfig.SegmentPushType.ValueString(),
-		MinimizeDataMovement:      plan.SegmentsConfig.MinimizeDataMovement.ValueBool(),
-		RetentionTimeUnit:         plan.SegmentsConfig.RetentionTimeUnit.ValueString(),
-		RetentionTimeValue:        plan.SegmentsConfig.RetentionTimeValue.ValueString(),
+		TimeType:           plan.SegmentsConfig.TimeType.ValueString(),
+		Replication:        plan.SegmentsConfig.Replication.ValueString(),
+		TimeColumnName:     plan.SegmentsConfig.TimeColumnName.ValueString(),
+		RetentionTimeUnit:  plan.SegmentsConfig.RetentionTimeUnit.ValueString(),
+		RetentionTimeValue: plan.SegmentsConfig.RetentionTimeValue.ValueString(),
 	}
+
 }
 
-func overrideTenantsConfig(plan *tableResourceModel) model.TableTenant {
+func overrideTenantsConfig(plan *models.TableResourceModel) model.TableTenant {
 	return model.TableTenant{
 		Broker: plan.TenantsConfig.Broker.ValueString(),
 		Server: plan.TenantsConfig.Server.ValueString(),
 	}
 }
 
-func overrideTierOverwrites(plan *tableResourceModel) model.TierOverwrites {
-	return model.TierOverwrites{
-		HotTier:  model.TierOverwrite{StarTreeIndexConfigs: overrideStarTreeConfigs(plan)},
-		ColdTier: model.TierOverwrite{StarTreeIndexConfigs: overrideStarTreeConfigs(plan)},
-	}
-}
+func overrideTierConfigs(plan *models.TableResourceModel) []*model.TierConfig {
 
-func overrideTierConfigs(plan *tableResourceModel) []model.TierConfig {
-	var tierConfigs []model.TierConfig
+	if plan.TierConfigs == nil {
+		return nil
+	}
+
+	var tierConfigs []*model.TierConfig
 	for _, tierConfig := range plan.TierConfigs {
-		tierConfigs = append(tierConfigs, model.TierConfig{
+		tierConfigs = append(tierConfigs, &model.TierConfig{
 			Name:                tierConfig.Name.ValueString(),
 			SegmentSelectorType: tierConfig.SegmentSelectorType.ValueString(),
 			SegmentAge:          tierConfig.SegmentAge.ValueString(),
@@ -590,14 +583,24 @@ func overrideTierConfigs(plan *tableResourceModel) []model.TierConfig {
 	return tierConfigs
 }
 
-func overrideMetadata(plan *tableResourceModel) model.TableMetadata {
-	return model.TableMetadata{
+func overrideMetadata(plan *models.TableResourceModel) *model.TableMetadata {
+
+	if plan.Metadata == nil {
+		return nil
+	}
+
+	return &model.TableMetadata{
 		CustomConfigs: plan.Metadata.CustomConfigs,
 	}
 }
 
-func overrideIngestionConfig(plan *tableResourceModel) model.TableIngestionConfig {
-	return model.TableIngestionConfig{
+func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionConfig {
+
+	if plan.IngestionConfig == nil {
+		return nil
+	}
+
+	return &model.TableIngestionConfig{
 		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBool(),
 		RowTimeValueCheck:     plan.IngestionConfig.RowTimeValueCheck.ValueBool(),
 		ContinueOnError:       plan.IngestionConfig.ContinueOnError.ValueBool(),
