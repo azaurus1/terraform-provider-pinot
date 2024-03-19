@@ -24,7 +24,7 @@ services:
 
   pinot-broker:
     image: apachepinot/pinot
-    command: "StartBroker -zkAddress pinot-zookeeper:2181"
+    command: "StartBroker -zkAddress pinot-zookeeper:2181 -configFileName /config/broker.conf"
     restart: unless-stopped
     container_name: "pinot-broker"
     volumes:
