@@ -71,12 +71,45 @@ locals {
     ]
   }
 
+  schema = {
+    for key, value in jsondecode(file("realtime_table_schema_example.json")) :
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }
+
+  dimension_field_specs = [
+    for field in local.schema["dimension_field_specs"] : {
+      for key, value in field :
+      join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+    }
+  ]
+
+  metric_field_specs = [
+    for field in local.schema["metric_field_specs"] : {
+      for key, value in field :
+      join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+    }
+  ]
+
+  date_time_field_specs = [
+    for field in local.schema["date_time_field_specs"] : {
+      for key, value in field :
+      join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+    }
+  ]
+
 
 }
 
 resource "pinot_schema" "realtime_table_schema" {
-  schema_name = "realtime_ethereum_mainnet_block_headers"
-  schema      = file("realtime_table_schema_example.json")
+  schema_name = local.schema["schema_name"]
+
+  enable_column_based_null_handling = local.schema["enable_column_based_null_handling"]
+
+  dimension_field_specs = local.dimension_field_specs
+
+  metric_field_specs = local.metric_field_specs
+
+  date_time_field_specs = local.date_time_field_specs
 }
 
 resource "pinot_table" "realtime_table" {
@@ -111,8 +144,4 @@ resource "pinot_table" "realtime_table" {
   is_dim_table = local.config_raw["isDimTable"]
 
   depends_on = [pinot_schema.realtime_table_schema]
-}
-
-output "d" {
-  value = local.metadata
 }
