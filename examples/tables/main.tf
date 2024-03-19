@@ -15,7 +15,7 @@ locals {
 
   kafka_broker = "kafka:9092"
   kafka_zk     = "kafka:2181"
-  config_raw = jsondecode(file("realtime_table_example.json"))
+  config_raw   = jsondecode(file("realtime_table_example.json"))
 
   ## Convert the keys to snake_case
   segments_config = {
@@ -39,7 +39,7 @@ locals {
   }
 
   segment_partition_config = try({
-    for key, value in local.table_index_config["segment_partition_config"]:
+    for key, value in local.table_index_config["segment_partition_config"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }, null)
 
@@ -54,20 +54,20 @@ locals {
   }
 
   kafka_overrides_secrets = sensitive({
-    "stream.kafka.broker.list": local.kafka_broker,
-    "stream.kafka.zk.broker.url": local.kafka_zk
+    "stream.kafka.broker.list" : local.kafka_broker,
+    "stream.kafka.zk.broker.url" : local.kafka_zk
   })
 
   kafka_overrides = {
-    "stream.kafka.broker.list": local.kafka_broker,
-    "stream.kafka.zk.broker.url": local.kafka_zk
-    "stream.kafka.topic.name": "ethereum_mainnet_block_headers"
+    "stream.kafka.broker.list" : local.kafka_broker,
+    "stream.kafka.zk.broker.url" : local.kafka_zk
+    "stream.kafka.topic.name" : "ethereum_mainnet_block_headers"
   }
 
   parsed_stream_ingestion_config = {
     column_major_segment_builder_enabled = true
     stream_config_maps = [
-      for value in local.stream_ingestion_config["stream_config_maps"] :merge(value, local.kafka_overrides_secrets, local.kafka_overrides)
+      for value in local.stream_ingestion_config["stream_config_maps"] : merge(value, local.kafka_overrides_secrets, local.kafka_overrides)
     ]
   }
 
@@ -128,7 +128,7 @@ resource "pinot_table" "realtime_table" {
   })
 
   table_index_config = merge(local.table_index_config, {
-    optimize_dictionary = false
+    optimize_dictionary      = false
     segment_partition_config = local.segment_partition_config
   })
 
@@ -136,7 +136,7 @@ resource "pinot_table" "realtime_table" {
     segment_time_check_value = true
     continue_on_error        = true
     row_time_value_check     = true
-    stream_ingestion_config = local.parsed_stream_ingestion_config
+    stream_ingestion_config  = local.parsed_stream_ingestion_config
   })
 
   metadata = local.metadata

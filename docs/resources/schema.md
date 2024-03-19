@@ -17,5 +17,52 @@ description: |-
 
 ### Required
 
-- `schema` (String) The schema definition.
 - `schema_name` (String) The name of the schema.
+
+### Optional
+
+- `date_time_field_specs` (Attributes List) The dimension field specs. (see [below for nested schema](#nestedatt--date_time_field_specs))
+- `dimension_field_specs` (Attributes List) The dimension field specs. (see [below for nested schema](#nestedatt--dimension_field_specs))
+- `enable_column_based_null_handling` (Boolean) Whether to enable column based null handling.
+- `metric_field_specs` (Attributes List) The dimension field specs. (see [below for nested schema](#nestedatt--metric_field_specs))
+- `primary_key_columns` (List of String) The primary key columns.
+
+<a id="nestedatt--date_time_field_specs"></a>
+### Nested Schema for `date_time_field_specs`
+
+Required:
+
+- `data_type` (String) The data type of the dimension.
+- `name` (String) The name of the dimension.
+
+Optional:
+
+- `format` (String) The format of the date time.
+- `granularity` (String) The granularity of the date time.
+- `not_null` (Boolean) Whether the dimension is not null.
+
+
+<a id="nestedatt--dimension_field_specs"></a>
+### Nested Schema for `dimension_field_specs`
+
+Required:
+
+- `data_type` (String) The data type of the dimension.
+- `name` (String) The name of the dimension.
+
+Optional:
+
+- `not_null` (Boolean) Whether the dimension is not null.
+
+
+<a id="nestedatt--metric_field_specs"></a>
+### Nested Schema for `metric_field_specs`
+
+Required:
+
+- `data_type` (String) The data type of the dimension.
+- `name` (String) The name of the dimension.
+
+Optional:
+
+- `not_null` (Boolean) Whether the dimension is not null.
