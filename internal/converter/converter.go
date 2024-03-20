@@ -46,6 +46,20 @@ func SetStateFromTable(state *models.TableResourceModel, table *model.Table) {
 		SortedColumn:                               table.TableIndexConfig.SortedColumn,
 		AggregateMetrics:                           types.BoolValue(table.TableIndexConfig.AggregateMetrics),
 		SegmentPartitionConfig:                     convertSegmentPartitionConfig(table),
+		OnHeapDictionaryColumns:                    table.TableIndexConfig.OnHeapDictionaryColumns,
+		VarLengthDictionaryColumns:                 table.TableIndexConfig.VarLengthDictionaryColumns,
+		RangeIndexColumns:                          table.TableIndexConfig.RangeIndexColumns,
+		NoDictionaryColumns:                        table.TableIndexConfig.NoDictionaryColumns,
+		BloomFilterColumns:                         table.TableIndexConfig.BloomFilterColumns,
+		RangeIndexVersion:                          types.Int64Value(int64(table.TableIndexConfig.RangeIndexVersion)),
+	}
+
+	var ingestionTransformConfigs []*models.TransformConfig
+	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
+		ingestionTransformConfigs = append(ingestionTransformConfigs, &models.TransformConfig{
+			ColumnName:        types.StringValue(transformConfig.ColumnName),
+			TransformFunction: types.StringValue(transformConfig.TransformFunction),
+		})
 	}
 
 	state.IngestionConfig = &models.IngestionConfig{
@@ -55,6 +69,7 @@ func SetStateFromTable(state *models.TableResourceModel, table *model.Table) {
 		StreamIngestionConfig: &models.StreamIngestionConfig{
 			StreamConfigMaps: table.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
 		},
+		TransformConfigs: ingestionTransformConfigs,
 	}
 
 	var tierConfigs []*models.TierConfig

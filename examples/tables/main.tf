@@ -53,6 +53,11 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
+  transform_configs = [
+    for value in local.ingestion_config["transform_configs"] :
+    { for key, inner_value in value : join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => inner_value }
+  ]
+
   kafka_overrides_secrets = sensitive({
     "stream.kafka.broker.list" : local.kafka_broker,
     "stream.kafka.zk.broker.url" : local.kafka_zk
@@ -137,6 +142,7 @@ resource "pinot_table" "realtime_table" {
     continue_on_error        = true
     row_time_value_check     = true
     stream_ingestion_config  = local.parsed_stream_ingestion_config
+    transform_configs        = local.transform_configs
   })
 
   metadata = local.metadata

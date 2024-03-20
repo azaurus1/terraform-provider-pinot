@@ -23,6 +23,7 @@ description: |-
 
 ### Optional
 
+- `field_config_list` (Attributes List) field configurations for the table (see [below for nested schema](#nestedatt--field_config_list))
 - `ingestion_config` (Attributes) ingestion configuration for the table i.e kafka (see [below for nested schema](#nestedatt--ingestion_config))
 - `is_dim_table` (Boolean) is dimension table
 - `metadata` (Attributes) metadata for the table (see [below for nested schema](#nestedatt--metadata))
@@ -31,6 +32,46 @@ description: |-
 - `tenants` (Attributes) The tenants configuration for the table. (see [below for nested schema](#nestedatt--tenants))
 - `tier_configs` (Attributes List) tier configurations for the table (see [below for nested schema](#nestedatt--tier_configs))
 - `upsert_config` (Attributes) The upsert configuration for the table. (see [below for nested schema](#nestedatt--upsert_config))
+
+<a id="nestedatt--field_config_list"></a>
+### Nested Schema for `field_config_list`
+
+Required:
+
+- `encoding_type` (String) encoding type
+- `index_type` (String) index type
+- `name` (String) name of the field
+
+Optional:
+
+- `index_types` (List of String) index types
+- `indexes` (Attributes) indexes (see [below for nested schema](#nestedatt--field_config_list--indexes))
+- `timestamp_config` (Attributes) timestamp configuration (see [below for nested schema](#nestedatt--field_config_list--timestamp_config))
+
+<a id="nestedatt--field_config_list--indexes"></a>
+### Nested Schema for `field_config_list.indexes`
+
+Optional:
+
+- `inverted` (Attributes) inverted (see [below for nested schema](#nestedatt--field_config_list--indexes--inverted))
+
+<a id="nestedatt--field_config_list--indexes--inverted"></a>
+### Nested Schema for `field_config_list.indexes.inverted`
+
+Required:
+
+- `enabled` (String) enabled
+
+
+
+<a id="nestedatt--field_config_list--timestamp_config"></a>
+### Nested Schema for `field_config_list.timestamp_config`
+
+Optional:
+
+- `granularities` (List of String) granularities
+
+
 
 <a id="nestedatt--ingestion_config"></a>
 ### Nested Schema for `ingestion_config`
@@ -41,6 +82,7 @@ Optional:
 - `row_time_value_check` (Boolean) row time value check.
 - `segment_time_value_check` (Boolean) segment time value check.
 - `stream_ingestion_config` (Attributes) stream ingestion configurations (see [below for nested schema](#nestedatt--ingestion_config--stream_ingestion_config))
+- `transform_configs` (Attributes List) transform configurations (see [below for nested schema](#nestedatt--ingestion_config--transform_configs))
 
 <a id="nestedatt--ingestion_config--stream_ingestion_config"></a>
 ### Nested Schema for `ingestion_config.stream_ingestion_config`
@@ -48,6 +90,15 @@ Optional:
 Optional:
 
 - `stream_config_maps` (List of Map of String) stream configuration
+
+
+<a id="nestedatt--ingestion_config--transform_configs"></a>
+### Nested Schema for `ingestion_config.transform_configs`
+
+Required:
+
+- `column_name` (String) column name
+- `transform_function` (String) transform function
 
 
 
@@ -70,6 +121,8 @@ Required:
 
 Optional:
 
+- `deleted_segments_retention_period` (String) The deleted segments retention period for the segments.
+- `replicas_per_partition` (String) The replicas per partition for the segments.
 - `retention_time_unit` (String) The retention time unit for the segments.
 - `retention_time_value` (String) The retention time value for the segments.
 
@@ -80,19 +133,25 @@ Optional:
 Optional:
 
 - `aggregate_metrics` (Boolean) The aggregate metrics for the table.
+- `bloom_filter_columns` (List of String) The bloom filter columns for the table.
 - `column_min_max_value_generator_mode` (String) The column min max value generator mode for the table.
 - `create_inverted_index_during_segment_generation` (Boolean) The create inverted index during segment generation for the table.
 - `enable_default_star_tree` (Boolean) The enable default star tree for the table.
 - `enable_dynamic_star_tree` (Boolean) The enable dynamic star tree for the table.
 - `load_mode` (String) The load mode for the table.
+- `no_dictionary_columns` (List of String) The no dictionary columns for the table.
 - `no_dictionary_size_ratio_threshold` (Number) The no dictionary size ration threshold for the table.
 - `null_handling_enabled` (Boolean) The null handling enabled for the table.
+- `on_heap_dictionary_columns` (List of String) The on heap dictionary columns for the table.
 - `optimize_dictionary` (Boolean) The optimize dictionary for the table.
 - `optimize_dictionary_for_metrics` (Boolean) The optimize dictionary for metrics for the table.
+- `range_index_columns` (List of String) The range index columns for the table.
+- `range_index_version` (Number) The range index version for the table.
 - `segment_name_generator_type` (String) The segment name generator type for the table.
 - `segment_partition_config` (Attributes) The segment partition configuration for the table. (see [below for nested schema](#nestedatt--table_index_config--segment_partition_config))
 - `sorted_column` (List of String) The sorted column for the table.
 - `star_tree_index_configs` (Attributes List) The star tree index configurations for the table. (see [below for nested schema](#nestedatt--table_index_config--star_tree_index_configs))
+- `var_length_dictionary_columns` (List of String) The var length dictionary columns for the table.
 
 <a id="nestedatt--table_index_config--segment_partition_config"></a>
 ### Nested Schema for `table_index_config.segment_partition_config`

@@ -14,6 +14,7 @@ type TableResourceModel struct {
 	TierConfigs      []*TierConfig     `tfsdk:"tier_configs"`
 	IsDimTable       types.Bool        `tfsdk:"is_dim_table"`
 	Metadata         *Metadata         `tfsdk:"metadata"`
+	FieldConfigList  []*FieldConfig    `tfsdk:"field_config_list"`
 }
 
 type TenantsConfig struct {
@@ -23,11 +24,13 @@ type TenantsConfig struct {
 }
 
 type SegmentsConfig struct {
-	TimeType           types.String `tfsdk:"time_type"`
-	Replication        types.String `tfsdk:"replication"`
-	TimeColumnName     types.String `tfsdk:"time_column_name"`
-	RetentionTimeUnit  types.String `tfsdk:"retention_time_unit"`
-	RetentionTimeValue types.String `tfsdk:"retention_time_value"`
+	TimeType                      types.String `tfsdk:"time_type"`
+	Replication                   types.String `tfsdk:"replication"`
+	ReplicasPerPartition          types.String `tfsdk:"replicas_per_partition"`
+	TimeColumnName                types.String `tfsdk:"time_column_name"`
+	RetentionTimeUnit             types.String `tfsdk:"retention_time_unit"`
+	RetentionTimeValue            types.String `tfsdk:"retention_time_value"`
+	DeletedSegmentRetentionPeriod types.String `tfsdk:"deleted_segment_retention_period"`
 }
 
 type UpsertConfig struct {
@@ -37,6 +40,27 @@ type UpsertConfig struct {
 
 type SegmentPartitionConfig struct {
 	ColumnPartitionMap map[string]map[string]string `tfsdk:"column_partition_map"`
+}
+
+type TimestampConfig struct {
+	Granularities []string `tfsdk:"granularities"`
+}
+
+type FiendIndexInverted struct {
+	Enabled types.String `tfsdk:"enabled"`
+}
+
+type FieldIndexes struct {
+	Inverted *FiendIndexInverted `tfsdk:"inverted"`
+}
+
+type FieldConfig struct {
+	Name            types.String     `tfsdk:"name"`
+	EncodingType    types.String     `tfsdk:"encoding_type"`
+	IndexType       types.String     `tfsdk:"index_type"`
+	IndexTypes      []string         `tfsdk:"index_types"`
+	TimestampConfig *TimestampConfig `tfsdk:"timestamp_config"`
+	Indexes         *FieldIndexes    `tfsdk:"indexes"`
 }
 
 type TableIndexConfig struct {
@@ -54,6 +78,12 @@ type TableIndexConfig struct {
 	AggregateMetrics                           types.Bool              `tfsdk:"aggregate_metrics"`
 	StarTreeIndexConfigs                       []*StarTreeIndexConfigs `tfsdk:"star_tree_index_configs"`
 	SegmentPartitionConfig                     *SegmentPartitionConfig `tfsdk:"segment_partition_config"`
+	NoDictionaryColumns                        []string                `tfsdk:"no_dictionary_columns"`
+	RangeIndexColumns                          []string                `tfsdk:"range_index_columns"`
+	OnHeapDictionaryColumns                    []string                `tfsdk:"on_heap_dictionary_columns"`
+	VarLengthDictionaryColumns                 []string                `tfsdk:"var_length_dictionary_columns"`
+	BloomFilterColumns                         []string                `tfsdk:"bloom_filter_columns"`
+	RangeIndexVersion                          types.Int64             `tfsdk:"range_index_version"`
 }
 
 type AggregationConfig struct {
@@ -70,11 +100,17 @@ type StarTreeIndexConfigs struct {
 	AggregationConfigs              []*AggregationConfig `tfsdk:"aggregation_configs"`
 }
 
+type TransformConfig struct {
+	ColumnName        types.String `tfsdk:"column_name"`
+	TransformFunction types.String `tfsdk:"transform_function"`
+}
+
 type IngestionConfig struct {
 	SegmentTimeValueCheck types.Bool             `tfsdk:"segment_time_value_check"`
 	RowTimeValueCheck     types.Bool             `tfsdk:"row_time_value_check"`
 	ContinueOnError       types.Bool             `tfsdk:"continue_on_error"`
 	StreamIngestionConfig *StreamIngestionConfig `tfsdk:"stream_ingestion_config"`
+	TransformConfigs      []*TransformConfig     `tfsdk:"transform_configs"`
 }
 
 type StreamIngestionConfig struct {

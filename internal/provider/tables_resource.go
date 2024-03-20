@@ -79,6 +79,10 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 						Description: "The replication count for the segments.",
 						Required:    true,
 					},
+					"replicas_per_partition": schema.StringAttribute{
+						Description: "The replicas per partition for the segments.",
+						Optional:    true,
+					},
 					"time_type": schema.StringAttribute{
 						Description: "The time type for the segments.",
 						Required:    true,
@@ -93,6 +97,10 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					},
 					"retention_time_value": schema.StringAttribute{
 						Description: "The retention time value for the segments.",
+						Optional:    true,
+					},
+					"deleted_segments_retention_period": schema.StringAttribute{
+						Description: "The deleted segments retention period for the segments.",
 						Optional:    true,
 					},
 				},
@@ -232,6 +240,35 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 							},
 						},
 					},
+					"range_index_columns": schema.ListAttribute{
+						Description: "The range index columns for the table.",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"no_dictionary_columns": schema.ListAttribute{
+						Description: "The no dictionary columns for the table.",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"on_heap_dictionary_columns": schema.ListAttribute{
+						Description: "The on heap dictionary columns for the table.",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"var_length_dictionary_columns": schema.ListAttribute{
+						Description: "The var length dictionary columns for the table.",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"bloom_filter_columns": schema.ListAttribute{
+						Description: "The bloom filter columns for the table.",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"range_index_version": schema.Int64Attribute{
+						Description: "The range index version for the table.",
+						Optional:    true,
+					},
 				},
 			},
 			"upsert_config": schema.SingleNestedAttribute{
@@ -273,6 +310,22 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 								Description: "stream configuration",
 								Optional:    true,
 								ElementType: types.MapType{ElemType: types.StringType},
+							},
+						},
+					},
+					"transform_configs": schema.ListNestedAttribute{
+						Description: "transform configurations",
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"column_name": schema.StringAttribute{
+									Description: "column name",
+									Required:    true,
+								},
+								"transform_function": schema.StringAttribute{
+									Description: "transform function",
+									Required:    true,
+								},
 							},
 						},
 					},
@@ -318,6 +371,58 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 						Description: "custom configs",
 						Optional:    true,
 						ElementType: types.StringType,
+					},
+				},
+			},
+			"field_config_list": schema.ListNestedAttribute{
+				Description: "field configurations for the table",
+				Optional:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "name of the field",
+							Required:    true,
+						},
+						"encoding_type": schema.StringAttribute{
+							Description: "encoding type",
+							Required:    true,
+						},
+						"index_type": schema.StringAttribute{
+							Description: "index type",
+							Required:    true,
+						},
+						"index_types": schema.ListAttribute{
+							Description: "index types",
+							Optional:    true,
+							ElementType: types.StringType,
+						},
+						"timestamp_config": schema.SingleNestedAttribute{
+							Description: "timestamp configuration",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"granularities": schema.ListAttribute{
+									Description: "granularities",
+									Optional:    true,
+									ElementType: types.StringType,
+								},
+							},
+						},
+						"indexes": schema.SingleNestedAttribute{
+							Description: "indexes",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"inverted": schema.SingleNestedAttribute{
+									Description: "inverted",
+									Optional:    true,
+									Attributes: map[string]schema.Attribute{
+										"enabled": schema.StringAttribute{
+											Description: "enabled",
+											Required:    true,
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -481,6 +586,11 @@ func override(plan *models.TableResourceModel) *model.Table {
 		table.TierConfigs = overrideTierConfigs(plan)
 	}
 
+	if plan.FieldConfigList != nil {
+		table.FieldConfigList = overrideFieldConfigList(plan)
+
+	}
+
 	return &table
 }
 
@@ -500,6 +610,12 @@ func overrideTableConfigs(plan *models.TableResourceModel) model.TableIndexConfi
 		NoDictionarySizeRatioThreshold: plan.TableIndexConfig.NoDictionarySizeRatioThreshold.ValueFloat64(),
 		SegmentNameGeneratorType:       plan.TableIndexConfig.SegmentNameGeneratorType.ValueString(),
 		SegmentPartitionConfig:         overrideSegmentPartitionConfig(plan),
+		RangeIndexColumns:              plan.TableIndexConfig.RangeIndexColumns,
+		NoDictionaryColumns:            plan.TableIndexConfig.NoDictionaryColumns,
+		RangeIndexVersion:              int(plan.TableIndexConfig.RangeIndexVersion.ValueInt64()),
+		OnHeapDictionaryColumns:        plan.TableIndexConfig.OnHeapDictionaryColumns,
+		VarLengthDictionaryColumns:     plan.TableIndexConfig.VarLengthDictionaryColumns,
+		BloomFilterColumns:             plan.TableIndexConfig.BloomFilterColumns,
 	}
 
 }
@@ -604,8 +720,43 @@ func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngest
 		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBool(),
 		RowTimeValueCheck:     plan.IngestionConfig.RowTimeValueCheck.ValueBool(),
 		ContinueOnError:       plan.IngestionConfig.ContinueOnError.ValueBool(),
-		StreamIngestionConfig: model.StreamIngestionConfig{
+		StreamIngestionConfig: &model.StreamIngestionConfig{
 			StreamConfigMaps: plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
 		},
 	}
+}
+
+func overrideFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
+
+	if plan.FieldConfigList == nil {
+		return nil
+	}
+
+	var fieldConfigs []model.FieldConfig
+	for _, fieldConfig := range plan.FieldConfigList {
+
+		fc := model.FieldConfig{
+			Name:         fieldConfig.Name.ValueString(),
+			EncodingType: fieldConfig.EncodingType.ValueString(),
+			IndexType:    fieldConfig.IndexType.ValueString(),
+			IndexTypes:   fieldConfig.IndexTypes,
+		}
+
+		if fieldConfig.TimestampConfig != nil {
+			fc.TimestampConfig = &model.TimestampConfig{
+				Granularities: fieldConfig.TimestampConfig.Granularities,
+			}
+		}
+
+		if fieldConfig.Indexes != nil {
+			fc.Indexes = &model.FieldIndexes{
+				Inverted: &model.FiendIndexInverted{
+					Enabled: fieldConfig.Indexes.Inverted.Enabled.ValueString(),
+				},
+			}
+		}
+
+		fieldConfigs = append(fieldConfigs, fc)
+	}
+	return fieldConfigs
 }
