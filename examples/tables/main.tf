@@ -55,7 +55,7 @@ locals {
 
   transform_configs = [
     for value in local.ingestion_config["transform_configs"] :
-    {for key, inner_value in value : join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => inner_value}
+    { for key, inner_value in value : join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => inner_value }
   ]
 
   kafka_overrides_secrets = sensitive({
