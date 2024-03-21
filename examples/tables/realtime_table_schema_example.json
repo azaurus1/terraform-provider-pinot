@@ -13,6 +13,11 @@
       "notNull": false
     },
     {
+      "name": "hash_json",
+      "dataType": "JSON",
+      "notNull": false
+    },
+    {
       "name": "parent_hash",
       "dataType": "STRING",
       "notNull": false

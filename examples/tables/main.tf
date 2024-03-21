@@ -58,21 +58,16 @@ locals {
     { for key, inner_value in value : join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => inner_value }
   ]
 
-  kafka_overrides_secrets = sensitive({
-    "stream.kafka.broker.list" : local.kafka_broker,
-    "stream.kafka.zk.broker.url" : local.kafka_zk
-  })
-
   kafka_overrides = {
-    "stream.kafka.broker.list" : local.kafka_broker,
-    "stream.kafka.zk.broker.url" : local.kafka_zk
+    "stream.kafka.broker.list" : sensitive(local.kafka_broker),
+    "stream.kafka.zk.broker.url" : sensitive(local.kafka_zk),
     "stream.kafka.topic.name" : "ethereum_mainnet_block_headers"
   }
 
   parsed_stream_ingestion_config = {
     column_major_segment_builder_enabled = true
     stream_config_maps = [
-      for value in local.stream_ingestion_config["stream_config_maps"] : merge(value, local.kafka_overrides_secrets, local.kafka_overrides)
+      for value in local.stream_ingestion_config["stream_config_maps"] : merge(value, local.kafka_overrides)
     ]
   }
 
