@@ -24,13 +24,13 @@ type TenantsConfig struct {
 }
 
 type SegmentsConfig struct {
-	TimeType                      types.String `tfsdk:"time_type"`
-	Replication                   types.String `tfsdk:"replication"`
-	ReplicasPerPartition          types.String `tfsdk:"replicas_per_partition"`
-	TimeColumnName                types.String `tfsdk:"time_column_name"`
-	RetentionTimeUnit             types.String `tfsdk:"retention_time_unit"`
-	RetentionTimeValue            types.String `tfsdk:"retention_time_value"`
-	DeletedSegmentRetentionPeriod types.String `tfsdk:"deleted_segment_retention_period"`
+	TimeType                       types.String `tfsdk:"time_type"`
+	Replication                    types.String `tfsdk:"replication"`
+	ReplicasPerPartition           types.String `tfsdk:"replicas_per_partition"`
+	TimeColumnName                 types.String `tfsdk:"time_column_name"`
+	RetentionTimeUnit              types.String `tfsdk:"retention_time_unit"`
+	RetentionTimeValue             types.String `tfsdk:"retention_time_value"`
+	DeletedSegmentsRetentionPeriod types.String `tfsdk:"deleted_segments_retention_period"`
 }
 
 type UpsertConfig struct {
