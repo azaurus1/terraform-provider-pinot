@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"log"
 	"strconv"
@@ -64,8 +65,8 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			},
 			"table": schema.StringAttribute{
 				Description: "The table definition.",
-				Sensitive:   true,
 				Required:    true,
+				Sensitive:   true,
 			},
 			"table_type": schema.StringAttribute{
 				Description: "The table type.",
@@ -264,6 +265,9 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 						Description: "The bloom filter columns for the table.",
 						Optional:    true,
 						ElementType: types.StringType,
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"range_index_version": schema.Int64Attribute{
 						Description: "The range index version for the table.",
@@ -481,6 +485,8 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
+	tflog.Info(ctx, "here\n")
+
 	var table model.Table
 
 	// if table.OFFLINE is not nil, set the state to populated data
@@ -490,7 +496,9 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		table = tableResponse.REALTIME
 	}
 
-	converter.SetStateFromTable(&state, &table)
+	tflog.Info(ctx, "setting state\n")
+
+	converter.SetStateFromTable(ctx, &state, &table)
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
@@ -507,13 +515,6 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	var table model.Table
-	err := json.Unmarshal([]byte(plan.Table.ValueString()), &table)
-	if err != nil {
-		resp.Diagnostics.AddError("Update Failed: Unable to unmarshal table", err.Error())
 		return
 	}
 
@@ -568,12 +569,15 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 
 func override(plan *models.TableResourceModel) *model.Table {
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	table := model.Table{
 		TableName:        plan.TableName.ValueString(),
 		TableType:        plan.TableType.ValueString(),
 		Tenants:          overrideTenantsConfig(plan),
 		SegmentsConfig:   overrideSegmentsConfig(plan),
-		TableIndexConfig: overrideTableConfigs(plan),
+		TableIndexConfig: overrideTableConfigs(ctx, plan),
 		IsDimTable:       plan.IsDimTable.ValueBool(),
 		IngestionConfig:  overrideIngestionConfig(plan),
 	}
@@ -594,11 +598,12 @@ func override(plan *models.TableResourceModel) *model.Table {
 	return &table
 }
 
-func overrideTableConfigs(plan *models.TableResourceModel) model.TableIndexConfig {
-	return model.TableIndexConfig{
+func overrideTableConfigs(ctx context.Context, plan *models.TableResourceModel) model.TableIndexConfig {
+
+	tableConfig := model.TableIndexConfig{
 		CreateInvertedIndexDuringSegmentGeneration: plan.TableIndexConfig.CreateInvertedIndexDuringSegmentGeneration.ValueBool(),
-		SortedColumn:                   plan.TableIndexConfig.SortedColumn,
-		StarTreeIndexConfigs:           overrideStarTreeConfigs(plan),
+		SortedColumn:                   toStringList(ctx, plan.TableIndexConfig.SortedColumn),
+		StarTreeIndexConfigs:           overrideStarTreeConfigs(ctx, plan),
 		EnableDefaultStarTree:          plan.TableIndexConfig.EnableDefaultStarTree.ValueBool(),
 		EnableDynamicStarTreeCreation:  plan.TableIndexConfig.EnableDynamicStarTree.ValueBool(),
 		LoadMode:                       plan.TableIndexConfig.LoadMode.ValueString(),
@@ -610,13 +615,15 @@ func overrideTableConfigs(plan *models.TableResourceModel) model.TableIndexConfi
 		NoDictionarySizeRatioThreshold: plan.TableIndexConfig.NoDictionarySizeRatioThreshold.ValueFloat64(),
 		SegmentNameGeneratorType:       plan.TableIndexConfig.SegmentNameGeneratorType.ValueString(),
 		SegmentPartitionConfig:         overrideSegmentPartitionConfig(plan),
-		RangeIndexColumns:              plan.TableIndexConfig.RangeIndexColumns,
-		NoDictionaryColumns:            plan.TableIndexConfig.NoDictionaryColumns,
+		RangeIndexColumns:              toStringList(ctx, plan.TableIndexConfig.RangeIndexColumns),
+		NoDictionaryColumns:            toStringList(ctx, plan.TableIndexConfig.NoDictionaryColumns),
 		RangeIndexVersion:              int(plan.TableIndexConfig.RangeIndexVersion.ValueInt64()),
-		OnHeapDictionaryColumns:        plan.TableIndexConfig.OnHeapDictionaryColumns,
-		VarLengthDictionaryColumns:     plan.TableIndexConfig.VarLengthDictionaryColumns,
-		BloomFilterColumns:             plan.TableIndexConfig.BloomFilterColumns,
+		OnHeapDictionaryColumns:        toStringList(ctx, plan.TableIndexConfig.OnHeapDictionaryColumns),
+		VarLengthDictionaryColumns:     toStringList(ctx, plan.TableIndexConfig.VarLengthDictionaryColumns),
+		BloomFilterColumns:             toStringList(ctx, plan.TableIndexConfig.BloomFilterColumns),
 	}
+
+	return tableConfig
 
 }
 
@@ -643,7 +650,7 @@ func overrideSegmentPartitionConfig(plan *models.TableResourceModel) *model.Segm
 	return &model.SegmentPartitionConfig{ColumnPartitionMap: columnPartitionMap}
 }
 
-func overrideStarTreeConfigs(plan *models.TableResourceModel) []*model.StarTreeIndexConfig {
+func overrideStarTreeConfigs(ctx context.Context, plan *models.TableResourceModel) []*model.StarTreeIndexConfig {
 
 	if plan.TableIndexConfig.StarTreeIndexConfigs == nil {
 		return nil
@@ -653,9 +660,9 @@ func overrideStarTreeConfigs(plan *models.TableResourceModel) []*model.StarTreeI
 	for _, starConfig := range plan.TableIndexConfig.StarTreeIndexConfigs {
 		starTreeConfigs = append(starTreeConfigs, &model.StarTreeIndexConfig{
 			MaxLeafRecords:                    int(starConfig.MaxLeafRecords.ValueInt64()),
-			DimensionsSplitOrder:              starConfig.DimensionsSplitOrder,
-			FunctionColumnPairs:               starConfig.FunctionColumnPairs,
-			SkipStarNodeCreationForDimensions: starConfig.SkipStarNodeCreationForDimNames,
+			DimensionsSplitOrder:              toStringList(ctx, starConfig.DimensionsSplitOrder),
+			FunctionColumnPairs:               toStringList(ctx, starConfig.FunctionColumnPairs),
+			SkipStarNodeCreationForDimensions: toStringList(ctx, starConfig.SkipStarNodeCreationForDimNames),
 		})
 	}
 	return starTreeConfigs
@@ -663,13 +670,23 @@ func overrideStarTreeConfigs(plan *models.TableResourceModel) []*model.StarTreeI
 
 func overrideSegmentsConfig(plan *models.TableResourceModel) model.TableSegmentsConfig {
 
-	return model.TableSegmentsConfig{
+	segmentsConfig := model.TableSegmentsConfig{
 		TimeType:           plan.SegmentsConfig.TimeType.ValueString(),
 		Replication:        plan.SegmentsConfig.Replication.ValueString(),
 		TimeColumnName:     plan.SegmentsConfig.TimeColumnName.ValueString(),
 		RetentionTimeUnit:  plan.SegmentsConfig.RetentionTimeUnit.ValueString(),
 		RetentionTimeValue: plan.SegmentsConfig.RetentionTimeValue.ValueString(),
 	}
+
+	if plan.SegmentsConfig.ReplicasPerPartition.ValueString() != "" {
+		segmentsConfig.ReplicasPerPartition = plan.SegmentsConfig.ReplicasPerPartition.ValueString()
+	}
+
+	if plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString() != "" {
+		segmentsConfig.DeletedSegmentsRetentionPeriod = plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString()
+	}
+
+	return segmentsConfig
 
 }
 
@@ -716,7 +733,7 @@ func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngest
 		return nil
 	}
 
-	return &model.TableIngestionConfig{
+	ingestionConfig := model.TableIngestionConfig{
 		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBool(),
 		RowTimeValueCheck:     plan.IngestionConfig.RowTimeValueCheck.ValueBool(),
 		ContinueOnError:       plan.IngestionConfig.ContinueOnError.ValueBool(),
@@ -724,6 +741,22 @@ func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngest
 			StreamConfigMaps: plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
 		},
 	}
+
+	if plan.IngestionConfig.TransformConfigs != nil {
+
+		var transformConfigs []model.TransformConfig
+
+		for _, transformConfig := range plan.IngestionConfig.TransformConfigs {
+			transformConfigs = append(transformConfigs, model.TransformConfig{
+				ColumnName:        transformConfig.ColumnName.ValueString(),
+				TransformFunction: transformConfig.TransformFunction.ValueString(),
+			})
+		}
+
+		ingestionConfig.TransformConfigs = transformConfigs
+	}
+
+	return &ingestionConfig
 }
 
 func overrideFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
@@ -759,4 +792,10 @@ func overrideFieldConfigList(plan *models.TableResourceModel) []model.FieldConfi
 		fieldConfigs = append(fieldConfigs, fc)
 	}
 	return fieldConfigs
+}
+
+func toStringList(ctx context.Context, listValue types.List) []string {
+	var values []string
+	listValue.ElementsAs(ctx, &values, true)
+	return values
 }

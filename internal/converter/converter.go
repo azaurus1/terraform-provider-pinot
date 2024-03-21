@@ -1,12 +1,13 @@
 package converter
 
 import (
+	"context"
 	"github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-pinot/internal/models"
 )
 
-func SetStateFromTable(state *models.TableResourceModel, table *model.Table) {
+func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) {
 
 	state.TableName = types.StringValue(table.TableName)
 	state.TableType = types.StringValue(table.TableType)
@@ -16,43 +17,8 @@ func SetStateFromTable(state *models.TableResourceModel, table *model.Table) {
 		Server: types.StringValue(table.Tenants.Server),
 	}
 
-	state.SegmentsConfig = &models.SegmentsConfig{
-		TimeType:           types.StringValue(table.SegmentsConfig.TimeType),
-		Replication:        types.StringValue(table.SegmentsConfig.Replication),
-		TimeColumnName:     types.StringValue(table.SegmentsConfig.TimeColumnName),
-		RetentionTimeUnit:  types.StringValue(table.SegmentsConfig.RetentionTimeUnit),
-		RetentionTimeValue: types.StringValue(table.SegmentsConfig.RetentionTimeValue),
-	}
-
-	var starTreeIndexConfigs []*models.StarTreeIndexConfigs
-	for _, starConfig := range table.TableIndexConfig.StarTreeIndexConfigs {
-		starTreeIndexConfigs = append(starTreeIndexConfigs, &models.StarTreeIndexConfigs{
-			MaxLeafRecords:                  types.Int64Value(int64(starConfig.MaxLeafRecords)),
-			DimensionsSplitOrder:            starConfig.DimensionsSplitOrder,
-			FunctionColumnPairs:             starConfig.FunctionColumnPairs,
-			SkipStarNodeCreationForDimNames: starConfig.SkipStarNodeCreationForDimensions,
-		})
-	}
-
-	state.TableIndexConfig = &models.TableIndexConfig{
-		LoadMode:            types.StringValue(table.TableIndexConfig.LoadMode),
-		NullHandlingEnabled: types.BoolValue(table.TableIndexConfig.NullHandlingEnabled),
-		CreateInvertedIndexDuringSegmentGeneration: types.BoolValue(table.TableIndexConfig.CreateInvertedIndexDuringSegmentGeneration),
-		EnableDefaultStarTree:                      types.BoolValue(table.TableIndexConfig.EnableDefaultStarTree),
-		OptimizeDictionary:                         types.BoolValue(table.TableIndexConfig.OptimizeDictionary),
-		OptimizeDictionaryForMetrics:               types.BoolValue(table.TableIndexConfig.OptimizeDictionaryForMetrics),
-		NoDictionarySizeRatioThreshold:             types.Float64Value(table.TableIndexConfig.NoDictionarySizeRatioThreshold),
-		StarTreeIndexConfigs:                       starTreeIndexConfigs,
-		SortedColumn:                               table.TableIndexConfig.SortedColumn,
-		AggregateMetrics:                           types.BoolValue(table.TableIndexConfig.AggregateMetrics),
-		SegmentPartitionConfig:                     convertSegmentPartitionConfig(table),
-		OnHeapDictionaryColumns:                    table.TableIndexConfig.OnHeapDictionaryColumns,
-		VarLengthDictionaryColumns:                 table.TableIndexConfig.VarLengthDictionaryColumns,
-		RangeIndexColumns:                          table.TableIndexConfig.RangeIndexColumns,
-		NoDictionaryColumns:                        table.TableIndexConfig.NoDictionaryColumns,
-		BloomFilterColumns:                         table.TableIndexConfig.BloomFilterColumns,
-		RangeIndexVersion:                          types.Int64Value(int64(table.TableIndexConfig.RangeIndexVersion)),
-	}
+	state.SegmentsConfig = convertSegmentsConfig(table)
+	state.TableIndexConfig = convertTableIndexConfig(ctx, table)
 
 	var ingestionTransformConfigs []*models.TransformConfig
 	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
@@ -114,4 +80,79 @@ func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionC
 	}
 
 	return segmentPartitionConfig
+}
+
+func convertTableIndexConfig(ctx context.Context, table *model.Table) *models.TableIndexConfig {
+
+	noDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.NoDictionaryColumns)
+	onHeapDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.OnHeapDictionaryColumns)
+	sortedColumn, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.SortedColumn)
+	varLengthDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.VarLengthDictionaryColumns)
+	bloomFilterColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.BloomFilterColumns)
+	rangeIndexColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.RangeIndexColumns)
+
+	indexConfig := models.TableIndexConfig{
+		LoadMode:            types.StringValue(table.TableIndexConfig.LoadMode),
+		NullHandlingEnabled: types.BoolValue(table.TableIndexConfig.NullHandlingEnabled),
+		CreateInvertedIndexDuringSegmentGeneration: types.BoolValue(table.TableIndexConfig.CreateInvertedIndexDuringSegmentGeneration),
+		EnableDefaultStarTree:                      types.BoolValue(table.TableIndexConfig.EnableDefaultStarTree),
+		OptimizeDictionary:                         types.BoolValue(table.TableIndexConfig.OptimizeDictionary),
+		OptimizeDictionaryForMetrics:               types.BoolValue(table.TableIndexConfig.OptimizeDictionaryForMetrics),
+		NoDictionarySizeRatioThreshold:             types.Float64Value(table.TableIndexConfig.NoDictionarySizeRatioThreshold),
+		StarTreeIndexConfigs:                       convertStarTreeIndexConfigs(ctx, table),
+		AggregateMetrics:                           types.BoolValue(table.TableIndexConfig.AggregateMetrics),
+		SegmentPartitionConfig:                     convertSegmentPartitionConfig(table),
+		RangeIndexVersion:                          types.Int64Value(int64(table.TableIndexConfig.RangeIndexVersion)),
+		SortedColumn:                               sortedColumn,
+		OnHeapDictionaryColumns:                    onHeapDictionaryColumns,
+		VarLengthDictionaryColumns:                 varLengthDictionaryColumns,
+		RangeIndexColumns:                          rangeIndexColumns,
+		NoDictionaryColumns:                        noDictionaryColumns,
+		BloomFilterColumns:                         bloomFilterColumns,
+	}
+
+	return &indexConfig
+}
+
+func convertStarTreeIndexConfigs(ctx context.Context, table *model.Table) []*models.StarTreeIndexConfigs {
+
+	var starTreeIndexConfigs []*models.StarTreeIndexConfigs
+
+	for _, starConfig := range table.TableIndexConfig.StarTreeIndexConfigs {
+
+		dimensionSplitOrder, _ := types.ListValueFrom(ctx, types.StringType, starConfig.DimensionsSplitOrder)
+		functionColumnPairs, _ := types.ListValueFrom(ctx, types.StringType, starConfig.FunctionColumnPairs)
+		skipStarNodeCreationDimensionColumns, _ := types.ListValueFrom(ctx, types.StringType, starConfig.SkipStarNodeCreationForDimensions)
+
+		starTreeIndexConfigs = append(starTreeIndexConfigs, &models.StarTreeIndexConfigs{
+			MaxLeafRecords:                  types.Int64Value(int64(starConfig.MaxLeafRecords)),
+			DimensionsSplitOrder:            dimensionSplitOrder,
+			FunctionColumnPairs:             functionColumnPairs,
+			SkipStarNodeCreationForDimNames: skipStarNodeCreationDimensionColumns,
+		})
+
+	}
+
+	return starTreeIndexConfigs
+}
+
+func convertSegmentsConfig(table *model.Table) *models.SegmentsConfig {
+
+	segmentsConfig := models.SegmentsConfig{
+		TimeType:           types.StringValue(table.SegmentsConfig.TimeType),
+		Replication:        types.StringValue(table.SegmentsConfig.Replication),
+		TimeColumnName:     types.StringValue(table.SegmentsConfig.TimeColumnName),
+		RetentionTimeUnit:  types.StringValue(table.SegmentsConfig.RetentionTimeUnit),
+		RetentionTimeValue: types.StringValue(table.SegmentsConfig.RetentionTimeValue),
+	}
+
+	if table.SegmentsConfig.ReplicasPerPartition != "" {
+		segmentsConfig.ReplicasPerPartition = types.StringValue(table.SegmentsConfig.ReplicasPerPartition)
+	}
+
+	if table.SegmentsConfig.DeletedSegmentsRetentionPeriod != "" {
+		segmentsConfig.DeletedSegmentsRetentionPeriod = types.StringValue(table.SegmentsConfig.DeletedSegmentsRetentionPeriod)
+	}
+
+	return &segmentsConfig
 }

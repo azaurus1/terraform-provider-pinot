@@ -64,7 +64,7 @@ type FieldConfig struct {
 }
 
 type TableIndexConfig struct {
-	SortedColumn                               []string                `tfsdk:"sorted_column"`
+	SortedColumn                               types.List              `tfsdk:"sorted_column"`
 	LoadMode                                   types.String            `tfsdk:"load_mode"`
 	NullHandlingEnabled                        types.Bool              `tfsdk:"null_handling_enabled"`
 	CreateInvertedIndexDuringSegmentGeneration types.Bool              `tfsdk:"create_inverted_index_during_segment_generation"`
@@ -78,11 +78,11 @@ type TableIndexConfig struct {
 	AggregateMetrics                           types.Bool              `tfsdk:"aggregate_metrics"`
 	StarTreeIndexConfigs                       []*StarTreeIndexConfigs `tfsdk:"star_tree_index_configs"`
 	SegmentPartitionConfig                     *SegmentPartitionConfig `tfsdk:"segment_partition_config"`
-	NoDictionaryColumns                        []string                `tfsdk:"no_dictionary_columns"`
-	RangeIndexColumns                          []string                `tfsdk:"range_index_columns"`
-	OnHeapDictionaryColumns                    []string                `tfsdk:"on_heap_dictionary_columns"`
-	VarLengthDictionaryColumns                 []string                `tfsdk:"var_length_dictionary_columns"`
-	BloomFilterColumns                         []string                `tfsdk:"bloom_filter_columns"`
+	NoDictionaryColumns                        types.List              `tfsdk:"no_dictionary_columns"`
+	RangeIndexColumns                          types.List              `tfsdk:"range_index_columns"`
+	OnHeapDictionaryColumns                    types.List              `tfsdk:"on_heap_dictionary_columns"`
+	VarLengthDictionaryColumns                 types.List              `tfsdk:"var_length_dictionary_columns"`
+	BloomFilterColumns                         types.List              `tfsdk:"bloom_filter_columns"`
 	RangeIndexVersion                          types.Int64             `tfsdk:"range_index_version"`
 }
 
@@ -94,9 +94,9 @@ type AggregationConfig struct {
 
 type StarTreeIndexConfigs struct {
 	MaxLeafRecords                  types.Int64          `tfsdk:"max_leaf_records"`
-	SkipStarNodeCreationForDimNames []string             `tfsdk:"skip_star_node_creation_for_dim_names"`
-	DimensionsSplitOrder            []string             `tfsdk:"dimensions_split_order"`
-	FunctionColumnPairs             []string             `tfsdk:"function_column_pairs"`
+	SkipStarNodeCreationForDimNames types.List           `tfsdk:"skip_star_node_creation_for_dim_names"`
+	DimensionsSplitOrder            types.List           `tfsdk:"dimensions_split_order"`
+	FunctionColumnPairs             types.List           `tfsdk:"function_column_pairs"`
 	AggregationConfigs              []*AggregationConfig `tfsdk:"aggregation_configs"`
 }
 
