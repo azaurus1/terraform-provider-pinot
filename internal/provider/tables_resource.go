@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"log"
 	"strconv"
 	"terraform-provider-pinot/internal/converter"
 	"terraform-provider-pinot/internal/models"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 	"github.com/azaurus1/go-pinot-api/model"
@@ -533,6 +534,16 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		resp.Diagnostics.AddError("Update Failed: Unable to update table", err.Error())
 		return
 	}
+
+	// Update succeeded, reload the table segments
+
+	_, err = r.client.ReloadTableSegments(plan.TableName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Update Failed: Unable to reload table segments", err.Error())
+		return
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("Table segments reloaded: %s", plan.TableName))
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &plan)

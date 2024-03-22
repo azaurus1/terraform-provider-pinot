@@ -2,12 +2,14 @@ package provider
 
 import (
 	"context"
+
 	pinot "github.com/azaurus1/go-pinot-api"
 	"github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"google.golang.org/appengine/log"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -25,22 +27,22 @@ func NewTableSchemaResource() resource.Resource {
 }
 
 type fieldSpec struct {
-	Name     string `tfsdk:"name"`
-	DataType string `tfsdk:"data_type"`
-	NotNull  bool   `tfsdk:"not_null"`
+	Name     string              `tfsdk:"name"`
+	DataType string              `tfsdk:"data_type"`
+	NotNull  basetypes.BoolValue `tfsdk:"not_null"`
 }
 
 type dateTimeFieldSpec struct {
-	Name        string `tfsdk:"name"`
-	DataType    string `tfsdk:"data_type"`
-	NotNull     bool   `tfsdk:"not_null"`
-	Format      string `tfsdk:"format"`
-	Granularity string `tfsdk:"granularity"`
+	Name        string              `tfsdk:"name"`
+	DataType    string              `tfsdk:"data_type"`
+	NotNull     basetypes.BoolValue `tfsdk:"not_null"`
+	Format      string              `tfsdk:"format"`
+	Granularity string              `tfsdk:"granularity"`
 }
 
 type tableSchemaResourceModel struct {
 	SchemaName                    types.String        `tfsdk:"schema_name"`
-	EnableColumnBasedNullHandling types.Bool          `tfsdk:"enable_column_based_null_handling"`
+	EnableColumnBasedNullHandling basetypes.BoolValue `tfsdk:"enable_column_based_null_handling"`
 	DimensionFieldSpecs           []fieldSpec         `tfsdk:"dimension_field_specs"`
 	MetricFieldSpecs              []fieldSpec         `tfsdk:"metric_field_specs"`
 	DateTimeFieldSpecs            []dateTimeFieldSpec `tfsdk:"date_time_field_specs"`
@@ -185,7 +187,6 @@ func (t *tableSchemaResource) Create(ctx context.Context, req resource.CreateReq
 	diagnostics = resp.State.Set(ctx, &plan)
 	resp.Diagnostics.Append(diagnostics...)
 	if resp.Diagnostics.HasError() {
-		log.Errorf(ctx, "Failed to set state: %v", diagnostics)
 		return
 	}
 
@@ -239,6 +240,36 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	// Update succeeded, reload the table segments
+
+	// First check if the table exists, if it doesnt, dont reload
+
+	tableResp, err := t.client.GetTable(plan.SchemaName.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Update Failed: Unable to get table", err.Error())
+		return
+	}
+
+	// iterate over the table segments and reload them
+	// tableResp.REALTIME or tableResp.OFFLINE
+
+	// if tableResp.OFFLINE doesnt exist and tableResp.REALTIME doesnt exist, return
+
+	// TODO: Once go-pinot-api is updated to have IsEmpty() method, use that instead
+
+	tflog.Debug(ctx, "reloading matching table segments")
+	if tableResp.OFFLINE.TableName == "" && tableResp.REALTIME.TableName == "" {
+		// No tables matching this schema, do not error out
+		tflog.Info(ctx, "no tables matching this schema, skipping reload")
+	} else {
+		_, err := t.client.ReloadTableSegments(plan.SchemaName.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Update Failed: Unable to reload table segments", err.Error())
+			return
+		}
+		tflog.Info(ctx, "successfully reloaded matching table segments")
+	}
+
 	diagnostics = resp.State.Set(ctx, &plan)
 	resp.Diagnostics.Append(diagnostics...)
 	if resp.Diagnostics.HasError() {
@@ -275,6 +306,7 @@ func toPinotModelFieldSpec(fieldSpecs []fieldSpec) []model.FieldSpec {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
+			NotNull:  fs.NotNull.ValueBool(),
 		})
 	}
 	return pinotFieldSpecs
@@ -288,6 +320,7 @@ func toDateTimeFieldSpecs(fieldSpecs []dateTimeFieldSpec) []model.FieldSpec {
 			DataType:    fs.DataType,
 			Format:      fs.Format,
 			Granularity: fs.Granularity,
+			NotNull:     fs.NotNull.ValueBool(),
 		})
 	}
 	return pinotFieldSpecs
@@ -300,6 +333,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 		dimensionFieldSpecs[i] = fieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
+			NotNull:  basetypes.NewBoolValue(fs.NotNull),
 		}
 	}
 
@@ -308,6 +342,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 		metricFieldSpecs[i] = fieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
+			NotNull:  basetypes.NewBoolValue(fs.NotNull),
 		}
 	}
 
@@ -318,6 +353,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 			DataType:    fs.DataType,
 			Format:      fs.Format,
 			Granularity: fs.Granularity,
+			NotNull:     basetypes.NewBoolValue(fs.NotNull),
 		}
 	}
 
