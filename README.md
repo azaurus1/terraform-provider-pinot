@@ -1,9 +1,90 @@
-# Terraform Provider for Apache Pinot (using Terraform Plugin Framework)
+# `terraform-provider-pinot`
+A [Terraform](https://www.terraform.io/) provider for [Apache Pinot](https://pinot.apache.org/)
 
-_This provider is built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). The template repository built on the [Terraform Plugin SDK](https://github.com/hashicorp/terraform-plugin-sdk) can be found at [terraform-provider-scaffolding](https://github.com/hashicorp/terraform-provider-scaffolding). 
+## Contents
+- [Using the provider](#using-the-provider)
+  - [Installation](#installation)
+  - [Examples](#examples)
+- [Requirements](#requirements)
 
+
+
+## Using the provider
+
+### Installation:
+```hcl
+terraform {
+  required_providers {
+    pinot = {
+      source = "azaurus1/pinot"
+      version = "0.2.0"
+    }
+  }
+}
+
+provider "pinot" {
+  controller_url = "http://localhost:9000" //required (can also be set via environment variable PINOT_CONTROLLER_URL)
+  auth_token     = "YWRtaW46dmVyeXNlY3JldA" //optional (can also be set via environment variable PINOT_AUTH_TOKEN) 
+}
+
+```
+### Examples:
+Example Schema:
+```
+resource "pinot_schema" "block_schema" {
+  schema_name = "ethereum_block_headers"
+  date_time_field_specs = [{
+    data_type   = "LONG",
+    name        = "block_timestamp",
+    format      = "1:MILLISECONDS:EPOCH",
+    granularity = "1:MILLISECONDS",
+  }]
+  dimension_field_specs = [{
+    name      = "block_number",
+    data_type = "INT",
+    not_null  = true
+    },
+    {
+      name      = "block_hash",
+      data_type = "STRING",
+      not_null  = true
+  }]
+  metric_field_specs = [{
+    name      = "block_difficulty",
+    data_type = "INT",
+    not_null  = true
+  }]
+}
+```
+
+Example Table:
+```
+resource "pinot_table" "realtime_table" {
+
+  table_name = "realtime_ethereum_mainnet_block_headers_REALTIME"
+  table_type = "REALTIME"
+  table      = file("realtime_table_example.json")
+```
+
+Example User:
+```
+resource "pinot_user" "test" {
+  username  = "user"
+  password  = "password"
+  component = "BROKER"
+  role      = "USER"
+
+  lifecycle {
+    ignore_changes = [password]
+  }
+}
+```
+
+This provider is built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). The template repository built on the [Terraform Plugin SDK](https://github.com/hashicorp/terraform-plugin-sdk) can be found at [terraform-provider-scaffolding](https://github.com/hashicorp/terraform-provider-scaffolding). 
 
 ## Requirements
+
+
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.20
@@ -35,8 +116,6 @@ provider_installation {
 go install
 ``` 
 
-
-
 ## Adding Dependencies
 
 This provider uses [Go modules](https://github.com/golang/go/wiki/Modules).
@@ -50,10 +129,6 @@ go mod tidy
 ```
 
 Then commit the changes to `go.mod` and `go.sum`.
-
-## Using the provider
-
-Fill this in for each provider
 
 ## Developing the Provider
 
