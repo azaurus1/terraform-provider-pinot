@@ -78,7 +78,8 @@ type Field struct {
 	ParameterizedHeaders       map[string]string   `tfsdk:"parameterized_headers"`
 }
 
-type segementResourceModel struct {
+type segmentResourceModel struct {
+	TableName            string              `tfsdk:"table_name"`
 	ContentDisposition   ContentDisposition  `tfsdk:"content_disposition"`
 	Entity               map[string]string   `tfsdk:"entity"`
 	Headers              map[string][]string `tfsdk:"headers"`
@@ -357,9 +358,57 @@ func (t *segmentResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 
 func (t *segmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan segmentResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (t *segmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state segmentResourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	segments, err := t.client.GetSegments(state.TableName)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to get segment", err.Error())
+		return
+	}
+
+	for _, segment := range segments {
+
+		// create slices for offline and realtime segments per segment
+		offlineSegments := make([]segmentsModel, 0)
+		realtimeSegments := make([]segmentsModel, 0)
+
+		if len(segment.Offline) > 0 {
+			for _, segment := range segment.Offline {
+				offlineSegments = append(offlineSegments, segmentsModel{
+					SegmentName: segment,
+				})
+			}
+		}
+
+		if len(segment.Realtime) > 0 {
+			for _, segment := range segment.Realtime {
+				realtimeSegments = append(realtimeSegments, segmentsModel{
+					SegmentName: segment,
+				})
+			}
+		}
+
+		state.OfflineSegments = offlineSegments
+		state.RealtimeSegments = realtimeSegments
+	}
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
 }
 
 func (t *segmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
