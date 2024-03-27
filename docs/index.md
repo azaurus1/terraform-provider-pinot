@@ -17,6 +17,7 @@ provider "pinot" {
   # example configuration here
   controller_url = "http://localhost:9000"  //required (can also be set via environment variable PINOT_CONTROLLER_URL)
   auth_token     = "YWRtaW46dmVyeXNlY3JldA" //optional (can also be set via environment variable PINOT_AUTH_TOKEN)
+  auth_type      = "bearer"                 //optional (can also be set via environment variable PINOT_AUTH_TYPE)
 }
 ```
 
@@ -26,4 +27,5 @@ provider "pinot" {
 ### Optional
 
 - `auth_token` (String) The auth token for the Pinot controller.
+- `auth_type` (String) The auth type for the Pinot controller. Default is 'Basic', Options are 'Basic' or 'Bearer'.
 - `controller_url` (String) The URL of the Pinot controller.

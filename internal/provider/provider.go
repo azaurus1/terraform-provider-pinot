@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 )
@@ -39,6 +40,7 @@ type pinotProvider struct {
 type pinotProviderModel struct {
 	ControllerURL types.String `tfsdk:"controller_url"`
 	AuthToken     types.String `tfsdk:"auth_token"`
+	AuthType      types.String `tfsdk:"auth_type"`
 }
 
 // Metadata returns the provider type name.
@@ -59,6 +61,10 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 				Description: "The auth token for the Pinot controller.",
 				Optional:    true,
 			},
+			"auth_type": schema.StringAttribute{
+				Description: "The auth type for the Pinot controller. Default is 'Basic', Options are 'Basic' or 'Bearer'.",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -66,6 +72,7 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 // Configure prepares a Pinot API client for data sources and resources.
 func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var config pinotProviderModel
+	var pinot *goPinotAPI.PinotAPIClient
 
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
@@ -97,6 +104,15 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
+	if config.AuthType.IsUnknown() {
+		resp.Diagnostics.AddAttributeWarning(
+			path.Root("auth_type"),
+			"Auth Type not set",
+			"The provider will use the default auth type for the Pinot API client.",
+		)
+		tflog.Info(ctx, "Auth Type not set. Using default auth type.")
+	}
+
 	controllerURL := os.Getenv("PINOT_CONTROLLER_URL")
 
 	if !(config.ControllerURL.IsNull()) {
@@ -111,6 +127,16 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	if !(config.AuthToken.IsNull()) {
 		authToken = config.AuthToken.ValueString()
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	authType := os.Getenv("PINOT_AUTH_TYPE")
+
+	if !(config.AuthType.IsNull()) {
+		authType = config.AuthType.ValueString()
 	}
 
 	if resp.Diagnostics.HasError() {
@@ -137,9 +163,10 @@ func (p *pinotProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
-	pinot := goPinotAPI.NewPinotAPIClient(
+	pinot = goPinotAPI.NewPinotAPIClient(
 		goPinotAPI.ControllerUrl(controllerURL),
 		goPinotAPI.AuthToken(authToken),
+		goPinotAPI.AuthType(authType),
 	)
 
 	resp.DataSourceData = pinot
