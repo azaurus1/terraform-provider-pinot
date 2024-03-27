@@ -8,6 +8,8 @@ terraform {
 
 provider "pinot" {
   controller_url = "http://localhost:9000"
+  # auth_type      = "bearer"
+  auth_token = "YWRtaW46dmVyeXNlY3JldA"
 }
 
 resource "pinot_user" "test" {
