@@ -27,5 +27,5 @@ provider "pinot" {
 ### Optional
 
 - `auth_token` (String) The auth token for the Pinot controller.
-- `auth_type` (String) The auth type for the Pinot controller. Options are 'Bearer' or 'Basic', anything not matching will default to basic
+- `auth_type` (String) The auth type for the Pinot controller. Default is 'Basic', Options are 'Basic' or 'Bearer'.
 - `controller_url` (String) The URL of the Pinot controller.

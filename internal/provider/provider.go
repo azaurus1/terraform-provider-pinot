@@ -62,7 +62,7 @@ func (p *pinotProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 				Optional:    true,
 			},
 			"auth_type": schema.StringAttribute{
-				Description: "The auth type for the Pinot controller.",
+				Description: "The auth type for the Pinot controller. Default is 'Basic', Options are 'Basic' or 'Bearer'.",
 				Optional:    true,
 			},
 		},
