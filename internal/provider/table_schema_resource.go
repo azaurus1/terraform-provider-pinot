@@ -36,7 +36,7 @@ type dimensionFieldSpec struct {
 	Name             string              `tfsdk:"name"`
 	DataType         string              `tfsdk:"data_type"`
 	NotNull          basetypes.BoolValue `tfsdk:"not_null"`
-	SingleValueField basetypes.BoolValue `tfsdk:"single_value_ield"`
+	SingleValueField basetypes.BoolValue `tfsdk:"single_value_field"`
 }
 
 type dateTimeFieldSpec struct {
@@ -104,6 +104,10 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 						},
 						"not_null": schema.BoolAttribute{
 							Description: "Whether the dimension is not null.",
+							Optional:    true,
+						},
+						"single_value_field": schema.BoolAttribute{
+							Description: "Whether the dimension is a single value field.",
 							Optional:    true,
 						},
 					},
@@ -306,10 +310,6 @@ func (t *tableSchemaResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 func toDimensionFieldSpecs(fieldSpecs []dimensionFieldSpec) []model.FieldSpec {
 
 	var pinotFieldSpecs []model.FieldSpec
@@ -317,7 +317,7 @@ func toDimensionFieldSpecs(fieldSpecs []dimensionFieldSpec) []model.FieldSpec {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  boolPtr(fs.NotNull.ValueBool()),
+			NotNull:  fs.NotNull.ValueBoolPointer(),
 		})
 	}
 	return pinotFieldSpecs
@@ -330,7 +330,7 @@ func toMetricFieldSpecs(fieldSpecs []metricFieldSpec) []model.FieldSpec {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  boolPtr(fs.NotNull.ValueBool()),
+			NotNull:  fs.NotNull.ValueBoolPointer(),
 		})
 	}
 	return pinotFieldSpecs
@@ -344,7 +344,7 @@ func toDateTimeFieldSpecs(fieldSpecs []dateTimeFieldSpec) []model.FieldSpec {
 			DataType:    fs.DataType,
 			Format:      fs.Format,
 			Granularity: fs.Granularity,
-			NotNull:     boolPtr(fs.NotNull.ValueBool()),
+			NotNull:     fs.NotNull.ValueBoolPointer(),
 		})
 	}
 	return pinotFieldSpecs
@@ -357,7 +357,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 		dimensionFieldSpecs[i] = dimensionFieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  basetypes.NewBoolValue(*fs.NotNull),
+			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
@@ -366,7 +366,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 		metricFieldSpecs[i] = metricFieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  basetypes.NewBoolValue(*fs.NotNull),
+			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
@@ -377,7 +377,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 			DataType:    fs.DataType,
 			Format:      fs.Format,
 			Granularity: fs.Granularity,
-			NotNull:     basetypes.NewBoolValue(*fs.NotNull),
+			NotNull:     basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
