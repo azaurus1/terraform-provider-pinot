@@ -241,8 +241,7 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	// Update succeeded, reload the table segments
-
-	// First check if the table exists, if it doesnt, dont reload
+	// First check if the table exists, if it doesn't, don't reload
 
 	tableResp, err := t.client.GetTable(plan.SchemaName.ValueString())
 	if err != nil {
@@ -252,8 +251,7 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 
 	// iterate over the table segments and reload them
 	// tableResp.REALTIME or tableResp.OFFLINE
-
-	// if tableResp.OFFLINE doesnt exist and tableResp.REALTIME doesnt exist, return
+	// if tableResp.OFFLINE doesn't exist and tableResp.REALTIME doesn't exist, return
 
 	// TODO: Once go-pinot-api is updated to have IsEmpty() method, use that instead
 
@@ -306,7 +304,7 @@ func toPinotModelFieldSpec(fieldSpecs []fieldSpec) []model.FieldSpec {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  fs.NotNull.ValueBool(),
+			NotNull:  fs.NotNull.ValueBoolPointer(),
 		})
 	}
 	return pinotFieldSpecs
@@ -320,7 +318,7 @@ func toDateTimeFieldSpecs(fieldSpecs []dateTimeFieldSpec) []model.FieldSpec {
 			DataType:    fs.DataType,
 			Format:      fs.Format,
 			Granularity: fs.Granularity,
-			NotNull:     fs.NotNull.ValueBool(),
+			NotNull:     fs.NotNull.ValueBoolPointer(),
 		})
 	}
 	return pinotFieldSpecs
@@ -333,7 +331,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 		dimensionFieldSpecs[i] = fieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  basetypes.NewBoolValue(fs.NotNull),
+			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
@@ -342,7 +340,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 		metricFieldSpecs[i] = fieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
-			NotNull:  basetypes.NewBoolValue(fs.NotNull),
+			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
@@ -353,7 +351,7 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 			DataType:    fs.DataType,
 			Format:      fs.Format,
 			Granularity: fs.Granularity,
-			NotNull:     basetypes.NewBoolValue(fs.NotNull),
+			NotNull:     basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
