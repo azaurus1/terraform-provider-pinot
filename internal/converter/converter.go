@@ -3,11 +3,15 @@ package converter
 import (
 	"context"
 	"github.com/azaurus1/go-pinot-api/model"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"strconv"
 	"terraform-provider-pinot/internal/models"
 )
 
-func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) {
+func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) diag.Diagnostics {
+
+	var diags diag.Diagnostics
 
 	state.TableName = types.StringValue(table.TableName)
 	state.TableType = types.StringValue(table.TableType)
@@ -57,6 +61,23 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		CustomConfigs: table.Metadata.CustomConfigs,
 	}
 
+	// Routing Config
+	routingConfig, routingDiags := convertRoutingConfig(ctx, table)
+	if routingDiags.HasError() {
+		diags.Append(routingDiags...)
+		return diags
+	}
+	state.Routing = routingConfig
+
+	// Upsert Config
+	upsertConfig, upsertDiags := convertUpsertConfig(ctx, table)
+	if upsertDiags.HasError() {
+		diags.Append(upsertDiags...)
+		return diags
+	}
+	state.UpsertConfig = upsertConfig
+
+	return diags
 }
 
 func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionConfig {
@@ -155,4 +176,48 @@ func convertSegmentsConfig(table *model.Table) *models.SegmentsConfig {
 	}
 
 	return &segmentsConfig
+}
+
+func convertRoutingConfig(ctx context.Context, table *model.Table) (*models.RoutingConfig, diag.Diagnostics) {
+
+	segmentPrunerTypes, resultDiags := types.ListValueFrom(ctx, types.StringType, table.Routing.SegmentPrunerTypes)
+	if resultDiags.HasError() {
+		return nil, resultDiags
+	}
+
+	routingConfig := models.RoutingConfig{
+		InstanceSelectorType: types.StringValue(table.Routing.InstanceSelectorType),
+		SegmentPrunerTypes:   segmentPrunerTypes,
+	}
+
+	return &routingConfig, resultDiags
+}
+
+func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.UpsertConfig, diag.Diagnostics) {
+
+	partialUpsertStrategies, resultDiags := types.MapValueFrom(ctx, types.StringType, table.UpsertConfig.PartialUpsertStrategies)
+	if resultDiags.HasError() {
+		return nil, resultDiags
+	}
+
+	metadataManagerConfigs, resultDiags := types.MapValueFrom(ctx, types.StringType, table.UpsertConfig.MetadataManagerConfigs)
+	if resultDiags.HasError() {
+		return nil, resultDiags
+	}
+
+	upsertConfig := models.UpsertConfig{
+		Mode:                   types.StringValue(table.UpsertConfig.Mode),
+		PartialUpsertStrategy:  partialUpsertStrategies,
+		DeletedKeysTTL:         types.StringValue(strconv.Itoa(table.UpsertConfig.DeletedKeysTTL)),
+		HashFunction:           types.StringValue(table.UpsertConfig.HashFunction),
+		EnableSnapshot:         types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
+		EnablePreLoad:          types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
+		UpsertTTL:              types.StringValue(table.UpsertConfig.UpsertTTL),
+		DropOutOfOrderRecords:  types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecords),
+		OutOfOrderRecordColumn: types.StringValue(table.UpsertConfig.OutOfOrderRecordColumn),
+		MetadataManagerClass:   types.StringValue(table.UpsertConfig.MetadataManagerClass),
+		MetadataManagerConfigs: metadataManagerConfigs,
+	}
+
+	return &upsertConfig, resultDiags
 }
