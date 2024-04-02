@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"log"
 	"strconv"
 	"terraform-provider-pinot/internal/converter"
@@ -289,6 +290,39 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 						Optional:    true,
 						ElementType: types.StringType,
 					},
+					"metadata_manager_class_name": schema.StringAttribute{
+						Description: "The metadata manager class name for the table.",
+						Optional:    true,
+					},
+					"metadata_manager_configs": schema.MapAttribute{
+						Description: "The metadata manager configs for the table.",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"enable_preload": schema.BoolAttribute{
+						Description: "The enable preload for the table.",
+						Optional:    true,
+					},
+					"deleted_keys_ttl": schema.Int64Attribute{
+						Description: "The deleted keys ttl for the table.",
+						Optional:    true,
+					},
+					"metadata_ttl": schema.Int64Attribute{
+						Description: "The metadata ttl for the table.",
+						Optional:    true,
+					},
+					"drop_out_of_order_record": schema.BoolAttribute{
+						Description: "The drop out of order record for the table.",
+						Optional:    true,
+					},
+					"hash_function": schema.StringAttribute{
+						Description: "The hash function for the table.",
+						Optional:    true,
+					},
+					"enable_snapshot": schema.BoolAttribute{
+						Description: "The enable snapshot for the table.",
+						Optional:    true,
+					},
 				},
 			},
 			"ingestion_config": schema.SingleNestedAttribute{
@@ -431,6 +465,21 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					},
 				},
 			},
+			"routing": schema.SingleNestedAttribute{
+				Description: "routing configuration for the table",
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					"segment_pruner_types": schema.ListAttribute{
+						Description: "segment pruner types",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"instance_selector_type": schema.StringAttribute{
+						Description: "instance selector type",
+						Optional:    true,
+					},
+				},
+			},
 		},
 	}
 }
@@ -452,7 +501,13 @@ func (r *tableResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	overriddenTableBytes, err := json.Marshal(override(&plan))
+	tableWithPlanOverrides, resultDiags := override(&plan)
+	if resultDiags.HasError() {
+		resp.Diagnostics.Append(resultDiags...)
+		return
+	}
+
+	overriddenTableBytes, err := json.Marshal(tableWithPlanOverrides)
 	if err != nil {
 		resp.Diagnostics.AddError("Create Failed: Unable to marshal table", err.Error())
 		return
@@ -499,7 +554,11 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	tflog.Info(ctx, "setting state\n")
 
-	converter.SetStateFromTable(ctx, &state, &table)
+	resultDiags := converter.SetStateFromTable(ctx, &state, &table)
+	if resultDiags.HasError() {
+		resp.Diagnostics.Append(resultDiags...)
+		return
+	}
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
@@ -521,7 +580,13 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	tflog.Info(ctx, fmt.Sprintf("Overriding table config: %s", plan.TableName))
 
-	overriddenTableBytes, err := json.Marshal(override(&plan))
+	tableWithPlanOverrides, resultDiags := override(&plan)
+	if resultDiags.HasError() {
+		resp.Diagnostics.Append(resultDiags...)
+		return
+	}
+
+	overriddenTableBytes, err := json.Marshal(tableWithPlanOverrides)
 	if err != nil {
 		resp.Diagnostics.AddError("Update Failed: Unable to marshal table", err.Error())
 		return
@@ -578,7 +643,9 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	}
 }
 
-func override(plan *models.TableResourceModel) *model.Table {
+func override(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) {
+
+	var diags diag.Diagnostics
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -603,10 +670,33 @@ func override(plan *models.TableResourceModel) *model.Table {
 
 	if plan.FieldConfigList != nil {
 		table.FieldConfigList = overrideFieldConfigList(plan)
+	}
+
+	if plan.UpsertConfig != nil {
+
+		upsertConfig, resultDiags := converter.ToUpsertConfig(ctx, plan.UpsertConfig)
+		if resultDiags.HasError() {
+			diags.Append(resultDiags...)
+			return nil, diags
+		}
+
+		table.UpsertConfig = upsertConfig
 
 	}
 
-	return &table
+	if plan.Routing != nil {
+
+		routingConfig, resultDiags := converter.ToRoutingConfig(ctx, plan.Routing)
+		if resultDiags.HasError() {
+			diags.Append(resultDiags...)
+			return nil, diags
+		}
+
+		table.Routing = routingConfig
+
+	}
+
+	return &table, diags
 }
 
 func overrideTableConfigs(ctx context.Context, plan *models.TableResourceModel) model.TableIndexConfig {
