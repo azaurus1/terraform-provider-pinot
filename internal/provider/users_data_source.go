@@ -7,6 +7,7 @@ import (
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -27,6 +28,7 @@ type usersDataSource struct {
 
 type usersDataSourceModel struct {
 	Users []usersModel `tfsdk:"users"`
+	ID    types.String `tfsdk:"id"`
 }
 
 type usersModel struct {
@@ -64,6 +66,10 @@ func (d *usersDataSource) Metadata(_ context.Context, req datasource.MetadataReq
 func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "The ID of the user.",
+				Computed:    true,
+			},
 			"users": schema.ListNestedAttribute{
 				Description: "The list of users.",
 				Computed:    true,
@@ -111,6 +117,8 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			Role:      user.Role,
 		})
 	}
+
+	state.ID = types.StringValue("placeholder")
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

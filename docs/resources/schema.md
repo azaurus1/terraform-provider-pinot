@@ -53,6 +53,7 @@ Required:
 Optional:
 
 - `not_null` (Boolean) Whether the dimension is not null.
+- `single_value_field` (Boolean) Whether the dimension is a single value field.
 
 
 <a id="nestedatt--metric_field_specs"></a>
