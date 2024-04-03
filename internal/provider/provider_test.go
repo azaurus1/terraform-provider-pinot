@@ -8,15 +8,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
-const (
-	providerConfig = `
-provider "pinot" {
-	controller_url = "http://localhost:9000"
-	# auth_type      = "Bearer" // Bearer will use bearer token, anything else will use default which is basic
-	auth_token = "YWRtaW46dmVyeXNlY3JldA"
- }
-`
-)
+// const (
+// 	providerConfig = `
+// provider "pinot" {
+// 	controller_url = "http://localhost:9000"
+// 	# auth_type      = "Bearer" // Bearer will use bearer token, anything else will use default which is basic
+// 	auth_token = "YWRtaW46dmVyeXNlY3JldA"
+//  }
+// `
+// )
 
 var (
 	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
