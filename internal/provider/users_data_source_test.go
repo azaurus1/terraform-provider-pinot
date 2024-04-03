@@ -19,7 +19,7 @@ func TestAccUsersDataSource(t *testing.T) {
 		t.Fatalf("Failed to run Pinot container: %v", err)
 	}
 
-	fmt.Println(pinot.URI)
+	// fmt.Println(pinot.URI)
 
 	providerConfig := fmt.Sprintf(`
 provider "pinot" {
