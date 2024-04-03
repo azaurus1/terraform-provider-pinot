@@ -17,6 +17,7 @@ description: |-
 
 ### Read-Only
 
+- `id` (String) The ID of the user.
 - `users` (Attributes List) The list of users. (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>
