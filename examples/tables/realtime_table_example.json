@@ -106,5 +106,13 @@
       "partition"
     ],
     "instanceSelectorType": "strictReplicaGroup"
+  },
+  "upsertConfig": {
+    "mode": "FULL",
+    "hashFunction": "NONE",
+    "enableSnapshot": true,
+    "upsertTTL": "1d",
+    "enablePreload": false,
+    "defaultPartialUpsertStrategy": "OVERWRITE"
   }
 }
