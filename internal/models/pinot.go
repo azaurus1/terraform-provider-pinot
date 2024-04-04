@@ -36,14 +36,14 @@ type SegmentsConfig struct {
 
 type UpsertConfig struct {
 	Mode                   types.String `tfsdk:"mode"`
-	PartialUpsertStrategy  types.Map    `tfsdk:"partial_upsert_strategy"`
-	DeletedRecordColumn    types.String `tfsdk:"deleted_record_column"`
-	DeletedKeysTTL         types.String `tfsdk:"deleted_keys_ttl"`
+	PartialUpsertStrategy  types.Map    `tfsdk:"partial_upsert_strategies"`
+	DeletedRecordColumn    types.String `tfsdk:"delete_record_column"`
+	DeletedKeysTTL         types.Int64  `tfsdk:"deleted_keys_ttl"`
 	HashFunction           types.String `tfsdk:"hash_function"`
 	EnableSnapshot         types.Bool   `tfsdk:"enable_snapshot"`
-	EnablePreLoad          types.Bool   `tfsdk:"enable_pre_load"`
+	EnablePreLoad          types.Bool   `tfsdk:"enable_preload"`
 	UpsertTTL              types.String `tfsdk:"upsert_ttl"`
-	DropOutOfOrderRecords  types.Bool   `tfsdk:"drop_out_of_order_records"`
+	DropOutOfOrderRecord   types.Bool   `tfsdk:"drop_out_of_order_record"`
 	OutOfOrderRecordColumn types.String `tfsdk:"out_of_order_record_column"`
 	MetadataManagerClass   types.String `tfsdk:"metadata_manager_class"`
 	MetadataManagerConfigs types.Map    `tfsdk:"metadata_manager_configs"`

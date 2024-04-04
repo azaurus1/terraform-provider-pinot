@@ -179,7 +179,7 @@ func UpsertConfig() schema.SingleNestedAttribute {
 				Optional:    true,
 				ElementType: types.StringType,
 			},
-			"metadata_manager_class_name": schema.StringAttribute{
+			"metadata_manager_class": schema.StringAttribute{
 				Description: "The metadata manager class name for the table.",
 				Optional:    true,
 			},
@@ -196,7 +196,15 @@ func UpsertConfig() schema.SingleNestedAttribute {
 				Description: "The deleted keys ttl for the table.",
 				Optional:    true,
 			},
-			"metadata_ttl": schema.Int64Attribute{
+			"delete_record_column": schema.StringAttribute{
+				Description: "The deleted record column for the table.",
+				Optional:    true,
+			},
+			"out_of_order_record_column": schema.StringAttribute{
+				Description: "The out of order record column for the table.",
+				Optional:    true,
+			},
+			"upsert_ttl": schema.StringAttribute{
 				Description: "The metadata ttl for the table.",
 				Optional:    true,
 			},

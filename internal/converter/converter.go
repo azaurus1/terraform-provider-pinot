@@ -5,7 +5,6 @@ import (
 	"github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strconv"
 	"terraform-provider-pinot/internal/models"
 )
 
@@ -240,14 +239,14 @@ func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.Upser
 	}
 
 	upsertConfig := models.UpsertConfig{
-		Mode:                   types.StringValue(table.UpsertConfig.Mode),
-		PartialUpsertStrategy:  partialUpsertStrategies,
-		DeletedKeysTTL:         types.StringValue(strconv.Itoa(table.UpsertConfig.DeletedKeysTTL)),
-		HashFunction:           types.StringValue(table.UpsertConfig.HashFunction),
-		EnableSnapshot:         types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
-		EnablePreLoad:          types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
-		UpsertTTL:              types.StringValue(table.UpsertConfig.UpsertTTL),
-		DropOutOfOrderRecords:  types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecords),
+		Mode:                  types.StringValue(table.UpsertConfig.Mode),
+		PartialUpsertStrategy: partialUpsertStrategies,
+		DeletedKeysTTL:        types.Int64Value(int64(table.UpsertConfig.DeletedKeysTTL)),
+		HashFunction:          types.StringValue(table.UpsertConfig.HashFunction),
+		EnableSnapshot:        types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
+		EnablePreLoad:         types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
+		UpsertTTL:             types.StringValue(table.UpsertConfig.UpsertTTL),
+		//DropOutOfOrderRecords:  types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecords),
 		OutOfOrderRecordColumn: types.StringValue(table.UpsertConfig.OutOfOrderRecordColumn),
 		MetadataManagerClass:   types.StringValue(table.UpsertConfig.MetadataManagerClass),
 		MetadataManagerConfigs: metadataManagerConfigs,
