@@ -213,6 +213,7 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 }
 
 func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+
 	var state models.TableResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -234,4 +235,5 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 }

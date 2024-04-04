@@ -67,20 +67,24 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	// Routing Config
-	routingConfig, routingDiags := convertRoutingConfig(ctx, table)
-	if routingDiags.HasError() {
-		diags.Append(routingDiags...)
-		return diags
+	if table.Routing != nil {
+		routingConfig, routingDiags := convertRoutingConfig(ctx, table)
+		if routingDiags.HasError() {
+			diags.Append(routingDiags...)
+			return diags
+		}
+		state.Routing = routingConfig
 	}
-	state.Routing = routingConfig
 
 	// Upsert Config
-	upsertConfig, upsertDiags := convertUpsertConfig(ctx, table)
-	if upsertDiags.HasError() {
-		diags.Append(upsertDiags...)
-		return diags
+	if table.UpsertConfig != nil {
+		upsertConfig, upsertDiags := convertUpsertConfig(ctx, table)
+		if upsertDiags.HasError() {
+			diags.Append(upsertDiags...)
+			return diags
+		}
+		state.UpsertConfig = upsertConfig
 	}
-	state.UpsertConfig = upsertConfig
 
 	return diags
 }
