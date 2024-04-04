@@ -62,10 +62,6 @@ func ToTable(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) {
 		table.Routing = routingConfig
 	}
 
-	if diags.HasError() {
-		return nil, diags
-	}
-
 	return &table, diags
 }
 

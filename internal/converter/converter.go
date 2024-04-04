@@ -70,7 +70,6 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		routingConfig, routingDiags := convertRoutingConfig(ctx, table)
 		if routingDiags.HasError() {
 			diags.Append(routingDiags...)
-			return diags
 		}
 		state.Routing = routingConfig
 	}
@@ -80,7 +79,6 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		upsertConfig, upsertDiags := convertUpsertConfig(ctx, table)
 		if upsertDiags.HasError() {
 			diags.Append(upsertDiags...)
-			return diags
 		}
 		state.UpsertConfig = upsertConfig
 	}
