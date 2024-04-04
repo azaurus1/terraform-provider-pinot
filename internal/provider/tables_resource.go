@@ -94,13 +94,6 @@ func (r *tableResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	var table model.Table
-	err := json.Unmarshal([]byte(plan.Table.ValueString()), &table)
-	if err != nil {
-		resp.Diagnostics.AddError("Create Failed: Unable to unmarshal table from config", err.Error())
-		return
-	}
-
 	tableWithPlanOverrides, resultDiags := converter.ToTable(&plan)
 	if resultDiags.HasError() {
 		resp.Diagnostics.Append(resultDiags...)
