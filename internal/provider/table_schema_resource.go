@@ -252,8 +252,7 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	// Update succeeded, reload the table segments
-
-	// First check if the table exists, if it doesnt, dont reload
+	// First check if the table exists, if it doesn't, don't reload
 
 	tableResp, err := t.client.GetTable(plan.SchemaName.ValueString())
 	if err != nil {
@@ -263,8 +262,7 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 
 	// iterate over the table segments and reload them
 	// tableResp.REALTIME or tableResp.OFFLINE
-
-	// if tableResp.OFFLINE doesnt exist and tableResp.REALTIME doesnt exist, return
+	// if tableResp.OFFLINE doesn't exist and tableResp.REALTIME doesn't exist, return
 
 	// TODO: Once go-pinot-api is updated to have IsEmpty() method, use that instead
 

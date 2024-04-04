@@ -100,5 +100,19 @@
       "serverTag": "DefaultTenant_REALTIME"
     }
   ],
-  "isDimTable": false
+  "isDimTable": false,
+  "routing":{
+    "segmentPrunerTypes": [
+      "partition"
+    ],
+    "instanceSelectorType": "strictReplicaGroup"
+  },
+  "upsertConfig": {
+    "mode": "FULL",
+    "hashFunction": "NONE",
+    "enableSnapshot": true,
+    "upsertTTL": "1d",
+    "enablePreload": false,
+    "defaultPartialUpsertStrategy": "OVERWRITE"
+  }
 }

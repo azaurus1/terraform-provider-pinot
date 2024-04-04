@@ -4,21 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
 	"terraform-provider-pinot/internal/converter"
 	"terraform-provider-pinot/internal/models"
-
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"terraform-provider-pinot/internal/tf_schema"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 	"github.com/azaurus1/go-pinot-api/model"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -73,364 +67,19 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description: "The table type.",
 				Required:    true,
 			},
-			"segments_config": schema.SingleNestedAttribute{
-				Description: "The segments configuration for the table.",
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					"replication": schema.StringAttribute{
-						Description: "The replication count for the segments.",
-						Required:    true,
-					},
-					"replicas_per_partition": schema.StringAttribute{
-						Description: "The replicas per partition for the segments.",
-						Optional:    true,
-					},
-					"time_type": schema.StringAttribute{
-						Description: "The time type for the segments.",
-						Required:    true,
-					},
-					"time_column_name": schema.StringAttribute{
-						Description: "The time column name for the segments.",
-						Required:    true,
-					},
-					"retention_time_unit": schema.StringAttribute{
-						Description: "The retention time unit for the segments.",
-						Optional:    true,
-					},
-					"retention_time_value": schema.StringAttribute{
-						Description: "The retention time value for the segments.",
-						Optional:    true,
-					},
-					"deleted_segments_retention_period": schema.StringAttribute{
-						Description: "The deleted segments retention period for the segments.",
-						Optional:    true,
-					},
-				},
-			},
-			"tenants": schema.SingleNestedAttribute{
-				Description: "The tenants configuration for the table.",
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					"broker": schema.StringAttribute{
-						Description: "The broker for the tenants.",
-						Optional:    true,
-					},
-					"server": schema.StringAttribute{
-						Description: "The server for the tenants.",
-						Optional:    true,
-					},
-					"tag_override_config": schema.MapAttribute{
-						Description: "The tag override config for the tenants.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-				},
-			},
-			"table_index_config": schema.SingleNestedAttribute{
-				Description: "The table index configuration for the table.",
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					"sorted_column": schema.ListAttribute{
-						Description: "The sorted column for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"load_mode": schema.StringAttribute{
-						Description: "The load mode for the table.",
-						Optional:    true,
-					},
-					"null_handling_enabled": schema.BoolAttribute{
-						Description: "The null handling enabled for the table.",
-						Optional:    true,
-					},
-					"create_inverted_index_during_segment_generation": schema.BoolAttribute{
-						Description: "The create inverted index during segment generation for the table.",
-						Optional:    true,
-					},
-					"star_tree_index_configs": schema.ListNestedAttribute{
-						Description: "The star tree index configurations for the table.",
-						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"dimensions_split_order": schema.ListAttribute{
-									Description: "The dimensions split order for the star tree index.",
-									Optional:    true,
-									ElementType: types.StringType,
-								},
-								"skip_star_node_creation_for_dim_names": schema.ListAttribute{
-									Description: "The skip star node creation for dim names for the star tree index.",
-									Optional:    true,
-									ElementType: types.StringType,
-								},
-								"max_leaf_records": schema.Int64Attribute{
-									Description: "The max leaf records for the star tree index.",
-									Required:    true,
-								},
-								"function_column_pairs": schema.ListAttribute{
-									Description: "The function column pairs for the star tree index.",
-									Optional:    true,
-									ElementType: types.StringType,
-								},
-								"aggregation_configs": schema.ListNestedAttribute{
-									Description: "The aggregation configurations for the star tree index.",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"column_name": schema.StringAttribute{
-												Description: "The column name for the star tree index.",
-												Required:    true,
-											},
-											"aggregate_function": schema.StringAttribute{
-												Description: "The aggregate function for the star tree index.",
-												Required:    true,
-											},
-											"compression_codec": schema.StringAttribute{
-												Description: "The compression codec for the star tree index.",
-												Required:    true,
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					"enable_dynamic_star_tree": schema.BoolAttribute{
-						Description: "The enable dynamic star tree for the table.",
-						Optional:    true,
-					},
-					"enable_default_star_tree": schema.BoolAttribute{
-						Description: "The enable default star tree for the table.",
-						Optional:    true,
-					},
-					"optimize_dictionary": schema.BoolAttribute{
-						Description: "The optimize dictionary for the table.",
-						Optional:    true,
-					},
-					"optimize_dictionary_for_metrics": schema.BoolAttribute{
-						Description: "The optimize dictionary for metrics for the table.",
-						Optional:    true,
-					},
-					"no_dictionary_size_ratio_threshold": schema.Float64Attribute{
-						Description: "The no dictionary size ration threshold for the table.",
-						Optional:    true,
-					},
-					"column_min_max_value_generator_mode": schema.StringAttribute{
-						Description: "The column min max value generator mode for the table.",
-						Optional:    true,
-					},
-					"segment_name_generator_type": schema.StringAttribute{
-						Description: "The segment name generator type for the table.",
-						Optional:    true,
-					},
-					"aggregate_metrics": schema.BoolAttribute{
-						Description: "The aggregate metrics for the table.",
-						Optional:    true,
-						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"segment_partition_config": schema.SingleNestedAttribute{
-						Description: "The segment partition configuration for the table.",
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"column_partition_map": schema.MapAttribute{
-								Description: "The column partition map for the segment partition config.",
-								Optional:    true,
-								ElementType: types.MapType{
-									ElemType: types.StringType,
-								},
-							},
-						},
-					},
-					"range_index_columns": schema.ListAttribute{
-						Description: "The range index columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"no_dictionary_columns": schema.ListAttribute{
-						Description: "The no dictionary columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"on_heap_dictionary_columns": schema.ListAttribute{
-						Description: "The on heap dictionary columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"var_length_dictionary_columns": schema.ListAttribute{
-						Description: "The var length dictionary columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"bloom_filter_columns": schema.ListAttribute{
-						Description: "The bloom filter columns for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-						PlanModifiers: []planmodifier.List{
-							listplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"range_index_version": schema.Int64Attribute{
-						Description: "The range index version for the table.",
-						Optional:    true,
-					},
-				},
-			},
-			"upsert_config": schema.SingleNestedAttribute{
-				Description: "The upsert configuration for the table.",
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					"mode": schema.StringAttribute{
-						Description: "The upsert mode for the table.",
-						Required:    true,
-					},
-					"partial_upsert_strategies": schema.MapAttribute{
-						Description: "The partial upsert strategies for the table.",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-				},
-			},
-			"ingestion_config": schema.SingleNestedAttribute{
-				Description: "ingestion configuration for the table i.e kafka",
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					"segment_time_value_check": schema.BoolAttribute{
-						Description: "segment time value check.",
-						Optional:    true,
-					},
-					"row_time_value_check": schema.BoolAttribute{
-						Description: "row time value check.",
-						Optional:    true,
-					},
-					"continue_on_error": schema.BoolAttribute{
-						Description: "continue after error ingesting.",
-						Optional:    true,
-					},
-					"stream_ingestion_config": schema.SingleNestedAttribute{
-						Description: "stream ingestion configurations",
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"stream_config_maps": schema.ListAttribute{
-								Description: "stream configuration",
-								Optional:    true,
-								ElementType: types.MapType{ElemType: types.StringType},
-							},
-						},
-					},
-					"transform_configs": schema.ListNestedAttribute{
-						Description: "transform configurations",
-						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"column_name": schema.StringAttribute{
-									Description: "column name",
-									Required:    true,
-								},
-								"transform_function": schema.StringAttribute{
-									Description: "transform function",
-									Required:    true,
-								},
-							},
-						},
-					},
-				},
-			},
-			"tier_configs": schema.ListNestedAttribute{
-				Description: "tier configurations for the table",
-				Optional:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "name of the tier",
-							Required:    true,
-						},
-						"segment_selector_type": schema.StringAttribute{
-							Description: "segment selector type",
-							Required:    true,
-						},
-						"segment_age": schema.StringAttribute{
-							Description: "segment age",
-							Required:    true,
-						},
-						"storage_type": schema.StringAttribute{
-							Description: "storage type",
-							Required:    true,
-						},
-						"server_tag": schema.StringAttribute{
-							Description: "server tag",
-							Required:    true,
-						},
-					},
-				},
-			},
 			"is_dim_table": schema.BoolAttribute{
 				Description: "is dimension table",
 				Optional:    true,
 			},
-			"metadata": schema.SingleNestedAttribute{
-				Description: "metadata for the table",
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					"custom_configs": schema.MapAttribute{
-						Description: "custom configs",
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-				},
-			},
-			"field_config_list": schema.ListNestedAttribute{
-				Description: "field configurations for the table",
-				Optional:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "name of the field",
-							Required:    true,
-						},
-						"encoding_type": schema.StringAttribute{
-							Description: "encoding type",
-							Required:    true,
-						},
-						"index_type": schema.StringAttribute{
-							Description: "index type",
-							Required:    true,
-						},
-						"index_types": schema.ListAttribute{
-							Description: "index types",
-							Optional:    true,
-							ElementType: types.StringType,
-						},
-						"timestamp_config": schema.SingleNestedAttribute{
-							Description: "timestamp configuration",
-							Optional:    true,
-							Attributes: map[string]schema.Attribute{
-								"granularities": schema.ListAttribute{
-									Description: "granularities",
-									Optional:    true,
-									ElementType: types.StringType,
-								},
-							},
-						},
-						"indexes": schema.SingleNestedAttribute{
-							Description: "indexes",
-							Optional:    true,
-							Attributes: map[string]schema.Attribute{
-								"inverted": schema.SingleNestedAttribute{
-									Description: "inverted",
-									Optional:    true,
-									Attributes: map[string]schema.Attribute{
-										"enabled": schema.StringAttribute{
-											Description: "enabled",
-											Required:    true,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			"segments_config":    tf_schema.SegmentsConfig(),
+			"tenants":            tf_schema.Tenants(),
+			"table_index_config": tf_schema.TableIndexConfig(),
+			"upsert_config":      tf_schema.UpsertConfig(),
+			"ingestion_config":   tf_schema.IngestionConfig(),
+			"tier_configs":       tf_schema.TierConfigs(),
+			"field_config_list":  tf_schema.FieldConfigList(),
+			"routing":            tf_schema.Routing(),
+			"metadata":           tf_schema.Metadata(),
 		},
 	}
 }
@@ -445,14 +94,13 @@ func (r *tableResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	var table model.Table
-	err := json.Unmarshal([]byte(plan.Table.ValueString()), &table)
-	if err != nil {
-		resp.Diagnostics.AddError("Create Failed: Unable to unmarshal table from config", err.Error())
+	tableWithPlanOverrides, resultDiags := converter.ToTable(&plan)
+	if resultDiags.HasError() {
+		resp.Diagnostics.Append(resultDiags...)
 		return
 	}
 
-	overriddenTableBytes, err := json.Marshal(override(&plan))
+	overriddenTableBytes, err := json.Marshal(tableWithPlanOverrides)
 	if err != nil {
 		resp.Diagnostics.AddError("Create Failed: Unable to marshal table", err.Error())
 		return
@@ -499,7 +147,11 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	tflog.Info(ctx, "setting state\n")
 
-	converter.SetStateFromTable(ctx, &state, &table)
+	resultDiags := converter.SetStateFromTable(ctx, &state, &table)
+	if resultDiags.HasError() {
+		resp.Diagnostics.Append(resultDiags...)
+		return
+	}
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
@@ -521,7 +173,13 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	tflog.Info(ctx, fmt.Sprintf("Overriding table config: %s", plan.TableName))
 
-	overriddenTableBytes, err := json.Marshal(override(&plan))
+	tableWithPlanOverrides, resultDiags := converter.ToTable(&plan)
+	if resultDiags.HasError() {
+		resp.Diagnostics.Append(resultDiags...)
+		return
+	}
+
+	overriddenTableBytes, err := json.Marshal(tableWithPlanOverrides)
 	if err != nil {
 		resp.Diagnostics.AddError("Update Failed: Unable to marshal table", err.Error())
 		return
@@ -555,6 +213,7 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 }
 
 func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+
 	var state models.TableResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -576,237 +235,5 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
 
-func override(plan *models.TableResourceModel) *model.Table {
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	table := model.Table{
-		TableName:        plan.TableName.ValueString(),
-		TableType:        plan.TableType.ValueString(),
-		Tenants:          overrideTenantsConfig(plan),
-		SegmentsConfig:   overrideSegmentsConfig(plan),
-		TableIndexConfig: overrideTableConfigs(ctx, plan),
-		IsDimTable:       plan.IsDimTable.ValueBool(),
-		IngestionConfig:  overrideIngestionConfig(plan),
-	}
-
-	if plan.Metadata != nil {
-		table.Metadata = overrideMetadata(plan)
-	}
-
-	if plan.TierConfigs != nil {
-		table.TierConfigs = overrideTierConfigs(plan)
-	}
-
-	if plan.FieldConfigList != nil {
-		table.FieldConfigList = overrideFieldConfigList(plan)
-
-	}
-
-	return &table
-}
-
-func overrideTableConfigs(ctx context.Context, plan *models.TableResourceModel) model.TableIndexConfig {
-
-	tableConfig := model.TableIndexConfig{
-		CreateInvertedIndexDuringSegmentGeneration: plan.TableIndexConfig.CreateInvertedIndexDuringSegmentGeneration.ValueBool(),
-		SortedColumn:                   toStringList(ctx, plan.TableIndexConfig.SortedColumn),
-		StarTreeIndexConfigs:           overrideStarTreeConfigs(ctx, plan),
-		EnableDefaultStarTree:          plan.TableIndexConfig.EnableDefaultStarTree.ValueBool(),
-		EnableDynamicStarTreeCreation:  plan.TableIndexConfig.EnableDynamicStarTree.ValueBool(),
-		LoadMode:                       plan.TableIndexConfig.LoadMode.ValueString(),
-		ColumnMinMaxValueGeneratorMode: plan.TableIndexConfig.ColumnMinMaxValueGeneratorMode.ValueString(),
-		NullHandlingEnabled:            plan.TableIndexConfig.NullHandlingEnabled.ValueBool(),
-		AggregateMetrics:               plan.TableIndexConfig.AggregateMetrics.ValueBool(),
-		OptimizeDictionary:             plan.TableIndexConfig.OptimizeDictionary.ValueBool(),
-		OptimizeDictionaryForMetrics:   plan.TableIndexConfig.OptimizeDictionaryForMetrics.ValueBool(),
-		NoDictionarySizeRatioThreshold: plan.TableIndexConfig.NoDictionarySizeRatioThreshold.ValueFloat64(),
-		SegmentNameGeneratorType:       plan.TableIndexConfig.SegmentNameGeneratorType.ValueString(),
-		SegmentPartitionConfig:         overrideSegmentPartitionConfig(plan),
-		RangeIndexColumns:              toStringList(ctx, plan.TableIndexConfig.RangeIndexColumns),
-		NoDictionaryColumns:            toStringList(ctx, plan.TableIndexConfig.NoDictionaryColumns),
-		RangeIndexVersion:              int(plan.TableIndexConfig.RangeIndexVersion.ValueInt64()),
-		OnHeapDictionaryColumns:        toStringList(ctx, plan.TableIndexConfig.OnHeapDictionaryColumns),
-		VarLengthDictionaryColumns:     toStringList(ctx, plan.TableIndexConfig.VarLengthDictionaryColumns),
-		BloomFilterColumns:             toStringList(ctx, plan.TableIndexConfig.BloomFilterColumns),
-	}
-
-	return tableConfig
-
-}
-
-func overrideSegmentPartitionConfig(plan *models.TableResourceModel) *model.SegmentPartitionConfig {
-
-	if plan.TableIndexConfig.SegmentPartitionConfig == nil {
-		return nil
-	}
-
-	columnPartitionMap := make(map[string]model.ColumnPartitionMapConfig, 1)
-	for key, value := range plan.TableIndexConfig.SegmentPartitionConfig.ColumnPartitionMap {
-
-		numPartitions, err := strconv.Atoi(value["numPartitions"])
-		if err != nil {
-			log.Panic(err)
-		}
-
-		columnPartitionMap[key] = model.ColumnPartitionMapConfig{
-			FunctionName: value["functionName"],
-			// convert to int
-			NumPartitions: numPartitions,
-		}
-	}
-	return &model.SegmentPartitionConfig{ColumnPartitionMap: columnPartitionMap}
-}
-
-func overrideStarTreeConfigs(ctx context.Context, plan *models.TableResourceModel) []*model.StarTreeIndexConfig {
-
-	if plan.TableIndexConfig.StarTreeIndexConfigs == nil {
-		return nil
-	}
-
-	var starTreeConfigs []*model.StarTreeIndexConfig
-	for _, starConfig := range plan.TableIndexConfig.StarTreeIndexConfigs {
-		starTreeConfigs = append(starTreeConfigs, &model.StarTreeIndexConfig{
-			MaxLeafRecords:                    int(starConfig.MaxLeafRecords.ValueInt64()),
-			DimensionsSplitOrder:              toStringList(ctx, starConfig.DimensionsSplitOrder),
-			FunctionColumnPairs:               toStringList(ctx, starConfig.FunctionColumnPairs),
-			SkipStarNodeCreationForDimensions: toStringList(ctx, starConfig.SkipStarNodeCreationForDimNames),
-		})
-	}
-	return starTreeConfigs
-}
-
-func overrideSegmentsConfig(plan *models.TableResourceModel) model.TableSegmentsConfig {
-
-	segmentsConfig := model.TableSegmentsConfig{
-		TimeType:           plan.SegmentsConfig.TimeType.ValueString(),
-		Replication:        plan.SegmentsConfig.Replication.ValueString(),
-		TimeColumnName:     plan.SegmentsConfig.TimeColumnName.ValueString(),
-		RetentionTimeUnit:  plan.SegmentsConfig.RetentionTimeUnit.ValueString(),
-		RetentionTimeValue: plan.SegmentsConfig.RetentionTimeValue.ValueString(),
-	}
-
-	if plan.SegmentsConfig.ReplicasPerPartition.ValueString() != "" {
-		segmentsConfig.ReplicasPerPartition = plan.SegmentsConfig.ReplicasPerPartition.ValueString()
-	}
-
-	if plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString() != "" {
-		segmentsConfig.DeletedSegmentsRetentionPeriod = plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString()
-	}
-
-	return segmentsConfig
-
-}
-
-func overrideTenantsConfig(plan *models.TableResourceModel) model.TableTenant {
-	return model.TableTenant{
-		Broker: plan.TenantsConfig.Broker.ValueString(),
-		Server: plan.TenantsConfig.Server.ValueString(),
-	}
-}
-
-func overrideTierConfigs(plan *models.TableResourceModel) []*model.TierConfig {
-
-	if plan.TierConfigs == nil {
-		return nil
-	}
-
-	var tierConfigs []*model.TierConfig
-	for _, tierConfig := range plan.TierConfigs {
-		tierConfigs = append(tierConfigs, &model.TierConfig{
-			Name:                tierConfig.Name.ValueString(),
-			SegmentSelectorType: tierConfig.SegmentSelectorType.ValueString(),
-			SegmentAge:          tierConfig.SegmentAge.ValueString(),
-			StorageType:         tierConfig.StorageType.ValueString(),
-			ServerTag:           tierConfig.ServerTag.ValueString(),
-		})
-	}
-	return tierConfigs
-}
-
-func overrideMetadata(plan *models.TableResourceModel) *model.TableMetadata {
-
-	if plan.Metadata == nil {
-		return nil
-	}
-
-	return &model.TableMetadata{
-		CustomConfigs: plan.Metadata.CustomConfigs,
-	}
-}
-
-func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionConfig {
-
-	if plan.IngestionConfig == nil {
-		return nil
-	}
-
-	ingestionConfig := model.TableIngestionConfig{
-		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBool(),
-		RowTimeValueCheck:     plan.IngestionConfig.RowTimeValueCheck.ValueBool(),
-		ContinueOnError:       plan.IngestionConfig.ContinueOnError.ValueBool(),
-		StreamIngestionConfig: &model.StreamIngestionConfig{
-			StreamConfigMaps: plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
-		},
-	}
-
-	if plan.IngestionConfig.TransformConfigs != nil {
-
-		var transformConfigs []model.TransformConfig
-
-		for _, transformConfig := range plan.IngestionConfig.TransformConfigs {
-			transformConfigs = append(transformConfigs, model.TransformConfig{
-				ColumnName:        transformConfig.ColumnName.ValueString(),
-				TransformFunction: transformConfig.TransformFunction.ValueString(),
-			})
-		}
-
-		ingestionConfig.TransformConfigs = transformConfigs
-	}
-
-	return &ingestionConfig
-}
-
-func overrideFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
-
-	if plan.FieldConfigList == nil {
-		return nil
-	}
-
-	var fieldConfigs []model.FieldConfig
-	for _, fieldConfig := range plan.FieldConfigList {
-
-		fc := model.FieldConfig{
-			Name:         fieldConfig.Name.ValueString(),
-			EncodingType: fieldConfig.EncodingType.ValueString(),
-			IndexType:    fieldConfig.IndexType.ValueString(),
-			IndexTypes:   fieldConfig.IndexTypes,
-		}
-
-		if fieldConfig.TimestampConfig != nil {
-			fc.TimestampConfig = &model.TimestampConfig{
-				Granularities: fieldConfig.TimestampConfig.Granularities,
-			}
-		}
-
-		if fieldConfig.Indexes != nil {
-			fc.Indexes = &model.FieldIndexes{
-				Inverted: &model.FiendIndexInverted{
-					Enabled: fieldConfig.Indexes.Inverted.Enabled.ValueString(),
-				},
-			}
-		}
-
-		fieldConfigs = append(fieldConfigs, fc)
-	}
-	return fieldConfigs
-}
-
-func toStringList(ctx context.Context, listValue types.List) []string {
-	var values []string
-	listValue.ElementsAs(ctx, &values, true)
-	return values
 }

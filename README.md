@@ -30,7 +30,7 @@ provider "pinot" {
 ```
 ### Examples:
 Example Schema:
-```
+```hcl
 resource "pinot_schema" "block_schema" {
   schema_name = "ethereum_block_headers"
   date_time_field_specs = [{
@@ -58,7 +58,7 @@ resource "pinot_schema" "block_schema" {
 ```
 
 Example Table:
-```
+```hcl
 resource "pinot_table" "realtime_table" {
 
   table_name = "realtime_ethereum_mainnet_block_headers_REALTIME"
@@ -67,7 +67,7 @@ resource "pinot_table" "realtime_table" {
 ```
 
 Example User:
-```
+```hcl
 resource "pinot_user" "test" {
   username  = "user"
   password  = "password"

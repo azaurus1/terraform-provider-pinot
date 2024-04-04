@@ -33,6 +33,16 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
+  routing = {
+    for key, value in local.config_raw["routing"] :
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }
+
+  upsert_config = {
+    for key, value in local.config_raw["upsertConfig"] :
+    join("_", [for keyName in regexall("(?:[A-Z]+[a-z]*)|(?:[a-z]+)", key) : lower(keyName)]) => value
+  }
+
   table_index_config = {
     for key, value in local.config_raw["tableIndexConfig"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
@@ -97,19 +107,15 @@ locals {
     }
   ]
 
-
 }
 
 resource "pinot_schema" "realtime_table_schema" {
-  schema_name = local.schema["schema_name"]
-
+  schema_name                       = local.schema["schema_name"]
   enable_column_based_null_handling = local.schema["enable_column_based_null_handling"]
-
-  dimension_field_specs = local.dimension_field_specs
-
-  metric_field_specs = local.metric_field_specs
-
-  date_time_field_specs = local.date_time_field_specs
+  primary_key_columns               = try(local.schema["primary_key_columns"], null)
+  dimension_field_specs             = local.dimension_field_specs
+  metric_field_specs                = local.metric_field_specs
+  date_time_field_specs             = local.date_time_field_specs
 }
 
 resource "pinot_table" "realtime_table" {
@@ -121,6 +127,9 @@ resource "pinot_table" "realtime_table" {
   segments_config = merge(local.segments_config, {
     replication = "1"
   })
+
+  routing       = local.routing
+  upsert_config = local.upsert_config
 
   tenants = merge(local.tenants, {
     broker = "DefaultTenant"

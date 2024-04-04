@@ -3,11 +3,14 @@ package converter
 import (
 	"context"
 	"github.com/azaurus1/go-pinot-api/model"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-pinot/internal/models"
 )
 
-func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) {
+func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) diag.Diagnostics {
+
+	var diags diag.Diagnostics
 
 	state.TableName = types.StringValue(table.TableName)
 	state.TableType = types.StringValue(table.TableType)
@@ -18,7 +21,12 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	state.SegmentsConfig = convertSegmentsConfig(table)
-	state.TableIndexConfig = convertTableIndexConfig(ctx, table)
+
+	tableIndexConfig, resultDiags := convertTableIndexConfig(ctx, table)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+	state.TableIndexConfig = tableIndexConfig
 
 	var ingestionTransformConfigs []*models.TransformConfig
 	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
@@ -57,6 +65,25 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		CustomConfigs: table.Metadata.CustomConfigs,
 	}
 
+	// Routing Config
+	if table.Routing != nil {
+		routingConfig, routingDiags := convertRoutingConfig(ctx, table)
+		if routingDiags.HasError() {
+			diags.Append(routingDiags...)
+		}
+		state.Routing = routingConfig
+	}
+
+	// Upsert Config
+	if table.UpsertConfig != nil {
+		upsertConfig, upsertDiags := convertUpsertConfig(ctx, table)
+		if upsertDiags.HasError() {
+			diags.Append(upsertDiags...)
+		}
+		state.UpsertConfig = upsertConfig
+	}
+
+	return diags
 }
 
 func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionConfig {
@@ -82,14 +109,39 @@ func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionC
 	return segmentPartitionConfig
 }
 
-func convertTableIndexConfig(ctx context.Context, table *model.Table) *models.TableIndexConfig {
+func convertTableIndexConfig(ctx context.Context, table *model.Table) (*models.TableIndexConfig, diag.Diagnostics) {
 
-	noDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.NoDictionaryColumns)
-	onHeapDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.OnHeapDictionaryColumns)
-	sortedColumn, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.SortedColumn)
-	varLengthDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.VarLengthDictionaryColumns)
-	bloomFilterColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.BloomFilterColumns)
-	rangeIndexColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.RangeIndexColumns)
+	var diags diag.Diagnostics
+
+	noDictionaryColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.NoDictionaryColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	onHeapDictionaryColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.OnHeapDictionaryColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	varLengthDictionaryColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.VarLengthDictionaryColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	rangeIndexColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.RangeIndexColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	bloomFilterColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.BloomFilterColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	sortedColumn, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.SortedColumn)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
 
 	indexConfig := models.TableIndexConfig{
 		LoadMode:            types.StringValue(table.TableIndexConfig.LoadMode),
@@ -111,7 +163,7 @@ func convertTableIndexConfig(ctx context.Context, table *model.Table) *models.Ta
 		BloomFilterColumns:                         bloomFilterColumns,
 	}
 
-	return &indexConfig
+	return &indexConfig, diags
 }
 
 func convertStarTreeIndexConfigs(ctx context.Context, table *model.Table) []*models.StarTreeIndexConfigs {
@@ -155,4 +207,48 @@ func convertSegmentsConfig(table *model.Table) *models.SegmentsConfig {
 	}
 
 	return &segmentsConfig
+}
+
+func convertRoutingConfig(ctx context.Context, table *model.Table) (*models.RoutingConfig, diag.Diagnostics) {
+
+	segmentPrunerTypes, resultDiags := types.ListValueFrom(ctx, types.StringType, table.Routing.SegmentPrunerTypes)
+	if resultDiags.HasError() {
+		return nil, resultDiags
+	}
+
+	routingConfig := models.RoutingConfig{
+		InstanceSelectorType: types.StringValue(table.Routing.InstanceSelectorType),
+		SegmentPrunerTypes:   segmentPrunerTypes,
+	}
+
+	return &routingConfig, resultDiags
+}
+
+func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.UpsertConfig, diag.Diagnostics) {
+
+	partialUpsertStrategies, resultDiags := types.MapValueFrom(ctx, types.StringType, table.UpsertConfig.PartialUpsertStrategies)
+	if resultDiags.HasError() {
+		return nil, resultDiags
+	}
+
+	metadataManagerConfigs, resultDiags := types.MapValueFrom(ctx, types.StringType, table.UpsertConfig.MetadataManagerConfigs)
+	if resultDiags.HasError() {
+		return nil, resultDiags
+	}
+
+	upsertConfig := models.UpsertConfig{
+		Mode:                  types.StringValue(table.UpsertConfig.Mode),
+		PartialUpsertStrategy: partialUpsertStrategies,
+		DeletedKeysTTL:        types.Int64Value(int64(table.UpsertConfig.DeletedKeysTTL)),
+		HashFunction:          types.StringValue(table.UpsertConfig.HashFunction),
+		EnableSnapshot:        types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
+		EnablePreLoad:         types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
+		UpsertTTL:             types.StringValue(table.UpsertConfig.UpsertTTL),
+		//DropOutOfOrderRecords:  types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecords),
+		OutOfOrderRecordColumn: types.StringValue(table.UpsertConfig.OutOfOrderRecordColumn),
+		MetadataManagerClass:   types.StringValue(table.UpsertConfig.MetadataManagerClass),
+		MetadataManagerConfigs: metadataManagerConfigs,
+	}
+
+	return &upsertConfig, resultDiags
 }
