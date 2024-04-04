@@ -172,7 +172,7 @@ func UpsertConfig() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"mode": schema.StringAttribute{
 				Description: "The upsert mode for the table.",
-				Required:    true,
+				Optional:    true,
 			},
 			"partial_upsert_strategies": schema.MapAttribute{
 				Description: "The partial upsert strategies for the table.",
