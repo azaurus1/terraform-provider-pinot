@@ -669,7 +669,7 @@ func override(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) 
 	}
 
 	if plan.FieldConfigList != nil {
-		table.FieldConfigList = overrideFieldConfigList(plan)
+		table.FieldConfigList = converter.ToFieldConfigList(plan)
 	}
 
 	if plan.UpsertConfig != nil {
@@ -858,41 +858,6 @@ func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngest
 	}
 
 	return &ingestionConfig
-}
-
-func overrideFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
-
-	if plan.FieldConfigList == nil {
-		return nil
-	}
-
-	var fieldConfigs []model.FieldConfig
-	for _, fieldConfig := range plan.FieldConfigList {
-
-		fc := model.FieldConfig{
-			Name:         fieldConfig.Name.ValueString(),
-			EncodingType: fieldConfig.EncodingType.ValueString(),
-			IndexType:    fieldConfig.IndexType.ValueString(),
-			IndexTypes:   fieldConfig.IndexTypes,
-		}
-
-		if fieldConfig.TimestampConfig != nil {
-			fc.TimestampConfig = &model.TimestampConfig{
-				Granularities: fieldConfig.TimestampConfig.Granularities,
-			}
-		}
-
-		if fieldConfig.Indexes != nil {
-			fc.Indexes = &model.FieldIndexes{
-				Inverted: &model.FiendIndexInverted{
-					Enabled: fieldConfig.Indexes.Inverted.Enabled.ValueString(),
-				},
-			}
-		}
-
-		fieldConfigs = append(fieldConfigs, fc)
-	}
-	return fieldConfigs
 }
 
 func toStringList(ctx context.Context, listValue types.List) []string {

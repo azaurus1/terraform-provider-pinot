@@ -62,6 +62,41 @@ func ToRoutingConfig(ctx context.Context, stateConfig *models.RoutingConfig) (*m
 
 }
 
+func ToFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
+
+	if plan.FieldConfigList == nil {
+		return nil
+	}
+
+	var fieldConfigs []model.FieldConfig
+	for _, fieldConfig := range plan.FieldConfigList {
+
+		fc := model.FieldConfig{
+			Name:         fieldConfig.Name.ValueString(),
+			EncodingType: fieldConfig.EncodingType.ValueString(),
+			IndexType:    fieldConfig.IndexType.ValueString(),
+			IndexTypes:   fieldConfig.IndexTypes,
+		}
+
+		if fieldConfig.TimestampConfig != nil {
+			fc.TimestampConfig = &model.TimestampConfig{
+				Granularities: fieldConfig.TimestampConfig.Granularities,
+			}
+		}
+
+		if fieldConfig.Indexes != nil {
+			fc.Indexes = &model.FieldIndexes{
+				Inverted: &model.FiendIndexInverted{
+					Enabled: fieldConfig.Indexes.Inverted.Enabled.ValueString(),
+				},
+			}
+		}
+
+		fieldConfigs = append(fieldConfigs, fc)
+	}
+	return fieldConfigs
+}
+
 func toMap(ctx context.Context, inputMap types.Map) (map[string]string, diag.Diagnostics) {
 
 	res := make(map[string]types.String, len(inputMap.Elements()))
