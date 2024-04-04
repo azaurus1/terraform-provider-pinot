@@ -22,7 +22,12 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	state.SegmentsConfig = convertSegmentsConfig(table)
-	state.TableIndexConfig = convertTableIndexConfig(ctx, table)
+
+	tableIndexConfig, resultDiags := convertTableIndexConfig(ctx, table)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+	state.TableIndexConfig = tableIndexConfig
 
 	var ingestionTransformConfigs []*models.TransformConfig
 	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
@@ -103,14 +108,39 @@ func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionC
 	return segmentPartitionConfig
 }
 
-func convertTableIndexConfig(ctx context.Context, table *model.Table) *models.TableIndexConfig {
+func convertTableIndexConfig(ctx context.Context, table *model.Table) (*models.TableIndexConfig, diag.Diagnostics) {
 
-	noDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.NoDictionaryColumns)
-	onHeapDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.OnHeapDictionaryColumns)
-	sortedColumn, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.SortedColumn)
-	varLengthDictionaryColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.VarLengthDictionaryColumns)
-	bloomFilterColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.BloomFilterColumns)
-	rangeIndexColumns, _ := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.RangeIndexColumns)
+	var diags diag.Diagnostics
+
+	noDictionaryColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.NoDictionaryColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	onHeapDictionaryColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.OnHeapDictionaryColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	varLengthDictionaryColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.VarLengthDictionaryColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	rangeIndexColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.RangeIndexColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	bloomFilterColumns, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.BloomFilterColumns)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
+
+	sortedColumn, resultDiags := types.ListValueFrom(ctx, types.StringType, table.TableIndexConfig.SortedColumn)
+	if resultDiags.HasError() {
+		diags.Append(resultDiags...)
+	}
 
 	indexConfig := models.TableIndexConfig{
 		LoadMode:            types.StringValue(table.TableIndexConfig.LoadMode),
@@ -132,7 +162,7 @@ func convertTableIndexConfig(ctx context.Context, table *model.Table) *models.Ta
 		BloomFilterColumns:                         bloomFilterColumns,
 	}
 
-	return &indexConfig
+	return &indexConfig, diags
 }
 
 func convertStarTreeIndexConfigs(ctx context.Context, table *model.Table) []*models.StarTreeIndexConfigs {
