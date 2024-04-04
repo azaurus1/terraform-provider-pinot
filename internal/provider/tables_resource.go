@@ -67,6 +67,10 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Description: "The table type.",
 				Required:    true,
 			},
+			"is_dim_table": schema.BoolAttribute{
+				Description: "is dimension table",
+				Optional:    true,
+			},
 			"segments_config":    tf_schema.SegmentsConfig(),
 			"tenants":            tf_schema.Tenants(),
 			"table_index_config": tf_schema.TableIndexConfig(),
@@ -76,10 +80,6 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"field_config_list":  tf_schema.FieldConfigList(),
 			"routing":            tf_schema.Routing(),
 			"metadata":           tf_schema.Metadata(),
-			"is_dim_table": schema.BoolAttribute{
-				Description: "is dimension table",
-				Optional:    true,
-			},
 		},
 	}
 }
