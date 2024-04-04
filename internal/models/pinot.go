@@ -105,7 +105,7 @@ type AggregationConfig struct {
 
 type RoutingConfig struct {
 	SegmentPrunerTypes   types.List   `tfsdk:"segment_pruner_types"`
-	InstanceSelectorType types.String `json:"instance_selector_type"`
+	InstanceSelectorType types.String `tfsdk:"instance_selector_type"`
 }
 
 type StarTreeIndexConfigs struct {
