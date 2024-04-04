@@ -26,10 +26,17 @@ func NewTableSchemaResource() resource.Resource {
 
 }
 
-type fieldSpec struct {
+type metricFieldSpec struct {
 	Name     string              `tfsdk:"name"`
 	DataType string              `tfsdk:"data_type"`
 	NotNull  basetypes.BoolValue `tfsdk:"not_null"`
+}
+
+type dimensionFieldSpec struct {
+	Name             string              `tfsdk:"name"`
+	DataType         string              `tfsdk:"data_type"`
+	NotNull          basetypes.BoolValue `tfsdk:"not_null"`
+	SingleValueField basetypes.BoolValue `tfsdk:"single_value_field"`
 }
 
 type dateTimeFieldSpec struct {
@@ -41,12 +48,12 @@ type dateTimeFieldSpec struct {
 }
 
 type tableSchemaResourceModel struct {
-	SchemaName                    types.String        `tfsdk:"schema_name"`
-	EnableColumnBasedNullHandling basetypes.BoolValue `tfsdk:"enable_column_based_null_handling"`
-	DimensionFieldSpecs           []fieldSpec         `tfsdk:"dimension_field_specs"`
-	MetricFieldSpecs              []fieldSpec         `tfsdk:"metric_field_specs"`
-	DateTimeFieldSpecs            []dateTimeFieldSpec `tfsdk:"date_time_field_specs"`
-	PrimaryKeyColumns             []string            `tfsdk:"primary_key_columns"`
+	SchemaName                    types.String         `tfsdk:"schema_name"`
+	EnableColumnBasedNullHandling basetypes.BoolValue  `tfsdk:"enable_column_based_null_handling"`
+	DimensionFieldSpecs           []dimensionFieldSpec `tfsdk:"dimension_field_specs"`
+	MetricFieldSpecs              []metricFieldSpec    `tfsdk:"metric_field_specs"`
+	DateTimeFieldSpecs            []dateTimeFieldSpec  `tfsdk:"date_time_field_specs"`
+	PrimaryKeyColumns             []string             `tfsdk:"primary_key_columns"`
 }
 
 func (t *tableSchemaResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -97,6 +104,10 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 						},
 						"not_null": schema.BoolAttribute{
 							Description: "Whether the dimension is not null.",
+							Optional:    true,
+						},
+						"single_value_field": schema.BoolAttribute{
+							Description: "Whether the dimension is a single value field.",
 							Optional:    true,
 						},
 					},
@@ -172,8 +183,8 @@ func (t *tableSchemaResource) Create(ctx context.Context, req resource.CreateReq
 
 	pinotSchema := model.Schema{
 		SchemaName:          plan.SchemaName.ValueString(),
-		DimensionFieldSpecs: toPinotModelFieldSpec(plan.DimensionFieldSpecs),
-		MetricFieldSpecs:    toPinotModelFieldSpec(plan.MetricFieldSpecs),
+		DimensionFieldSpecs: toDimensionFieldSpecs(plan.DimensionFieldSpecs),
+		MetricFieldSpecs:    toMetricFieldSpecs(plan.MetricFieldSpecs),
 		DateTimeFieldSpecs:  toDateTimeFieldSpecs(plan.DateTimeFieldSpecs),
 		PrimaryKeyColumns:   plan.PrimaryKeyColumns,
 	}
@@ -228,8 +239,8 @@ func (t *tableSchemaResource) Update(ctx context.Context, req resource.UpdateReq
 
 	pinotSchema := model.Schema{
 		SchemaName:          plan.SchemaName.ValueString(),
-		DimensionFieldSpecs: toPinotModelFieldSpec(plan.DimensionFieldSpecs),
-		MetricFieldSpecs:    toPinotModelFieldSpec(plan.MetricFieldSpecs),
+		DimensionFieldSpecs: toDimensionFieldSpecs(plan.DimensionFieldSpecs),
+		MetricFieldSpecs:    toMetricFieldSpecs(plan.MetricFieldSpecs),
 		DateTimeFieldSpecs:  toDateTimeFieldSpecs(plan.DateTimeFieldSpecs),
 		PrimaryKeyColumns:   plan.PrimaryKeyColumns,
 	}
@@ -297,7 +308,20 @@ func (t *tableSchemaResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
-func toPinotModelFieldSpec(fieldSpecs []fieldSpec) []model.FieldSpec {
+func toDimensionFieldSpecs(fieldSpecs []dimensionFieldSpec) []model.FieldSpec {
+
+	var pinotFieldSpecs []model.FieldSpec
+	for _, fs := range fieldSpecs {
+		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
+			Name:     fs.Name,
+			DataType: fs.DataType,
+			NotNull:  fs.NotNull.ValueBoolPointer(),
+		})
+	}
+	return pinotFieldSpecs
+}
+
+func toMetricFieldSpecs(fieldSpecs []metricFieldSpec) []model.FieldSpec {
 
 	var pinotFieldSpecs []model.FieldSpec
 	for _, fs := range fieldSpecs {
@@ -326,18 +350,18 @@ func toDateTimeFieldSpecs(fieldSpecs []dateTimeFieldSpec) []model.FieldSpec {
 
 func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 
-	dimensionFieldSpecs := make([]fieldSpec, len(schema.DimensionFieldSpecs))
+	dimensionFieldSpecs := make([]dimensionFieldSpec, len(schema.DimensionFieldSpecs))
 	for i, fs := range schema.DimensionFieldSpecs {
-		dimensionFieldSpecs[i] = fieldSpec{
+		dimensionFieldSpecs[i] = dimensionFieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
 			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
 		}
 	}
 
-	metricFieldSpecs := make([]fieldSpec, len(schema.MetricFieldSpecs))
+	metricFieldSpecs := make([]metricFieldSpec, len(schema.MetricFieldSpecs))
 	for i, fs := range schema.MetricFieldSpecs {
-		metricFieldSpecs[i] = fieldSpec{
+		metricFieldSpecs[i] = metricFieldSpec{
 			Name:     fs.Name,
 			DataType: fs.DataType,
 			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
