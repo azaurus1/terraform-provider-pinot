@@ -27,6 +27,7 @@ description: |-
 - `ingestion_config` (Attributes) ingestion configuration for the table i.e kafka (see [below for nested schema](#nestedatt--ingestion_config))
 - `is_dim_table` (Boolean) is dimension table
 - `metadata` (Attributes) metadata for the table (see [below for nested schema](#nestedatt--metadata))
+- `routing` (Attributes) routing configuration for the table (see [below for nested schema](#nestedatt--routing))
 - `segments_config` (Attributes) The segments configuration for the table. (see [below for nested schema](#nestedatt--segments_config))
 - `table_index_config` (Attributes) The table index configuration for the table. (see [below for nested schema](#nestedatt--table_index_config))
 - `tenants` (Attributes) The tenants configuration for the table. (see [below for nested schema](#nestedatt--tenants))
@@ -108,6 +109,15 @@ Required:
 Optional:
 
 - `custom_configs` (Map of String) custom configs
+
+
+<a id="nestedatt--routing"></a>
+### Nested Schema for `routing`
+
+Optional:
+
+- `instance_selector_type` (String) instance selector type
+- `segment_pruner_types` (List of String) segment pruner types
 
 
 <a id="nestedatt--segments_config"></a>
@@ -212,10 +222,17 @@ Required:
 <a id="nestedatt--upsert_config"></a>
 ### Nested Schema for `upsert_config`
 
-Required:
-
-- `mode` (String) The upsert mode for the table.
-
 Optional:
 
+- `delete_record_column` (String) The deleted record column for the table.
+- `deleted_keys_ttl` (Number) The deleted keys ttl for the table.
+- `drop_out_of_order_record` (Boolean) The drop out of order record for the table.
+- `enable_preload` (Boolean) The enable preload for the table.
+- `enable_snapshot` (Boolean) The enable snapshot for the table.
+- `hash_function` (String) The hash function for the table.
+- `metadata_manager_class` (String) The metadata manager class name for the table.
+- `metadata_manager_configs` (Map of String) The metadata manager configs for the table.
+- `mode` (String) The upsert mode for the table.
+- `out_of_order_record_column` (String) The out of order record column for the table.
 - `partial_upsert_strategies` (Map of String) The partial upsert strategies for the table.
+- `upsert_ttl` (String) The metadata ttl for the table.
