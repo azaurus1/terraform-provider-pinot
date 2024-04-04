@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"log"
-	"strconv"
 	"terraform-provider-pinot/internal/converter"
 	"terraform-provider-pinot/internal/models"
 
@@ -501,7 +498,7 @@ func (r *tableResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	tableWithPlanOverrides, resultDiags := override(&plan)
+	tableWithPlanOverrides, resultDiags := converter.ToTable(&plan)
 	if resultDiags.HasError() {
 		resp.Diagnostics.Append(resultDiags...)
 		return
@@ -580,7 +577,7 @@ func (r *tableResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	tflog.Info(ctx, fmt.Sprintf("Overriding table config: %s", plan.TableName))
 
-	tableWithPlanOverrides, resultDiags := override(&plan)
+	tableWithPlanOverrides, resultDiags := converter.ToTable(&plan)
 	if resultDiags.HasError() {
 		resp.Diagnostics.Append(resultDiags...)
 		return
@@ -641,227 +638,4 @@ func (r *tableResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func override(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) {
-
-	var diags diag.Diagnostics
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	table := model.Table{
-		TableName:        plan.TableName.ValueString(),
-		TableType:        plan.TableType.ValueString(),
-		Tenants:          overrideTenantsConfig(plan),
-		SegmentsConfig:   overrideSegmentsConfig(plan),
-		TableIndexConfig: overrideTableConfigs(ctx, plan),
-		IsDimTable:       plan.IsDimTable.ValueBool(),
-		IngestionConfig:  overrideIngestionConfig(plan),
-	}
-
-	if plan.Metadata != nil {
-		table.Metadata = overrideMetadata(plan)
-	}
-
-	if plan.TierConfigs != nil {
-		table.TierConfigs = overrideTierConfigs(plan)
-	}
-
-	if plan.FieldConfigList != nil {
-		table.FieldConfigList = converter.ToFieldConfigList(plan)
-	}
-
-	if plan.UpsertConfig != nil {
-
-		upsertConfig, resultDiags := converter.ToUpsertConfig(ctx, plan.UpsertConfig)
-		if resultDiags.HasError() {
-			diags.Append(resultDiags...)
-			return nil, diags
-		}
-
-		table.UpsertConfig = upsertConfig
-
-	}
-
-	if plan.Routing != nil {
-
-		routingConfig, resultDiags := converter.ToRoutingConfig(ctx, plan.Routing)
-		if resultDiags.HasError() {
-			diags.Append(resultDiags...)
-			return nil, diags
-		}
-
-		table.Routing = routingConfig
-
-	}
-
-	return &table, diags
-}
-
-func overrideTableConfigs(ctx context.Context, plan *models.TableResourceModel) model.TableIndexConfig {
-
-	tableConfig := model.TableIndexConfig{
-		CreateInvertedIndexDuringSegmentGeneration: plan.TableIndexConfig.CreateInvertedIndexDuringSegmentGeneration.ValueBool(),
-		SortedColumn:                   toStringList(ctx, plan.TableIndexConfig.SortedColumn),
-		StarTreeIndexConfigs:           overrideStarTreeConfigs(ctx, plan),
-		EnableDefaultStarTree:          plan.TableIndexConfig.EnableDefaultStarTree.ValueBool(),
-		EnableDynamicStarTreeCreation:  plan.TableIndexConfig.EnableDynamicStarTree.ValueBool(),
-		LoadMode:                       plan.TableIndexConfig.LoadMode.ValueString(),
-		ColumnMinMaxValueGeneratorMode: plan.TableIndexConfig.ColumnMinMaxValueGeneratorMode.ValueString(),
-		NullHandlingEnabled:            plan.TableIndexConfig.NullHandlingEnabled.ValueBool(),
-		AggregateMetrics:               plan.TableIndexConfig.AggregateMetrics.ValueBool(),
-		OptimizeDictionary:             plan.TableIndexConfig.OptimizeDictionary.ValueBool(),
-		OptimizeDictionaryForMetrics:   plan.TableIndexConfig.OptimizeDictionaryForMetrics.ValueBool(),
-		NoDictionarySizeRatioThreshold: plan.TableIndexConfig.NoDictionarySizeRatioThreshold.ValueFloat64(),
-		SegmentNameGeneratorType:       plan.TableIndexConfig.SegmentNameGeneratorType.ValueString(),
-		SegmentPartitionConfig:         overrideSegmentPartitionConfig(plan),
-		RangeIndexColumns:              toStringList(ctx, plan.TableIndexConfig.RangeIndexColumns),
-		NoDictionaryColumns:            toStringList(ctx, plan.TableIndexConfig.NoDictionaryColumns),
-		RangeIndexVersion:              int(plan.TableIndexConfig.RangeIndexVersion.ValueInt64()),
-		OnHeapDictionaryColumns:        toStringList(ctx, plan.TableIndexConfig.OnHeapDictionaryColumns),
-		VarLengthDictionaryColumns:     toStringList(ctx, plan.TableIndexConfig.VarLengthDictionaryColumns),
-		BloomFilterColumns:             toStringList(ctx, plan.TableIndexConfig.BloomFilterColumns),
-	}
-
-	return tableConfig
-
-}
-
-func overrideSegmentPartitionConfig(plan *models.TableResourceModel) *model.SegmentPartitionConfig {
-
-	if plan.TableIndexConfig.SegmentPartitionConfig == nil {
-		return nil
-	}
-
-	columnPartitionMap := make(map[string]model.ColumnPartitionMapConfig, 1)
-	for key, value := range plan.TableIndexConfig.SegmentPartitionConfig.ColumnPartitionMap {
-
-		numPartitions, err := strconv.Atoi(value["numPartitions"])
-		if err != nil {
-			log.Panic(err)
-		}
-
-		columnPartitionMap[key] = model.ColumnPartitionMapConfig{
-			FunctionName: value["functionName"],
-			// convert to int
-			NumPartitions: numPartitions,
-		}
-	}
-	return &model.SegmentPartitionConfig{ColumnPartitionMap: columnPartitionMap}
-}
-
-func overrideStarTreeConfigs(ctx context.Context, plan *models.TableResourceModel) []*model.StarTreeIndexConfig {
-
-	if plan.TableIndexConfig.StarTreeIndexConfigs == nil {
-		return nil
-	}
-
-	var starTreeConfigs []*model.StarTreeIndexConfig
-	for _, starConfig := range plan.TableIndexConfig.StarTreeIndexConfigs {
-		starTreeConfigs = append(starTreeConfigs, &model.StarTreeIndexConfig{
-			MaxLeafRecords:                    int(starConfig.MaxLeafRecords.ValueInt64()),
-			DimensionsSplitOrder:              toStringList(ctx, starConfig.DimensionsSplitOrder),
-			FunctionColumnPairs:               toStringList(ctx, starConfig.FunctionColumnPairs),
-			SkipStarNodeCreationForDimensions: toStringList(ctx, starConfig.SkipStarNodeCreationForDimNames),
-		})
-	}
-	return starTreeConfigs
-}
-
-func overrideSegmentsConfig(plan *models.TableResourceModel) model.TableSegmentsConfig {
-
-	segmentsConfig := model.TableSegmentsConfig{
-		TimeType:           plan.SegmentsConfig.TimeType.ValueString(),
-		Replication:        plan.SegmentsConfig.Replication.ValueString(),
-		TimeColumnName:     plan.SegmentsConfig.TimeColumnName.ValueString(),
-		RetentionTimeUnit:  plan.SegmentsConfig.RetentionTimeUnit.ValueString(),
-		RetentionTimeValue: plan.SegmentsConfig.RetentionTimeValue.ValueString(),
-	}
-
-	if plan.SegmentsConfig.ReplicasPerPartition.ValueString() != "" {
-		segmentsConfig.ReplicasPerPartition = plan.SegmentsConfig.ReplicasPerPartition.ValueString()
-	}
-
-	if plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString() != "" {
-		segmentsConfig.DeletedSegmentsRetentionPeriod = plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString()
-	}
-
-	return segmentsConfig
-
-}
-
-func overrideTenantsConfig(plan *models.TableResourceModel) model.TableTenant {
-	return model.TableTenant{
-		Broker: plan.TenantsConfig.Broker.ValueString(),
-		Server: plan.TenantsConfig.Server.ValueString(),
-	}
-}
-
-func overrideTierConfigs(plan *models.TableResourceModel) []*model.TierConfig {
-
-	if plan.TierConfigs == nil {
-		return nil
-	}
-
-	var tierConfigs []*model.TierConfig
-	for _, tierConfig := range plan.TierConfigs {
-		tierConfigs = append(tierConfigs, &model.TierConfig{
-			Name:                tierConfig.Name.ValueString(),
-			SegmentSelectorType: tierConfig.SegmentSelectorType.ValueString(),
-			SegmentAge:          tierConfig.SegmentAge.ValueString(),
-			StorageType:         tierConfig.StorageType.ValueString(),
-			ServerTag:           tierConfig.ServerTag.ValueString(),
-		})
-	}
-	return tierConfigs
-}
-
-func overrideMetadata(plan *models.TableResourceModel) *model.TableMetadata {
-
-	if plan.Metadata == nil {
-		return nil
-	}
-
-	return &model.TableMetadata{
-		CustomConfigs: plan.Metadata.CustomConfigs,
-	}
-}
-
-func overrideIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionConfig {
-
-	if plan.IngestionConfig == nil {
-		return nil
-	}
-
-	ingestionConfig := model.TableIngestionConfig{
-		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBool(),
-		RowTimeValueCheck:     plan.IngestionConfig.RowTimeValueCheck.ValueBool(),
-		ContinueOnError:       plan.IngestionConfig.ContinueOnError.ValueBool(),
-		StreamIngestionConfig: &model.StreamIngestionConfig{
-			StreamConfigMaps: plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
-		},
-	}
-
-	if plan.IngestionConfig.TransformConfigs != nil {
-
-		var transformConfigs []model.TransformConfig
-
-		for _, transformConfig := range plan.IngestionConfig.TransformConfigs {
-			transformConfigs = append(transformConfigs, model.TransformConfig{
-				ColumnName:        transformConfig.ColumnName.ValueString(),
-				TransformFunction: transformConfig.TransformFunction.ValueString(),
-			})
-		}
-
-		ingestionConfig.TransformConfigs = transformConfigs
-	}
-
-	return &ingestionConfig
-}
-
-func toStringList(ctx context.Context, listValue types.List) []string {
-	var values []string
-	listValue.ElementsAs(ctx, &values, true)
-	return values
 }
