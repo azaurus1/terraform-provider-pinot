@@ -100,5 +100,11 @@
       "serverTag": "DefaultTenant_REALTIME"
     }
   ],
-  "isDimTable": false
+  "isDimTable": false,
+  "routing":{
+    "segmentPrunerTypes": [
+      "partition"
+    ],
+    "instanceSelectorType": "strictReplicaGroup"
+  }
 }

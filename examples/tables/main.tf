@@ -33,6 +33,11 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
+  routing = {
+    for key, value in local.config_raw["routing"] :
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }
+
   table_index_config = {
     for key, value in local.config_raw["tableIndexConfig"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
@@ -117,6 +122,8 @@ resource "pinot_table" "realtime_table" {
   segments_config = merge(local.segments_config, {
     replication = "1"
   })
+
+  routing = local.routing
 
   tenants = merge(local.tenants, {
     broker = "DefaultTenant"
