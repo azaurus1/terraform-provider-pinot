@@ -1,6 +1,9 @@
 {
   "schemaName": "realtime_ethereum_mainnet_block_headers",
   "enableColumnBasedNullHandling": false,
+  "primaryKeyColumns": [
+    "number"
+  ],
   "dimensionFieldSpecs": [
     {
       "name": "number",
