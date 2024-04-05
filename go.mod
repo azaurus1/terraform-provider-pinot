@@ -24,7 +24,7 @@ require (
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d // indirect
+	github.com/azaurus1/pinot-testContainer v0.0.0-20240404234650-a51c8dc650eb // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect

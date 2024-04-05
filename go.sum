@@ -31,6 +31,8 @@ github.com/azaurus1/pinot-testContainer v0.0.0-20240403031919-9fad6899d753 h1:QQ
 github.com/azaurus1/pinot-testContainer v0.0.0-20240403031919-9fad6899d753/go.mod h1:SG7Smj9VxxeB5xy90nHOjAqUVS1D4cWMOwgph2NPQqg=
 github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d h1:kHkQOHQk8+uHTad97uBhNhg0vEmYPhqeFUqoHxGescU=
 github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d/go.mod h1:SG7Smj9VxxeB5xy90nHOjAqUVS1D4cWMOwgph2NPQqg=
+github.com/azaurus1/pinot-testContainer v0.0.0-20240404234650-a51c8dc650eb h1:yJ1dM1j32OfgXVK8Zb6RiP3arspus5yordrJd/mod0Q=
+github.com/azaurus1/pinot-testContainer v0.0.0-20240404234650-a51c8dc650eb/go.mod h1:SG7Smj9VxxeB5xy90nHOjAqUVS1D4cWMOwgph2NPQqg=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=

@@ -28,6 +28,7 @@ type tablesDataSource struct {
 
 type tablesDataSourceModel struct {
 	Tables []tablesModel `tfsdk:"tables"`
+	ID     types.String  `tfsdk:"id"`
 }
 
 // type TableSegmentsConfig struct {
@@ -166,6 +167,10 @@ func (d *tablesDataSource) Metadata(_ context.Context, req datasource.MetadataRe
 func (d *tablesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Description: "The ID of the user.",
+				Computed:    true,
+			},
 			"tables": schema.ListNestedAttribute{
 				Description: "The list of tables.",
 				Computed:    true,
@@ -581,6 +586,8 @@ func (d *tablesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	// 	// state.Tables = append(state.Tables, tableRealtime)
 
 	// }
+
+	state.ID = types.StringValue("placeholder")
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
