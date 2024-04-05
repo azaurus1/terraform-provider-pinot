@@ -313,9 +313,10 @@ func toDimensionFieldSpecs(fieldSpecs []dimensionFieldSpec) []model.FieldSpec {
 	var pinotFieldSpecs []model.FieldSpec
 	for _, fs := range fieldSpecs {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
-			Name:     fs.Name,
-			DataType: fs.DataType,
-			NotNull:  fs.NotNull.ValueBoolPointer(),
+			Name:             fs.Name,
+			DataType:         fs.DataType,
+			NotNull:          fs.NotNull.ValueBoolPointer(),
+			SingleValueField: fs.SingleValueField.ValueBoolPointer(),
 		})
 	}
 	return pinotFieldSpecs
@@ -353,9 +354,10 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 	dimensionFieldSpecs := make([]dimensionFieldSpec, len(schema.DimensionFieldSpecs))
 	for i, fs := range schema.DimensionFieldSpecs {
 		dimensionFieldSpecs[i] = dimensionFieldSpec{
-			Name:     fs.Name,
-			DataType: fs.DataType,
-			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
+			Name:             fs.Name,
+			DataType:         fs.DataType,
+			NotNull:          basetypes.NewBoolPointerValue(fs.NotNull),
+			SingleValueField: basetypes.NewBoolPointerValue(fs.SingleValueField),
 		}
 	}
 
