@@ -5,6 +5,7 @@ import (
 
 	pinot "github.com/azaurus1/go-pinot-api"
 	"github.com/azaurus1/go-pinot-api/model"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,8 +14,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &tableSchemaResource{}
-	_ resource.ResourceWithConfigure = &tableSchemaResource{}
+	_ resource.Resource                = &tableSchemaResource{}
+	_ resource.ResourceWithConfigure   = &tableSchemaResource{}
+	_ resource.ResourceWithImportState = &tableSchemaResource{}
 )
 
 type tableSchemaResource struct {
@@ -168,6 +170,10 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 			},
 		},
 	}
+}
+
+func (t *tableSchemaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("schema_name"), req, resp)
 }
 
 func (t *tableSchemaResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
