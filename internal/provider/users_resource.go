@@ -4,16 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strings"
 
 	goPinotAPI "github.com/azaurus1/go-pinot-api"
 	goPinotModel "github.com/azaurus1/go-pinot-api/model"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var (
-	_ resource.Resource              = &userResource{}
-	_ resource.ResourceWithConfigure = &userResource{}
+	_ resource.Resource                = &userResource{}
+	_ resource.ResourceWithConfigure   = &userResource{}
+	_ resource.ResourceWithImportState = &userResource{}
 )
 
 func NewUserResource() resource.Resource {
@@ -25,10 +29,10 @@ type userResource struct {
 }
 
 type userResourceModel struct {
-	Username  string `tfsdk:"username"`
-	Password  string `tfsdk:"password"`
-	Component string `tfsdk:"component"`
-	Role      string `tfsdk:"role"`
+	Username  basetypes.StringValue `tfsdk:"username"`
+	Password  basetypes.StringValue `tfsdk:"password"`
+	Component basetypes.StringValue `tfsdk:"component"`
+	Role      basetypes.StringValue `tfsdk:"role"`
 }
 
 func (r *userResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -77,6 +81,20 @@ func (r *userResource) Schema(_ context.Context, req resource.SchemaRequest, res
 	}
 }
 
+func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+
+	idParts := strings.Split(req.ID, ",")
+
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError("Invalid ID format", "Expected ID to be in the format <username>,<component>")
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("username"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("component"), idParts[1])...)
+
+}
+
 func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan userResourceModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -89,10 +107,10 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	// Convert plan into []byte
 
 	user := goPinotModel.User{
-		Username:  plan.Username,
-		Password:  plan.Password,
-		Component: plan.Component,
-		Role:      plan.Role,
+		Username:  plan.Username.ValueString(),
+		Password:  plan.Password.ValueString(),
+		Component: plan.Component.ValueString(),
+		Role:      plan.Role.ValueString(),
 	}
 
 	userBytes, err := json.Marshal(user)
@@ -123,16 +141,16 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	user, err := r.client.GetUser(state.Username, state.Component)
+	user, err := r.client.GetUser(state.Username.ValueString(), state.Component.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to get user", err.Error())
 		return
 	}
 
-	state.Username = user.Username
-	state.Password = user.Password
-	state.Component = user.Component
-	state.Role = user.Role
+	state.Username = basetypes.NewStringValue(user.Username)
+	state.Password = basetypes.NewStringValue(user.Password)
+	state.Component = basetypes.NewStringValue(user.Component)
+	state.Role = basetypes.NewStringValue(user.Role)
 
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
@@ -166,17 +184,17 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if state.Password != plan.Password {
 		passwordChanged = true
 		user = goPinotModel.User{
-			Username:  plan.Username,
-			Password:  plan.Password,
-			Component: plan.Component,
-			Role:      plan.Role,
+			Username:  plan.Username.ValueString(),
+			Password:  plan.Password.ValueString(),
+			Component: plan.Component.ValueString(),
+			Role:      plan.Role.ValueString(),
 		}
 	} else {
 		user = goPinotModel.User{
-			Username:  plan.Username,
-			Password:  state.Password,
-			Component: plan.Component,
-			Role:      plan.Role,
+			Username:  plan.Username.ValueString(),
+			Password:  state.Password.ValueString(),
+			Component: plan.Component.ValueString(),
+			Role:      plan.Role.ValueString(),
 		}
 
 	}
@@ -189,7 +207,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		log.Panic(err)
 	}
 
-	_, err = r.client.UpdateUser(plan.Username, plan.Component, passwordChanged, userBytes)
+	_, err = r.client.UpdateUser(plan.Username.ValueString(), plan.Component.ValueString(), passwordChanged, userBytes)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update user", err.Error())
 		return
@@ -212,7 +230,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	_, err := r.client.DeleteUser(state.Username, state.Component)
+	_, err := r.client.DeleteUser(state.Username.ValueString(), state.Component.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete user", err.Error())
 		return
