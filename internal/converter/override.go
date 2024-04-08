@@ -2,12 +2,13 @@ package converter
 
 import (
 	"context"
-	"github.com/azaurus1/go-pinot-api/model"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"log"
 	"strconv"
 	"terraform-provider-pinot/internal/models"
+
+	"github.com/azaurus1/go-pinot-api/model"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func ToTable(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) {
@@ -85,7 +86,7 @@ func ToUpsertConfig(ctx context.Context, stateConfig *models.UpsertConfig) (*mod
 		Mode:                    stateConfig.Mode.ValueString(),
 		PartialUpsertStrategies: partialUpsertStrategies,
 		DeleteRecordColumn:      stateConfig.DeletedRecordColumn.ValueString(),
-		DeletedKeysTTL:          int(stateConfig.DeletedKeysTTL.ValueInt64()),
+		DeletedKeysTTL:          float64(stateConfig.DeletedKeysTTL.ValueInt64()),
 		HashFunction:            stateConfig.HashFunction.ValueString(),
 		EnableSnapshot:          stateConfig.EnableSnapshot.ValueBoolPointer(),
 		EnablePreLoad:           stateConfig.EnablePreLoad.ValueBoolPointer(),

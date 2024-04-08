@@ -3,7 +3,8 @@ module terraform-provider-pinot
 go 1.22.0
 
 require (
-	github.com/azaurus1/go-pinot-api v0.4.0
+	github.com/azaurus1/go-pinot-api v0.4.1
+	github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d
 	github.com/hashicorp/terraform-plugin-docs v0.18.0
 	github.com/hashicorp/terraform-plugin-framework v1.7.0
 	github.com/hashicorp/terraform-plugin-go v0.22.1
@@ -24,7 +25,6 @@ require (
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
