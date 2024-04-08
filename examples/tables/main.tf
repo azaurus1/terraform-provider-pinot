@@ -149,6 +149,7 @@ resource "pinot_table" "realtime_table" {
     transform_configs        = local.transform_configs
   })
 
+
   metadata = local.metadata
 
   is_dim_table = local.config_raw["isDimTable"]

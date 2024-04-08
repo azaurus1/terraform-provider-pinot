@@ -2,10 +2,11 @@ package converter
 
 import (
 	"context"
+	"terraform-provider-pinot/internal/models"
+
 	"github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-pinot/internal/models"
 )
 
 func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) diag.Diagnostics {
