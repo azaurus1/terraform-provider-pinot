@@ -268,6 +268,16 @@ func IngestionConfig() schema.SingleNestedAttribute {
 					},
 				},
 			},
+			"filter_config": schema.SingleNestedAttribute{
+				Description: "filter configuration",
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					"filter_function": schema.StringAttribute{
+						Description: "filter function",
+						Optional:    true,
+					},
+				},
+			},
 		},
 	}
 }

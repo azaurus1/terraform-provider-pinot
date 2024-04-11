@@ -121,12 +121,17 @@ type TransformConfig struct {
 	TransformFunction types.String `tfsdk:"transform_function"`
 }
 
+type FilterConfig struct {
+	FilterFunction types.String `tfsdk:"filter_function"`
+}
+
 type IngestionConfig struct {
 	SegmentTimeValueCheck types.Bool             `tfsdk:"segment_time_value_check"`
 	RowTimeValueCheck     types.Bool             `tfsdk:"row_time_value_check"`
 	ContinueOnError       types.Bool             `tfsdk:"continue_on_error"`
 	StreamIngestionConfig *StreamIngestionConfig `tfsdk:"stream_ingestion_config"`
 	TransformConfigs      []*TransformConfig     `tfsdk:"transform_configs"`
+	FilterConfig          *FilterConfig          `tfsdk:"filter_configs"`
 }
 
 type StreamIngestionConfig struct {
