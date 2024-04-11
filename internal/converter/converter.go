@@ -22,30 +22,13 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	state.SegmentsConfig = convertSegmentsConfig(table)
+	state.IngestionConfig = convertIngestionConfig(table)
 
 	tableIndexConfig, resultDiags := convertTableIndexConfig(ctx, table)
 	if resultDiags.HasError() {
 		diags.Append(resultDiags...)
 	}
 	state.TableIndexConfig = tableIndexConfig
-
-	var ingestionTransformConfigs []*models.TransformConfig
-	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
-		ingestionTransformConfigs = append(ingestionTransformConfigs, &models.TransformConfig{
-			ColumnName:        types.StringValue(transformConfig.ColumnName),
-			TransformFunction: types.StringValue(transformConfig.TransformFunction),
-		})
-	}
-
-	state.IngestionConfig = &models.IngestionConfig{
-		SegmentTimeValueCheck: types.BoolValue(table.IngestionConfig.SegmentTimeValueCheck),
-		RowTimeValueCheck:     types.BoolValue(table.IngestionConfig.RowTimeValueCheck),
-		ContinueOnError:       types.BoolValue(table.IngestionConfig.ContinueOnError),
-		StreamIngestionConfig: &models.StreamIngestionConfig{
-			StreamConfigMaps: table.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
-		},
-		TransformConfigs: ingestionTransformConfigs,
-	}
 
 	var tierConfigs []*models.TierConfig
 	for _, tierConfig := range table.TierConfigs {
@@ -85,6 +68,35 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	return diags
+}
+
+func convertIngestionConfig(table *model.Table) *models.IngestionConfig {
+
+	var transformConfigs []*models.TransformConfig
+	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
+		transformConfigs = append(transformConfigs, &models.TransformConfig{
+			ColumnName:        types.StringValue(transformConfig.ColumnName),
+			TransformFunction: types.StringValue(transformConfig.TransformFunction),
+		})
+	}
+
+	var filterConfig *models.FilterConfig
+	if table.IngestionConfig.FilterConfig != nil {
+		filterConfig = &models.FilterConfig{
+			FilterFunction: types.StringValue(table.IngestionConfig.FilterConfig.FilterFunction),
+		}
+	}
+
+	return &models.IngestionConfig{
+		SegmentTimeValueCheck: types.BoolValue(table.IngestionConfig.SegmentTimeValueCheck),
+		RowTimeValueCheck:     types.BoolValue(table.IngestionConfig.RowTimeValueCheck),
+		ContinueOnError:       types.BoolValue(table.IngestionConfig.ContinueOnError),
+		StreamIngestionConfig: &models.StreamIngestionConfig{
+			StreamConfigMaps: table.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
+		},
+		TransformConfigs: transformConfigs,
+		FilterConfig:     filterConfig,
+	}
 }
 
 func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionConfig {
