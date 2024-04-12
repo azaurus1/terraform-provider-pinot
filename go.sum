@@ -25,8 +25,8 @@ github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/azaurus1/go-pinot-api v0.4.1 h1:4XnOs+0qPceS0ObvIK+HrlQdoWL4xttbwH1ZW8hjJo8=
-github.com/azaurus1/go-pinot-api v0.4.1/go.mod h1:Zxi9gp5nAlU95XH1FQlAXLzH/cLGdX6KaisGtVF56t0=
+github.com/azaurus1/go-pinot-api v0.4.2 h1:VrGsXi4i0kAokLacmu8IV18zokGVhuoQOq2xY/SIP6Q=
+github.com/azaurus1/go-pinot-api v0.4.2/go.mod h1:Zxi9gp5nAlU95XH1FQlAXLzH/cLGdX6KaisGtVF56t0=
 github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d h1:kHkQOHQk8+uHTad97uBhNhg0vEmYPhqeFUqoHxGescU=
 github.com/azaurus1/pinot-testContainer v0.0.0-20240403033323-8a28c4c0636d/go.mod h1:SG7Smj9VxxeB5xy90nHOjAqUVS1D4cWMOwgph2NPQqg=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
