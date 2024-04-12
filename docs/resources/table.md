@@ -80,10 +80,19 @@ Optional:
 Optional:
 
 - `continue_on_error` (Boolean) continue after error ingesting.
+- `filter_config` (Attributes) filter configuration (see [below for nested schema](#nestedatt--ingestion_config--filter_config))
 - `row_time_value_check` (Boolean) row time value check.
 - `segment_time_value_check` (Boolean) segment time value check.
 - `stream_ingestion_config` (Attributes) stream ingestion configurations (see [below for nested schema](#nestedatt--ingestion_config--stream_ingestion_config))
 - `transform_configs` (Attributes List) transform configurations (see [below for nested schema](#nestedatt--ingestion_config--transform_configs))
+
+<a id="nestedatt--ingestion_config--filter_config"></a>
+### Nested Schema for `ingestion_config.filter_config`
+
+Optional:
+
+- `filter_function` (String) filter function
+
 
 <a id="nestedatt--ingestion_config--stream_ingestion_config"></a>
 ### Nested Schema for `ingestion_config.stream_ingestion_config`

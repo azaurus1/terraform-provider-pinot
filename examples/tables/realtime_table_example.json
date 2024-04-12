@@ -89,7 +89,10 @@
         "columnName": "hash_json",
         "transformFunction": "json_format(hash)"
       }
-    ]
+    ],
+    "filterConfig": {
+      "filterFunction": "mod(number, 10) >=5"
+    }
   },
   "tierConfigs": [
     {

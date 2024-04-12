@@ -15,56 +15,20 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 
 	state.TableName = types.StringValue(table.TableName)
 	state.TableType = types.StringValue(table.TableType)
+	state.IsDimTable = types.BoolValue(table.IsDimTable)
 
-	state.TenantsConfig = &models.TenantsConfig{
-		Broker: types.StringValue(table.Tenants.Broker),
-		Server: types.StringValue(table.Tenants.Server),
-	}
-
+	state.TenantsConfig = convertTenantConfig(table)
 	state.SegmentsConfig = convertSegmentsConfig(table)
+	state.IngestionConfig = convertIngestionConfig(table)
+	state.TierConfigs = convertTierConfigs(table)
+	state.TierConfigs = convertTierConfigs(table)
+	state.Metadata = convertMetadata(table)
 
 	tableIndexConfig, resultDiags := convertTableIndexConfig(ctx, table)
 	if resultDiags.HasError() {
 		diags.Append(resultDiags...)
 	}
 	state.TableIndexConfig = tableIndexConfig
-
-	var ingestionTransformConfigs []*models.TransformConfig
-	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
-		ingestionTransformConfigs = append(ingestionTransformConfigs, &models.TransformConfig{
-			ColumnName:        types.StringValue(transformConfig.ColumnName),
-			TransformFunction: types.StringValue(transformConfig.TransformFunction),
-		})
-	}
-
-	state.IngestionConfig = &models.IngestionConfig{
-		SegmentTimeValueCheck: types.BoolValue(table.IngestionConfig.SegmentTimeValueCheck),
-		RowTimeValueCheck:     types.BoolValue(table.IngestionConfig.RowTimeValueCheck),
-		ContinueOnError:       types.BoolValue(table.IngestionConfig.ContinueOnError),
-		StreamIngestionConfig: &models.StreamIngestionConfig{
-			StreamConfigMaps: table.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
-		},
-		TransformConfigs: ingestionTransformConfigs,
-	}
-
-	var tierConfigs []*models.TierConfig
-	for _, tierConfig := range table.TierConfigs {
-		tierConfigs = append(tierConfigs, &models.TierConfig{
-			Name:                types.StringValue(tierConfig.Name),
-			StorageType:         types.StringValue(tierConfig.StorageType),
-			SegmentSelectorType: types.StringValue(tierConfig.SegmentSelectorType),
-			SegmentAge:          types.StringValue(tierConfig.SegmentAge),
-			ServerTag:           types.StringValue(tierConfig.ServerTag),
-		})
-	}
-
-	state.TierConfigs = tierConfigs
-
-	state.IsDimTable = types.BoolValue(table.IsDimTable)
-
-	state.Metadata = &models.Metadata{
-		CustomConfigs: table.Metadata.CustomConfigs,
-	}
 
 	// Routing Config
 	if table.Routing != nil {
@@ -85,6 +49,63 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	return diags
+}
+
+func convertMetadata(table *model.Table) *models.Metadata {
+	return &models.Metadata{
+		CustomConfigs: table.Metadata.CustomConfigs,
+	}
+}
+
+func convertTierConfigs(table *model.Table) []*models.TierConfig {
+	var tierConfigs []*models.TierConfig
+	for _, tierConfig := range table.TierConfigs {
+		tierConfigs = append(tierConfigs, &models.TierConfig{
+			Name:                types.StringValue(tierConfig.Name),
+			StorageType:         types.StringValue(tierConfig.StorageType),
+			SegmentSelectorType: types.StringValue(tierConfig.SegmentSelectorType),
+			SegmentAge:          types.StringValue(tierConfig.SegmentAge),
+			ServerTag:           types.StringValue(tierConfig.ServerTag),
+		})
+	}
+
+	return tierConfigs
+}
+
+func convertTenantConfig(table *model.Table) *models.TenantsConfig {
+	return &models.TenantsConfig{
+		Broker: types.StringValue(table.Tenants.Broker),
+		Server: types.StringValue(table.Tenants.Server),
+	}
+}
+
+func convertIngestionConfig(table *model.Table) *models.IngestionConfig {
+
+	var transformConfigs []*models.TransformConfig
+	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
+		transformConfigs = append(transformConfigs, &models.TransformConfig{
+			ColumnName:        types.StringValue(transformConfig.ColumnName),
+			TransformFunction: types.StringValue(transformConfig.TransformFunction),
+		})
+	}
+
+	var filterConfig *models.FilterConfig
+	if table.IngestionConfig.FilterConfig != nil {
+		filterConfig = &models.FilterConfig{
+			FilterFunction: types.StringValue(table.IngestionConfig.FilterConfig.FilterFunction),
+		}
+	}
+
+	return &models.IngestionConfig{
+		SegmentTimeValueCheck: types.BoolValue(table.IngestionConfig.SegmentTimeValueCheck),
+		RowTimeValueCheck:     types.BoolValue(table.IngestionConfig.RowTimeValueCheck),
+		ContinueOnError:       types.BoolValue(table.IngestionConfig.ContinueOnError),
+		StreamIngestionConfig: &models.StreamIngestionConfig{
+			StreamConfigMaps: table.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
+		},
+		TransformConfigs: transformConfigs,
+		FilterConfig:     filterConfig,
+	}
 }
 
 func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionConfig {

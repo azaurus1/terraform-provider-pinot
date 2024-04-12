@@ -58,6 +58,11 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
+  filter_config = {
+    for key, value in local.ingestion_config["filter_config"] :
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }
+
   stream_ingestion_config = {
     for key, value in local.ingestion_config["stream_ingestion_config"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
@@ -147,6 +152,7 @@ resource "pinot_table" "realtime_table" {
     row_time_value_check     = true
     stream_ingestion_config  = local.parsed_stream_ingestion_config
     transform_configs        = local.transform_configs
+    filter_config            = local.filter_config
   })
 
 

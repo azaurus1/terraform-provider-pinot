@@ -345,6 +345,12 @@ func ToIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionCon
 		ingestionConfig.TransformConfigs = transformConfigs
 	}
 
+	if plan.IngestionConfig.FilterConfig != nil {
+		ingestionConfig.FilterConfig = &model.FilterConfig{
+			FilterFunction: plan.IngestionConfig.FilterConfig.FilterFunction.ValueString(),
+		}
+	}
+
 	return &ingestionConfig
 }
 
