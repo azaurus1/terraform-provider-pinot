@@ -131,7 +131,7 @@ type IngestionConfig struct {
 	ContinueOnError       types.Bool             `tfsdk:"continue_on_error"`
 	StreamIngestionConfig *StreamIngestionConfig `tfsdk:"stream_ingestion_config"`
 	TransformConfigs      []*TransformConfig     `tfsdk:"transform_configs"`
-	FilterConfig          *FilterConfig          `tfsdk:"filter_configs"`
+	FilterConfig          *FilterConfig          `tfsdk:"filter_config"`
 }
 
 type StreamIngestionConfig struct {
