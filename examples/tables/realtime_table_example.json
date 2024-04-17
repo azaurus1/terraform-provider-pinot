@@ -116,6 +116,8 @@
     "enableSnapshot": true,
     "upsertTTL": "1d",
     "enablePreload": false,
-    "defaultPartialUpsertStrategy": "OVERWRITE"
+    "defaultPartialUpsertStrategy": "OVERWRITE",
+    "dropOutOfOrderRecord": false,
+    "deletedKeysTTL": 0
   }
 }

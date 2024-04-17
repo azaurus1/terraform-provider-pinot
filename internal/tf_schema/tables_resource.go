@@ -212,6 +212,10 @@ func UpsertConfig() schema.SingleNestedAttribute {
 				Description: "The drop out of order record for the table.",
 				Optional:    true,
 			},
+			"default_partial_upsert_strategy": schema.StringAttribute{
+				Description: "The default partial upsert strategy for the table.",
+				Optional:    true,
+			},
 			"hash_function": schema.StringAttribute{
 				Description: "The hash function for the table.",
 				Optional:    true,

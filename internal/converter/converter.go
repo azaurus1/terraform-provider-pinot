@@ -259,17 +259,28 @@ func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.Upser
 	}
 
 	upsertConfig := models.UpsertConfig{
-		Mode:                  types.StringValue(table.UpsertConfig.Mode),
-		PartialUpsertStrategy: partialUpsertStrategies,
-		DeletedKeysTTL:        types.Int64Value(int64(table.UpsertConfig.DeletedKeysTTL)),
-		HashFunction:          types.StringValue(table.UpsertConfig.HashFunction),
-		EnableSnapshot:        types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
-		EnablePreLoad:         types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
-		UpsertTTL:             types.StringValue(table.UpsertConfig.UpsertTTL),
-		//DropOutOfOrderRecords:  types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecords),
-		OutOfOrderRecordColumn: types.StringValue(table.UpsertConfig.OutOfOrderRecordColumn),
-		MetadataManagerClass:   types.StringValue(table.UpsertConfig.MetadataManagerClass),
-		MetadataManagerConfigs: metadataManagerConfigs,
+		Mode:                         types.StringValue(table.UpsertConfig.Mode),
+		PartialUpsertStrategy:        partialUpsertStrategies,
+		DeletedKeysTTL:               types.Int64Value(int64(table.UpsertConfig.DeletedKeysTTL)),
+		HashFunction:                 types.StringValue(table.UpsertConfig.HashFunction),
+		EnableSnapshot:               types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
+		EnablePreLoad:                types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
+		UpsertTTL:                    types.StringValue(table.UpsertConfig.UpsertTTL),
+		DropOutOfOrderRecord:         types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecord),
+		DefaultPartialUpsertStrategy: types.StringValue(table.UpsertConfig.DefaultPartialUpsertStrategy),
+		MetadataManagerConfigs:       metadataManagerConfigs,
+	}
+
+	if table.UpsertConfig.DeleteRecordColumn != "" {
+		upsertConfig.DeletedRecordColumn = types.StringValue(table.UpsertConfig.DeleteRecordColumn)
+	}
+
+	if table.UpsertConfig.MetadataManagerClass != "" {
+		upsertConfig.MetadataManagerClass = types.StringValue(table.UpsertConfig.MetadataManagerClass)
+	}
+
+	if table.UpsertConfig.OutOfOrderRecordColumn != "" {
+		upsertConfig.OutOfOrderRecordColumn = types.StringValue(table.UpsertConfig.OutOfOrderRecordColumn)
 	}
 
 	return &upsertConfig, resultDiags

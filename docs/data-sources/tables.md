@@ -153,7 +153,7 @@ Read-Only:
 - `hot_tier` (Attributes List) The hot tier of the table. (see [below for nested schema](#nestedatt--tables--table_index_config--tier_overwrites--hot_tier))
 
 <a id="nestedatt--tables--table_index_config--tier_overwrites--cold_tier"></a>
-### Nested Schema for `tables.table_index_config.tier_overwrites.hot_tier`
+### Nested Schema for `tables.table_index_config.tier_overwrites.cold_tier`
 
 Read-Only:
 

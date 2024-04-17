@@ -83,18 +83,25 @@ func ToUpsertConfig(ctx context.Context, stateConfig *models.UpsertConfig) (*mod
 	}
 
 	upsertConfig := model.UpsertConfig{
-		Mode:                    stateConfig.Mode.ValueString(),
-		PartialUpsertStrategies: partialUpsertStrategies,
-		DeleteRecordColumn:      stateConfig.DeletedRecordColumn.ValueString(),
-		DeletedKeysTTL:          float64(stateConfig.DeletedKeysTTL.ValueInt64()),
-		HashFunction:            stateConfig.HashFunction.ValueString(),
-		EnableSnapshot:          stateConfig.EnableSnapshot.ValueBoolPointer(),
-		EnablePreLoad:           stateConfig.EnablePreLoad.ValueBoolPointer(),
-		UpsertTTL:               stateConfig.UpsertTTL.ValueString(),
-		//DropOutOfOrderRecord:    stateConfig.DropOutOfOrderRecord.ValueBoolPointer(),
-		OutOfOrderRecordColumn: stateConfig.OutOfOrderRecordColumn.ValueString(),
-		MetadataManagerClass:   stateConfig.MetadataManagerClass.ValueString(),
-		MetadataManagerConfigs: metadataManagerConfigs,
+		Mode:                         stateConfig.Mode.ValueString(),
+		PartialUpsertStrategies:      partialUpsertStrategies,
+		DeleteRecordColumn:           stateConfig.DeletedRecordColumn.ValueString(),
+		DeletedKeysTTL:               float64(stateConfig.DeletedKeysTTL.ValueInt64()),
+		HashFunction:                 stateConfig.HashFunction.ValueString(),
+		EnableSnapshot:               stateConfig.EnableSnapshot.ValueBoolPointer(),
+		EnablePreLoad:                stateConfig.EnablePreLoad.ValueBoolPointer(),
+		UpsertTTL:                    stateConfig.UpsertTTL.ValueString(),
+		DropOutOfOrderRecord:         stateConfig.DropOutOfOrderRecord.ValueBoolPointer(),
+		DefaultPartialUpsertStrategy: stateConfig.DefaultPartialUpsertStrategy.ValueString(),
+		MetadataManagerConfigs:       metadataManagerConfigs,
+	}
+
+	if stateConfig.OutOfOrderRecordColumn.IsNull() {
+		upsertConfig.OutOfOrderRecordColumn = stateConfig.OutOfOrderRecordColumn.ValueString()
+	}
+
+	if stateConfig.MetadataManagerClass.IsNull() {
+		upsertConfig.MetadataManagerClass = stateConfig.MetadataManagerClass.ValueString()
 	}
 
 	return &upsertConfig, diags
