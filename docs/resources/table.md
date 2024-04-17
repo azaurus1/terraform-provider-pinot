@@ -233,6 +233,7 @@ Required:
 
 Optional:
 
+- `default_partial_upsert_strategy` (String) The default partial upsert strategy for the table.
 - `delete_record_column` (String) The deleted record column for the table.
 - `deleted_keys_ttl` (Number) The deleted keys ttl for the table.
 - `drop_out_of_order_record` (Boolean) The drop out of order record for the table.
