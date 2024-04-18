@@ -182,6 +182,7 @@ func (p *pinotProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewTenantsDataSource,
 		NewClustersDataSource,
 		NewInstancesDataSource,
+		NewSchemasDataSource,
 	}
 }
 
