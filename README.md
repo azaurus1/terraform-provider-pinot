@@ -145,3 +145,8 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```shell
 make testacc
 ```
+
+## Acknowledgments:
+Many thanks to:
+- [Hagen H](https://github.com/hendoxc)
+- [Gustavo Vieira](https://github.com/guustavov)
