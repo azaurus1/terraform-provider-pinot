@@ -269,6 +269,7 @@ func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.Upser
 		DropOutOfOrderRecord:         types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecord),
 		DefaultPartialUpsertStrategy: types.StringValue(table.UpsertConfig.DefaultPartialUpsertStrategy),
 		MetadataManagerConfigs:       metadataManagerConfigs,
+		MetadataManagerClass:         types.StringValue(table.UpsertConfig.MetadataManagerClass),
 	}
 
 	if table.UpsertConfig.DeleteRecordColumn != "" {
