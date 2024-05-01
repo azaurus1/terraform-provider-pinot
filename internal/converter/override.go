@@ -94,6 +94,7 @@ func ToUpsertConfig(ctx context.Context, stateConfig *models.UpsertConfig) (*mod
 		DropOutOfOrderRecord:         stateConfig.DropOutOfOrderRecord.ValueBoolPointer(),
 		DefaultPartialUpsertStrategy: stateConfig.DefaultPartialUpsertStrategy.ValueString(),
 		MetadataManagerConfigs:       metadataManagerConfigs,
+		MetadataManagerClass:         stateConfig.MetadataManagerClass.ValueString(),
 	}
 
 	if stateConfig.OutOfOrderRecordColumn.IsNull() {
