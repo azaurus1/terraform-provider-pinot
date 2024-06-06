@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // Ensure the implementation satisfies the expected interfaces.
@@ -32,10 +33,12 @@ type usersDataSourceModel struct {
 }
 
 type usersModel struct {
-	Username  string `tfsdk:"username"`
-	Password  string `tfsdk:"password"`
-	Component string `tfsdk:"component"`
-	Role      string `tfsdk:"role"`
+	Username    string    `tfsdk:"username"`
+	Password    string    `tfsdk:"password"`
+	Component   string    `tfsdk:"component"`
+	Role        string    `tfsdk:"role"`
+	Permissions *[]string `tfsdk:"permissions"`
+	Tables      *[]string `tfsdk:"tables"`
 }
 
 // Configure adds the provider configured client to the data source.
@@ -92,6 +95,16 @@ func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 							Description: "The role of the user.",
 							Computed:    true,
 						},
+						"permissions": schema.ListAttribute{
+							Description: "A list of permissions for the user.",
+							Optional:    true,
+							ElementType: basetypes.StringType{},
+						},
+						"tables": schema.ListAttribute{
+							Description: "A list of tables which the permissions are applied to.",
+							Optional:    true,
+							ElementType: basetypes.StringType{},
+						},
 					},
 				},
 			},
@@ -111,10 +124,12 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	for _, user := range usersResp.Users {
 		state.Users = append(state.Users, usersModel{
-			Username:  user.Username,
-			Password:  user.Password,
-			Component: user.Component,
-			Role:      user.Role,
+			Username:    user.Username,
+			Password:    user.Password,
+			Component:   user.Component,
+			Role:        user.Role,
+			Permissions: user.Permissions,
+			Tables:      user.Tables,
 		})
 	}
 
