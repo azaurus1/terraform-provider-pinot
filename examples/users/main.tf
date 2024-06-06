@@ -13,10 +13,12 @@ provider "pinot" {
 }
 
 resource "pinot_user" "test" {
-  username  = "liam"
-  password  = "password"
-  component = "BROKER"
-  role      = "USER"
+  username    = "liam"
+  password    = "password"
+  component   = "BROKER"
+  role        = "USER"
+  permissions = ["READ", "CREATE"]
+  tables      = ["my_table_OFFLINE"]
 
   lifecycle {
     ignore_changes = [password]

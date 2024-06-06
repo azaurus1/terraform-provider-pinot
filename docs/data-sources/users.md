@@ -33,6 +33,11 @@ output "example_output" {
 <a id="nestedatt--users"></a>
 ### Nested Schema for `users`
 
+Optional:
+
+- `permissions` (List of String) A list of permissions for the user.
+- `tables` (List of String) A list of tables which the permissions are applied to.
+
 Read-Only:
 
 - `component` (String) The component of the user.

@@ -29,10 +29,12 @@ type userResource struct {
 }
 
 type userResourceModel struct {
-	Username  basetypes.StringValue `tfsdk:"username"`
-	Password  basetypes.StringValue `tfsdk:"password"`
-	Component basetypes.StringValue `tfsdk:"component"`
-	Role      basetypes.StringValue `tfsdk:"role"`
+	Username    basetypes.StringValue `tfsdk:"username"`
+	Password    basetypes.StringValue `tfsdk:"password"`
+	Component   basetypes.StringValue `tfsdk:"component"`
+	Role        basetypes.StringValue `tfsdk:"role"`
+	Permissions *[]string             `tfsdk:"permissions"`
+	Tables      *[]string             `tfsdk:"tables"`
 }
 
 func (r *userResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -77,6 +79,16 @@ func (r *userResource) Schema(_ context.Context, req resource.SchemaRequest, res
 				Description: "The role of the user.",
 				Required:    true,
 			},
+			"permissions": schema.ListAttribute{
+				Description: "A list of permissions for the user.",
+				Optional:    true,
+				ElementType: basetypes.StringType{},
+			},
+			"tables": schema.ListAttribute{
+				Description: "A list of tables which the permissions are applied to.",
+				Optional:    true,
+				ElementType: basetypes.StringType{},
+			},
 		},
 	}
 }
@@ -111,6 +123,14 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		Password:  plan.Password.ValueString(),
 		Component: plan.Component.ValueString(),
 		Role:      plan.Role.ValueString(),
+	}
+
+	if plan.Permissions != nil {
+		user.Permissions = plan.Permissions
+	}
+
+	if plan.Tables != nil {
+		user.Tables = plan.Tables
 	}
 
 	userBytes, err := json.Marshal(user)
@@ -152,6 +172,14 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	state.Component = basetypes.NewStringValue(user.Component)
 	state.Role = basetypes.NewStringValue(user.Role)
 
+	if user.Permissions != nil {
+		state.Permissions = user.Permissions
+	}
+
+	if user.Tables != nil {
+		state.Tables = user.Tables
+	}
+
 	// set state to populated data
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -189,6 +217,14 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			Component: plan.Component.ValueString(),
 			Role:      plan.Role.ValueString(),
 		}
+		if plan.Permissions != nil {
+			user.Permissions = plan.Permissions
+		}
+
+		if plan.Tables != nil {
+			user.Tables = plan.Tables
+		}
+
 	} else {
 		user = goPinotModel.User{
 			Username:  plan.Username.ValueString(),
@@ -196,7 +232,13 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			Component: plan.Component.ValueString(),
 			Role:      plan.Role.ValueString(),
 		}
+		if plan.Permissions != nil {
+			user.Permissions = plan.Permissions
+		}
 
+		if plan.Tables != nil {
+			user.Tables = plan.Tables
+		}
 	}
 
 	// Generate API request from plan

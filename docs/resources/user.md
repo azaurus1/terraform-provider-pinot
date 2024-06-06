@@ -34,3 +34,8 @@ resource "pinot_user" "test" {
 - `password` (String, Sensitive) The password of the user.
 - `role` (String) The role of the user.
 - `username` (String) The username of the user.
+
+### Optional
+
+- `permissions` (List of String) A list of permissions for the user.
+- `tables` (List of String) A list of tables which the permissions are applied to.
