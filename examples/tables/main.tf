@@ -125,8 +125,8 @@ resource "pinot_schema" "realtime_table_schema" {
 
 resource "pinot_table" "realtime_table" {
 
-  table_name = "realtime_ethereum_mainnet_block_headers_REALTIME"
-  table_type = "REALTIME"
+  table_name = "realtime_ethereum_mainnet_block_headers_OFFLINE"
+  table_type = "OFFLINE"
   table      = file("realtime_table_example.json")
 
   segments_config = merge(local.segments_config, {

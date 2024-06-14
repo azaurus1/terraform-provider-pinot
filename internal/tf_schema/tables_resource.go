@@ -20,7 +20,7 @@ func SegmentsConfig() schema.SingleNestedAttribute {
 			},
 			"time_type": schema.StringAttribute{
 				Description: "The time type for the segments.",
-				Required:    true,
+				Optional:    true,
 			},
 			"time_column_name": schema.StringAttribute{
 				Description: "The time column name for the segments.",
