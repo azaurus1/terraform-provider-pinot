@@ -265,7 +265,6 @@ func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.Upser
 		HashFunction:                 types.StringValue(table.UpsertConfig.HashFunction),
 		EnableSnapshot:               types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
 		EnablePreLoad:                types.BoolPointerValue(table.UpsertConfig.EnablePreLoad),
-		UpsertTTL:                    types.StringValue(table.UpsertConfig.UpsertTTL),
 		DropOutOfOrderRecord:         types.BoolPointerValue(table.UpsertConfig.DropOutOfOrderRecord),
 		DefaultPartialUpsertStrategy: types.StringValue(table.UpsertConfig.DefaultPartialUpsertStrategy),
 		MetadataManagerConfigs:       metadataManagerConfigs,

@@ -43,7 +43,6 @@ type UpsertConfig struct {
 	HashFunction                 types.String `tfsdk:"hash_function"`
 	EnableSnapshot               types.Bool   `tfsdk:"enable_snapshot"`
 	EnablePreLoad                types.Bool   `tfsdk:"enable_preload"`
-	UpsertTTL                    types.String `tfsdk:"upsert_ttl"`
 	DropOutOfOrderRecord         types.Bool   `tfsdk:"drop_out_of_order_record"`
 	OutOfOrderRecordColumn       types.String `tfsdk:"out_of_order_record_column"`
 	MetadataManagerClass         types.String `tfsdk:"metadata_manager_class"`

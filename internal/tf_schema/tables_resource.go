@@ -204,10 +204,6 @@ func UpsertConfig() schema.SingleNestedAttribute {
 				Description: "The out of order record column for the table.",
 				Optional:    true,
 			},
-			"upsert_ttl": schema.StringAttribute{
-				Description: "The metadata ttl for the table.",
-				Optional:    true,
-			},
 			"drop_out_of_order_record": schema.BoolAttribute{
 				Description: "The drop out of order record for the table.",
 				Optional:    true,

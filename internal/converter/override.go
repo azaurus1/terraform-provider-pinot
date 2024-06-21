@@ -90,7 +90,6 @@ func ToUpsertConfig(ctx context.Context, stateConfig *models.UpsertConfig) (*mod
 		HashFunction:                 stateConfig.HashFunction.ValueString(),
 		EnableSnapshot:               stateConfig.EnableSnapshot.ValueBoolPointer(),
 		EnablePreLoad:                stateConfig.EnablePreLoad.ValueBoolPointer(),
-		UpsertTTL:                    stateConfig.UpsertTTL.ValueString(),
 		DropOutOfOrderRecord:         stateConfig.DropOutOfOrderRecord.ValueBoolPointer(),
 		DefaultPartialUpsertStrategy: stateConfig.DefaultPartialUpsertStrategy.ValueString(),
 		MetadataManagerConfigs:       metadataManagerConfigs,
