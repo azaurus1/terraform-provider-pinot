@@ -192,6 +192,10 @@ func UpsertConfig() schema.SingleNestedAttribute {
 				Description: "The enable preload for the table.",
 				Optional:    true,
 			},
+			"metadata_ttl": schema.Int64Attribute{
+				Description: "The metadata ttl for the table.",
+				Optional:    true,
+			},
 			"deleted_keys_ttl": schema.Int64Attribute{
 				Description: "The deleted keys ttl for the table.",
 				Optional:    true,
