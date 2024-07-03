@@ -40,6 +40,7 @@ type UpsertConfig struct {
 	DefaultPartialUpsertStrategy types.String `tfsdk:"default_partial_upsert_strategy"`
 	DeletedRecordColumn          types.String `tfsdk:"delete_record_column"`
 	DeletedKeysTTL               types.Int64  `tfsdk:"deleted_keys_ttl"`
+	MetadataTTL                  types.Int64  `tfsdk:"metadata_ttl"`
 	HashFunction                 types.String `tfsdk:"hash_function"`
 	EnableSnapshot               types.Bool   `tfsdk:"enable_snapshot"`
 	EnablePreLoad                types.Bool   `tfsdk:"enable_preload"`
