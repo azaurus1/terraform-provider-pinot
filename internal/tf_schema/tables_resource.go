@@ -192,6 +192,10 @@ func UpsertConfig() schema.SingleNestedAttribute {
 				Description: "The enable preload for the table.",
 				Optional:    true,
 			},
+			"metadata_ttl": schema.Int64Attribute{
+				Description: "The metadata ttl for the table.",
+				Optional:    true,
+			},
 			"deleted_keys_ttl": schema.Int64Attribute{
 				Description: "The deleted keys ttl for the table.",
 				Optional:    true,
@@ -202,10 +206,6 @@ func UpsertConfig() schema.SingleNestedAttribute {
 			},
 			"out_of_order_record_column": schema.StringAttribute{
 				Description: "The out of order record column for the table.",
-				Optional:    true,
-			},
-			"upsert_ttl": schema.StringAttribute{
-				Description: "The metadata ttl for the table.",
 				Optional:    true,
 			},
 			"drop_out_of_order_record": schema.BoolAttribute{
