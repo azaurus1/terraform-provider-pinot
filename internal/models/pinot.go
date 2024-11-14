@@ -16,6 +16,7 @@ type TableResourceModel struct {
 	Metadata         *Metadata         `tfsdk:"metadata"`
 	FieldConfigList  []*FieldConfig    `tfsdk:"field_config_list"`
 	Routing          *RoutingConfig    `tfsdk:"routing"`
+	Task             *Task             `tfsdk:"task"`
 }
 
 type TenantsConfig struct {
@@ -149,4 +150,8 @@ type TierConfig struct {
 
 type Metadata struct {
 	CustomConfigs map[string]string `tfsdk:"custom_configs"`
+}
+
+type Task struct {
+	TaskConfigMap map[string]string `tfsdk:"task_config_map"`
 }
