@@ -91,11 +91,13 @@ func convertIngestionConfig(table *pinot_api.Table) *models.IngestionConfig {
 
 	var transformConfigs []*models.TransformConfig
 
-	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
-		transformConfigs = append(transformConfigs, &models.TransformConfig{
-			ColumnName:        types.StringValue(transformConfig.ColumnName),
-			TransformFunction: types.StringValue(transformConfig.TransformFunction),
-		})
+	if table.IngestionConfig.TransformConfigs != nil {
+		for _, transformConfig := range table.IngestionConfig.TransformConfigs {
+			transformConfigs = append(transformConfigs, &models.TransformConfig{
+				ColumnName:        types.StringValue(transformConfig.ColumnName),
+				TransformFunction: types.StringValue(transformConfig.TransformFunction),
+			})
+		}
 	}
 
 	var filterConfig *models.FilterConfig
