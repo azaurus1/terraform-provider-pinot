@@ -19,7 +19,11 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 
 	state.TenantsConfig = convertTenantConfig(table)
 	state.SegmentsConfig = convertSegmentsConfig(table)
-	state.IngestionConfig = convertIngestionConfig(table)
+
+	if table.IngestionConfig != nil {
+		state.IngestionConfig = convertIngestionConfig(table)
+	}
+
 	state.TierConfigs = convertTierConfigs(table)
 	state.TierConfigs = convertTierConfigs(table)
 	state.Metadata = convertMetadata(table)
