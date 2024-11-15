@@ -4,12 +4,12 @@ import (
 	"context"
 	"terraform-provider-pinot/internal/models"
 
-	"github.com/azaurus1/go-pinot-api/model"
+	pinot_api "github.com/azaurus1/go-pinot-api/model"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *model.Table) diag.Diagnostics {
+func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, table *pinot_api.Table) diag.Diagnostics {
 
 	var diags diag.Diagnostics
 
@@ -48,16 +48,24 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		state.UpsertConfig = upsertConfig
 	}
 
+	if table.Task != nil {
+		taskConfig, taskDiags := convertTaskConfig(table)
+		if taskDiags.HasError() {
+			diags.Append(taskDiags...)
+		}
+		state.Task = taskConfig
+	}
+
 	return diags
 }
 
-func convertMetadata(table *model.Table) *models.Metadata {
+func convertMetadata(table *pinot_api.Table) *models.Metadata {
 	return &models.Metadata{
 		CustomConfigs: table.Metadata.CustomConfigs,
 	}
 }
 
-func convertTierConfigs(table *model.Table) []*models.TierConfig {
+func convertTierConfigs(table *pinot_api.Table) []*models.TierConfig {
 	var tierConfigs []*models.TierConfig
 	for _, tierConfig := range table.TierConfigs {
 		tierConfigs = append(tierConfigs, &models.TierConfig{
@@ -72,16 +80,17 @@ func convertTierConfigs(table *model.Table) []*models.TierConfig {
 	return tierConfigs
 }
 
-func convertTenantConfig(table *model.Table) *models.TenantsConfig {
+func convertTenantConfig(table *pinot_api.Table) *models.TenantsConfig {
 	return &models.TenantsConfig{
 		Broker: types.StringValue(table.Tenants.Broker),
 		Server: types.StringValue(table.Tenants.Server),
 	}
 }
 
-func convertIngestionConfig(table *model.Table) *models.IngestionConfig {
+func convertIngestionConfig(table *pinot_api.Table) *models.IngestionConfig {
 
 	var transformConfigs []*models.TransformConfig
+
 	for _, transformConfig := range table.IngestionConfig.TransformConfigs {
 		transformConfigs = append(transformConfigs, &models.TransformConfig{
 			ColumnName:        types.StringValue(transformConfig.ColumnName),
@@ -108,7 +117,7 @@ func convertIngestionConfig(table *model.Table) *models.IngestionConfig {
 	}
 }
 
-func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionConfig {
+func convertSegmentPartitionConfig(table *pinot_api.Table) *models.SegmentPartitionConfig {
 
 	segmentPartitionConfig := &models.SegmentPartitionConfig{}
 
@@ -131,7 +140,7 @@ func convertSegmentPartitionConfig(table *model.Table) *models.SegmentPartitionC
 	return segmentPartitionConfig
 }
 
-func convertTableIndexConfig(ctx context.Context, table *model.Table) (*models.TableIndexConfig, diag.Diagnostics) {
+func convertTableIndexConfig(ctx context.Context, table *pinot_api.Table) (*models.TableIndexConfig, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
 
@@ -188,7 +197,7 @@ func convertTableIndexConfig(ctx context.Context, table *model.Table) (*models.T
 	return &indexConfig, diags
 }
 
-func convertStarTreeIndexConfigs(ctx context.Context, table *model.Table) []*models.StarTreeIndexConfigs {
+func convertStarTreeIndexConfigs(ctx context.Context, table *pinot_api.Table) []*models.StarTreeIndexConfigs {
 
 	var starTreeIndexConfigs []*models.StarTreeIndexConfigs
 
@@ -210,7 +219,7 @@ func convertStarTreeIndexConfigs(ctx context.Context, table *model.Table) []*mod
 	return starTreeIndexConfigs
 }
 
-func convertSegmentsConfig(table *model.Table) *models.SegmentsConfig {
+func convertSegmentsConfig(table *pinot_api.Table) *models.SegmentsConfig {
 
 	segmentsConfig := models.SegmentsConfig{
 		TimeType:           types.StringValue(table.SegmentsConfig.TimeType),
@@ -231,7 +240,7 @@ func convertSegmentsConfig(table *model.Table) *models.SegmentsConfig {
 	return &segmentsConfig
 }
 
-func convertRoutingConfig(ctx context.Context, table *model.Table) (*models.RoutingConfig, diag.Diagnostics) {
+func convertRoutingConfig(ctx context.Context, table *pinot_api.Table) (*models.RoutingConfig, diag.Diagnostics) {
 
 	segmentPrunerTypes, resultDiags := types.ListValueFrom(ctx, types.StringType, table.Routing.SegmentPrunerTypes)
 	if resultDiags.HasError() {
@@ -246,7 +255,7 @@ func convertRoutingConfig(ctx context.Context, table *model.Table) (*models.Rout
 	return &routingConfig, resultDiags
 }
 
-func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.UpsertConfig, diag.Diagnostics) {
+func convertUpsertConfig(ctx context.Context, table *pinot_api.Table) (*models.UpsertConfig, diag.Diagnostics) {
 
 	partialUpsertStrategies, resultDiags := types.MapValueFrom(ctx, types.StringType, table.UpsertConfig.PartialUpsertStrategies)
 	if resultDiags.HasError() {
@@ -285,4 +294,15 @@ func convertUpsertConfig(ctx context.Context, table *model.Table) (*models.Upser
 	}
 
 	return &upsertConfig, resultDiags
+}
+
+func convertTaskConfig(table *pinot_api.Table) (*models.Task, diag.Diagnostics) {
+
+	if table.Task == nil {
+		return nil, nil
+	}
+
+	return &models.Task{
+		TaskTypeConfigsMap: table.Task.TaskTypeConfigsMap, // Changed to match new field name
+	}, nil
 }

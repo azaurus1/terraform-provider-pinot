@@ -82,6 +82,7 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"field_config_list":  tf_schema.FieldConfigList(),
 			"routing":            tf_schema.Routing(),
 			"metadata":           tf_schema.Metadata(),
+			"task":               tf_schema.TaskConfig(),
 		},
 	}
 }

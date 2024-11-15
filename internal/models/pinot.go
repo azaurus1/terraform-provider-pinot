@@ -153,5 +153,5 @@ type Metadata struct {
 }
 
 type Task struct {
-	TaskConfigMap map[string]string `tfsdk:"task_config_map"`
+	TaskTypeConfigsMap map[string]map[string]string `tfsdk:"task_type_configs_map"` // Changed from TaskTypeConfigMap
 }

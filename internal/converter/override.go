@@ -63,6 +63,10 @@ func ToTable(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) {
 		table.Routing = routingConfig
 	}
 
+	if plan.Task != nil {
+		table.Task = ToTask(plan.Task)
+	}
+
 	return &table, diags
 }
 
@@ -385,6 +389,17 @@ func ToTenantsConfig(plan *models.TableResourceModel) model.TableTenant {
 	return model.TableTenant{
 		Broker: plan.TenantsConfig.Broker.ValueString(),
 		Server: plan.TenantsConfig.Server.ValueString(),
+	}
+}
+
+func ToTask(plan *models.Task) *model.Task {
+
+	if plan == nil {
+		return nil
+	}
+
+	return &model.Task{
+		TaskTypeConfigsMap: plan.TaskTypeConfigsMap, // Changed to match new field name
 	}
 }
 
