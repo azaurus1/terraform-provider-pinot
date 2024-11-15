@@ -453,3 +453,18 @@ func StarTreeIndexConfigs() schema.ListNestedAttribute {
 		},
 	}
 }
+
+func TaskConfig() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Optional: true,
+		Attributes: map[string]schema.Attribute{
+			"task_type_configs_map": schema.MapAttribute{
+				Description: "The task configs for table",
+				Optional:    true,
+				ElementType: types.MapType{
+					ElemType: types.StringType,
+				},
+			},
+		},
+	}
+}

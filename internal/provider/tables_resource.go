@@ -82,6 +82,7 @@ func (r *tableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"field_config_list":  tf_schema.FieldConfigList(),
 			"routing":            tf_schema.Routing(),
 			"metadata":           tf_schema.Metadata(),
+			"task":               tf_schema.TaskConfig(),
 		},
 	}
 }
@@ -140,8 +141,6 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	tflog.Info(ctx, "here\n")
-
 	var table model.Table
 
 	// if table.OFFLINE is not nil, set the state to populated data
@@ -150,8 +149,6 @@ func (r *tableResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	} else {
 		table = tableResponse.REALTIME
 	}
-
-	tflog.Info(ctx, "setting state\n")
 
 	resultDiags := converter.SetStateFromTable(ctx, &state, &table)
 	if resultDiags.HasError() {

@@ -15,7 +15,7 @@ locals {
 
   kafka_broker = "kafka:9092"
   kafka_zk     = "kafka:2181"
-  config_raw   = jsondecode(file("realtime_table_example.json"))
+  config_raw   = jsondecode(file("realtime_example.json"))
 
   ## Convert the keys to snake_case
   segments_config = {
@@ -58,26 +58,27 @@ locals {
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
-  filter_config = {
+  filter_config = try({
     for key, value in local.ingestion_config["filter_config"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
-  }
+  }, null)
 
   stream_ingestion_config = {
     for key, value in local.ingestion_config["stream_ingestion_config"] :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
-  transform_configs = [
+  transform_configs = try([
     for value in local.ingestion_config["transform_configs"] :
     { for key, inner_value in value : join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => inner_value }
-  ]
+  ], [])
 
-  kafka_overrides = {
-    "stream.kafka.broker.list" : sensitive(local.kafka_broker),
-    "stream.kafka.zk.broker.url" : sensitive(local.kafka_zk),
-    "stream.kafka.topic.name" : "ethereum_mainnet_block_headers"
-  }
+  task_config = try({
+    for key, value in local.config_raw["task"] :
+    join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
+  }, null)
+
+  kafka_overrides = {}
 
   parsed_stream_ingestion_config = {
     column_major_segment_builder_enabled = true
@@ -87,7 +88,7 @@ locals {
   }
 
   schema = {
-    for key, value in jsondecode(file("realtime_table_schema_example.json")) :
+    for key, value in jsondecode(file("realtime_example_schema.json")) :
     join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
   }
 
@@ -98,12 +99,12 @@ locals {
     }
   ]
 
-  metric_field_specs = [
+  metric_field_specs = try([
     for field in local.schema["metric_field_specs"] : {
       for key, value in field :
       join("_", [for keyName in regexall("[A-Z]?[a-z]+", key) : lower(keyName)]) => value
     }
-  ]
+  ], [])
 
   date_time_field_specs = [
     for field in local.schema["date_time_field_specs"] : {
@@ -116,7 +117,7 @@ locals {
 
 resource "pinot_schema" "realtime_table_schema" {
   schema_name                       = local.schema["schema_name"]
-  enable_column_based_null_handling = local.schema["enable_column_based_null_handling"]
+  enable_column_based_null_handling = try(local.schema["enable_column_based_null_handling"], false)
   primary_key_columns               = try(local.schema["primary_key_columns"], null)
   dimension_field_specs             = local.dimension_field_specs
   metric_field_specs                = local.metric_field_specs
@@ -125,9 +126,9 @@ resource "pinot_schema" "realtime_table_schema" {
 
 resource "pinot_table" "realtime_table" {
 
-  table_name = "realtime_ethereum_mainnet_block_headers_OFFLINE"
-  table_type = "OFFLINE"
-  table      = file("realtime_table_example.json")
+  table_name = "monster_transformed"
+  table_type = "REALTIME"
+  table      = file("realtime_example.json")
 
   segments_config = merge(local.segments_config, {
     replication = "1"
@@ -160,5 +161,11 @@ resource "pinot_table" "realtime_table" {
 
   is_dim_table = local.config_raw["isDimTable"]
 
+  task = local.task_config
+
   depends_on = [pinot_schema.realtime_table_schema]
+}
+
+output "tasks_thing" {
+  value = local.task_config
 }
