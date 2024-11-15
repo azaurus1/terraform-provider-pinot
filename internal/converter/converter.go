@@ -49,11 +49,7 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	}
 
 	if table.Task != nil {
-		taskConfig, taskDiags := convertTaskConfig(table)
-		if taskDiags.HasError() {
-			diags.Append(taskDiags...)
-		}
-		state.Task = taskConfig
+		state.Task = convertTaskConfig(table)
 	}
 
 	return diags
@@ -298,13 +294,13 @@ func convertUpsertConfig(ctx context.Context, table *pinot_api.Table) (*models.U
 	return &upsertConfig, resultDiags
 }
 
-func convertTaskConfig(table *pinot_api.Table) (*models.Task, diag.Diagnostics) {
+func convertTaskConfig(table *pinot_api.Table) *models.Task {
 
 	if table.Task == nil {
-		return nil, nil
+		return nil
 	}
 
 	return &models.Task{
 		TaskTypeConfigsMap: table.Task.TaskTypeConfigsMap, // Changed to match new field name
-	}, nil
+	}
 }
