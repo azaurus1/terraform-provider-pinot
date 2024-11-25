@@ -272,7 +272,7 @@ func convertUpsertConfig(ctx context.Context, table *pinot_api.Table) (*models.U
 	upsertConfig := models.UpsertConfig{
 		Mode:                         types.StringValue(table.UpsertConfig.Mode),
 		PartialUpsertStrategy:        partialUpsertStrategies,
-		MetadataTTL:                  types.Int64Value(table.UpsertConfig.MetadataTTL),
+		MetadataTTL:                  types.Int64Value(int64(table.UpsertConfig.MetadataTTL)),
 		DeletedKeysTTL:               types.Int64Value(int64(table.UpsertConfig.DeletedKeysTTL)),
 		HashFunction:                 types.StringValue(table.UpsertConfig.HashFunction),
 		EnableSnapshot:               types.BoolPointerValue(table.UpsertConfig.EnableSnapshot),
