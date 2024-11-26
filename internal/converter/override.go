@@ -90,7 +90,7 @@ func ToUpsertConfig(ctx context.Context, stateConfig *models.UpsertConfig) (*mod
 		Mode:                         stateConfig.Mode.ValueString(),
 		PartialUpsertStrategies:      partialUpsertStrategies,
 		DeleteRecordColumn:           stateConfig.DeletedRecordColumn.ValueString(),
-		MetadataTTL:                  stateConfig.MetadataTTL.ValueInt64(),
+		MetadataTTL:                  float64(stateConfig.MetadataTTL.ValueInt64()),
 		DeletedKeysTTL:               float64(stateConfig.DeletedKeysTTL.ValueInt64()),
 		HashFunction:                 stateConfig.HashFunction.ValueString(),
 		EnableSnapshot:               stateConfig.EnableSnapshot.ValueBoolPointer(),
