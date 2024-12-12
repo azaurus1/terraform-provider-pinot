@@ -27,7 +27,7 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	if state.TierConfigs != nil {
 		state.TierConfigs = convertTierConfigs(table)
 	}
-	
+
 	if state.Metadata != nil {
 		state.Metadata = convertMetadata(table)
 	}
