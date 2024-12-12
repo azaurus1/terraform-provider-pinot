@@ -24,9 +24,13 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		state.IngestionConfig = convertIngestionConfig(table)
 	}
 
-	state.TierConfigs = convertTierConfigs(table)
-	state.TierConfigs = convertTierConfigs(table)
-	state.Metadata = convertMetadata(table)
+	if state.TierConfigs != nil {
+		state.TierConfigs = convertTierConfigs(table)
+	}
+	
+	if state.Metadata != nil {
+		state.Metadata = convertMetadata(table)
+	}
 
 	tableIndexConfig, resultDiags := convertTableIndexConfig(ctx, table)
 	if resultDiags.HasError() {
