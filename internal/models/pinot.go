@@ -33,6 +33,7 @@ type SegmentsConfig struct {
 	RetentionTimeUnit              types.String `tfsdk:"retention_time_unit"`
 	RetentionTimeValue             types.String `tfsdk:"retention_time_value"`
 	DeletedSegmentsRetentionPeriod types.String `tfsdk:"deleted_segments_retention_period"`
+	SchemaName                     types.String `tfsdk:"schema_name"`
 }
 
 type UpsertConfig struct {
