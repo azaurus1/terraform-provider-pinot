@@ -192,6 +192,10 @@ func (d *tablesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 										Description: "The replication of the table.",
 										Computed:    true,
 									},
+									"schema_name": schema.StringAttribute{
+										Description: "The name of the used schema for table",
+										Computed:    true,
+									},
 									"time_column_name": schema.StringAttribute{
 										Description: "The time column name of the table.",
 										Computed:    true,
