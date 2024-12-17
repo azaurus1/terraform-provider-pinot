@@ -107,6 +107,7 @@ Read-Only:
 
 - `minimize_data_movement` (Boolean) The minimize data movement of the table.
 - `replication` (String) The replication of the table.
+- `schema_name` (String) The schema name of the table.
 - `segment_assignment_strategy` (String) The segment assignment strategy of the table.
 - `segment_push_type` (String) The segment push type of the table.
 - `time_column_name` (String) The time column name of the table.

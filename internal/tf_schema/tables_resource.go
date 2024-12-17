@@ -18,6 +18,10 @@ func SegmentsConfig() schema.SingleNestedAttribute {
 				Description: "The replicas per partition for the segments.",
 				Optional:    true,
 			},
+			"schema_name": schema.StringAttribute{
+				Description: "The name of the used schema for table",
+				Optional:    true,
+			},
 			"time_type": schema.StringAttribute{
 				Description: "The time type for the segments.",
 				Optional:    true,
