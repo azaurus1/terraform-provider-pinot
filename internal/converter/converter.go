@@ -239,6 +239,10 @@ func convertSegmentsConfig(table *pinot_api.Table) *models.SegmentsConfig {
 		segmentsConfig.ReplicasPerPartition = types.StringValue(table.SegmentsConfig.ReplicasPerPartition)
 	}
 
+	if table.SegmentsConfig.SchemaName != "" {
+		segmentsConfig.SchemaName = types.StringValue(table.SegmentsConfig.SchemaName)
+	}
+
 	if table.SegmentsConfig.DeletedSegmentsRetentionPeriod != "" {
 		segmentsConfig.DeletedSegmentsRetentionPeriod = types.StringValue(table.SegmentsConfig.DeletedSegmentsRetentionPeriod)
 	}

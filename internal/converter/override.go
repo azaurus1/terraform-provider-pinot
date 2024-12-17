@@ -310,6 +310,10 @@ func ToSegmentsConfig(plan *models.TableResourceModel) model.TableSegmentsConfig
 		segmentsConfig.ReplicasPerPartition = plan.SegmentsConfig.ReplicasPerPartition.ValueString()
 	}
 
+	if plan.SegmentsConfig.SchemaName.ValueString() != "" {
+		segmentsConfig.SchemaName = plan.SegmentsConfig.SchemaName.ValueString()
+	}
+
 	if plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString() != "" {
 		segmentsConfig.DeletedSegmentsRetentionPeriod = plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString()
 	}
