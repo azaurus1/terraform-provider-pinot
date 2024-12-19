@@ -28,10 +28,11 @@ func DimensionFieldSpecsFromFieldSpecs(fieldSpecs []model.FieldSpec) []dimension
 
 	for _, fieldSpec := range fieldSpecs {
 		dimensionFieldSpecs = append(dimensionFieldSpecs, dimensionFieldSpec{
-			Name:             fieldSpec.Name,
-			DataType:         fieldSpec.DataType,
-			NotNull:          basetypes.NewBoolPointerValue(fieldSpec.NotNull),
-			SingleValueField: basetypes.NewBoolPointerValue(fieldSpec.SingleValueField),
+			Name:              fieldSpec.Name,
+			DataType:          fieldSpec.DataType,
+			NotNull:           basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+			SingleValueField:  basetypes.NewBoolPointerValue(fieldSpec.SingleValueField),
+			TransformFunction: types.StringValue(fieldSpec.TransformFunction),
 		})
 	}
 
@@ -43,9 +44,10 @@ func MetricFieldSpecsFromFieldSpecs(fieldSpecs []model.FieldSpec) []metricFieldS
 
 	for _, fieldSpec := range fieldSpecs {
 		metricFieldSpecs = append(metricFieldSpecs, metricFieldSpec{
-			Name:     fieldSpec.Name,
-			DataType: fieldSpec.DataType,
-			NotNull:  basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+			Name:              fieldSpec.Name,
+			DataType:          fieldSpec.DataType,
+			NotNull:           basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+			TransformFunction: types.StringValue(fieldSpec.TransformFunction),
 		})
 	}
 
@@ -57,11 +59,12 @@ func DateTimeFieldSpecsFromFieldSpecs(fieldSpecs []model.FieldSpec) []dateTimeFi
 
 	for _, fieldSpec := range fieldSpecs {
 		dateTimeFieldSpecs = append(dateTimeFieldSpecs, dateTimeFieldSpec{
-			Name:        fieldSpec.Name,
-			DataType:    fieldSpec.DataType,
-			NotNull:     basetypes.NewBoolPointerValue(fieldSpec.NotNull),
-			Format:      fieldSpec.Format,
-			Granularity: fieldSpec.Granularity,
+			Name:              fieldSpec.Name,
+			DataType:          fieldSpec.DataType,
+			NotNull:           basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+			Format:            fieldSpec.Format,
+			Granularity:       fieldSpec.Granularity,
+			TransformFunction: types.StringValue(fieldSpec.TransformFunction),
 		})
 	}
 
@@ -146,7 +149,10 @@ func (d *schemasDataSource) Schema(_ context.Context, req datasource.SchemaReque
 										Description: "Whether the dimension is a single value field.",
 										Optional:    true,
 									},
-								},
+									"transform_function": schema.StringAttribute{
+										Description: "Transform function for specific field.",
+										Optional:    true,
+									}},
 							},
 						},
 						"metric_field_specs": schema.ListNestedAttribute{
@@ -164,6 +170,10 @@ func (d *schemasDataSource) Schema(_ context.Context, req datasource.SchemaReque
 									},
 									"not_null": schema.BoolAttribute{
 										Description: "Whether the dimension is not null.",
+										Optional:    true,
+									},
+									"transform_function": schema.StringAttribute{
+										Description: "Transform function for specific field.",
 										Optional:    true,
 									},
 								},
@@ -192,6 +202,10 @@ func (d *schemasDataSource) Schema(_ context.Context, req datasource.SchemaReque
 									},
 									"granularity": schema.StringAttribute{
 										Description: "The granularity of the date time.",
+										Optional:    true,
+									},
+									"transform_function": schema.StringAttribute{
+										Description: "Transform function for specific field.",
 										Optional:    true,
 									},
 								},
