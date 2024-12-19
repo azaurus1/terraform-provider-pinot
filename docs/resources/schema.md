@@ -21,6 +21,7 @@ resource "pinot_schema" "block_schema" {
     not_null    = false,
     format      = "1:MILLISECONDS:EPOCH",
     granularity = "1:MILLISECONDS",
+    transform_function = "ago('PT3H')"
   }]
   enable_column_based_null_handling = false
   dimension_field_specs = [{
@@ -31,7 +32,8 @@ resource "pinot_schema" "block_schema" {
     {
       name      = "block_hash",
       data_type = "STRING",
-      not_null  = true
+      not_null  = true,
+      transform_function = "jsonPathString(block, '$.block_hash')"
   }]
   metric_field_specs = [{
     name      = "block_difficulty",
@@ -69,6 +71,7 @@ Optional:
 - `format` (String) The format of the date time.
 - `granularity` (String) The granularity of the date time.
 - `not_null` (Boolean) Whether the dimension is not null.
+- `transform_function` (String) Transform function for specific field.
 
 
 <a id="nestedatt--dimension_field_specs"></a>
@@ -83,6 +86,7 @@ Optional:
 
 - `not_null` (Boolean) Whether the dimension is not null.
 - `single_value_field` (Boolean) Whether the dimension is a single value field.
+- `transform_function` (String) Transform function for specific field.
 
 
 <a id="nestedatt--metric_field_specs"></a>
@@ -96,3 +100,4 @@ Required:
 Optional:
 
 - `not_null` (Boolean) Whether the dimension is not null.
+- `transform_function` (String) Transform function for specific field.

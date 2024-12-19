@@ -29,24 +29,27 @@ func NewTableSchemaResource() resource.Resource {
 }
 
 type metricFieldSpec struct {
-	Name     string              `tfsdk:"name"`
-	DataType string              `tfsdk:"data_type"`
-	NotNull  basetypes.BoolValue `tfsdk:"not_null"`
+	Name              string              `tfsdk:"name"`
+	DataType          string              `tfsdk:"data_type"`
+	NotNull           basetypes.BoolValue `tfsdk:"not_null"`
+	TransformFunction types.String        `tfsdk:"transform_function"`
 }
 
 type dimensionFieldSpec struct {
-	Name             string              `tfsdk:"name"`
-	DataType         string              `tfsdk:"data_type"`
-	NotNull          basetypes.BoolValue `tfsdk:"not_null"`
-	SingleValueField basetypes.BoolValue `tfsdk:"single_value_field"`
+	Name              string              `tfsdk:"name"`
+	DataType          string              `tfsdk:"data_type"`
+	NotNull           basetypes.BoolValue `tfsdk:"not_null"`
+	SingleValueField  basetypes.BoolValue `tfsdk:"single_value_field"`
+	TransformFunction types.String        `tfsdk:"transform_function"`
 }
 
 type dateTimeFieldSpec struct {
-	Name        string              `tfsdk:"name"`
-	DataType    string              `tfsdk:"data_type"`
-	NotNull     basetypes.BoolValue `tfsdk:"not_null"`
-	Format      string              `tfsdk:"format"`
-	Granularity string              `tfsdk:"granularity"`
+	Name              string              `tfsdk:"name"`
+	DataType          string              `tfsdk:"data_type"`
+	NotNull           basetypes.BoolValue `tfsdk:"not_null"`
+	Format            string              `tfsdk:"format"`
+	Granularity       string              `tfsdk:"granularity"`
+	TransformFunction types.String        `tfsdk:"transform_function"`
 }
 
 type tableSchemaResourceModel struct {
@@ -112,6 +115,10 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 							Description: "Whether the dimension is a single value field.",
 							Optional:    true,
 						},
+						"transform_function": schema.StringAttribute{
+							Description: "Transform function for specific field.",
+							Optional:    true,
+						},
 					},
 				},
 			},
@@ -130,6 +137,10 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 						},
 						"not_null": schema.BoolAttribute{
 							Description: "Whether the dimension is not null.",
+							Optional:    true,
+						},
+						"transform_function": schema.StringAttribute{
+							Description: "Transform function for specific field.",
 							Optional:    true,
 						},
 					},
@@ -158,6 +169,10 @@ func (t *tableSchemaResource) Schema(_ context.Context, _ resource.SchemaRequest
 						},
 						"granularity": schema.StringAttribute{
 							Description: "The granularity of the date time.",
+							Optional:    true,
+						},
+						"transform_function": schema.StringAttribute{
+							Description: "Transform function for specific field.",
 							Optional:    true,
 						},
 					},
@@ -319,10 +334,11 @@ func toDimensionFieldSpecs(fieldSpecs []dimensionFieldSpec) []model.FieldSpec {
 	var pinotFieldSpecs []model.FieldSpec
 	for _, fs := range fieldSpecs {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
-			Name:             fs.Name,
-			DataType:         fs.DataType,
-			NotNull:          fs.NotNull.ValueBoolPointer(),
-			SingleValueField: fs.SingleValueField.ValueBoolPointer(),
+			Name:              fs.Name,
+			DataType:          fs.DataType,
+			NotNull:           fs.NotNull.ValueBoolPointer(),
+			SingleValueField:  fs.SingleValueField.ValueBoolPointer(),
+			TransformFunction: fs.TransformFunction.ValueString(),
 		})
 	}
 	return pinotFieldSpecs
@@ -333,9 +349,10 @@ func toMetricFieldSpecs(fieldSpecs []metricFieldSpec) []model.FieldSpec {
 	var pinotFieldSpecs []model.FieldSpec
 	for _, fs := range fieldSpecs {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
-			Name:     fs.Name,
-			DataType: fs.DataType,
-			NotNull:  fs.NotNull.ValueBoolPointer(),
+			Name:              fs.Name,
+			DataType:          fs.DataType,
+			NotNull:           fs.NotNull.ValueBoolPointer(),
+			TransformFunction: fs.TransformFunction.ValueString(),
 		})
 	}
 	return pinotFieldSpecs
@@ -345,11 +362,12 @@ func toDateTimeFieldSpecs(fieldSpecs []dateTimeFieldSpec) []model.FieldSpec {
 	var pinotFieldSpecs []model.FieldSpec
 	for _, fs := range fieldSpecs {
 		pinotFieldSpecs = append(pinotFieldSpecs, model.FieldSpec{
-			Name:        fs.Name,
-			DataType:    fs.DataType,
-			Format:      fs.Format,
-			Granularity: fs.Granularity,
-			NotNull:     fs.NotNull.ValueBoolPointer(),
+			Name:              fs.Name,
+			DataType:          fs.DataType,
+			Format:            fs.Format,
+			Granularity:       fs.Granularity,
+			NotNull:           fs.NotNull.ValueBoolPointer(),
+			TransformFunction: fs.TransformFunction.ValueString(),
 		})
 	}
 	return pinotFieldSpecs
@@ -360,30 +378,33 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 	dimensionFieldSpecs := make([]dimensionFieldSpec, len(schema.DimensionFieldSpecs))
 	for i, fs := range schema.DimensionFieldSpecs {
 		dimensionFieldSpecs[i] = dimensionFieldSpec{
-			Name:             fs.Name,
-			DataType:         fs.DataType,
-			NotNull:          basetypes.NewBoolPointerValue(fs.NotNull),
-			SingleValueField: basetypes.NewBoolPointerValue(fs.SingleValueField),
+			Name:              fs.Name,
+			DataType:          fs.DataType,
+			NotNull:           basetypes.NewBoolPointerValue(fs.NotNull),
+			SingleValueField:  basetypes.NewBoolPointerValue(fs.SingleValueField),
+			TransformFunction: types.StringValue(fs.TransformFunction),
 		}
 	}
 
 	metricFieldSpecs := make([]metricFieldSpec, len(schema.MetricFieldSpecs))
 	for i, fs := range schema.MetricFieldSpecs {
 		metricFieldSpecs[i] = metricFieldSpec{
-			Name:     fs.Name,
-			DataType: fs.DataType,
-			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
+			Name:              fs.Name,
+			DataType:          fs.DataType,
+			NotNull:           basetypes.NewBoolPointerValue(fs.NotNull),
+			TransformFunction: types.StringValue(fs.TransformFunction),
 		}
 	}
 
 	dateTimeFieldSpecs := make([]dateTimeFieldSpec, len(schema.DateTimeFieldSpecs))
 	for i, fs := range schema.DateTimeFieldSpecs {
 		dateTimeFieldSpecs[i] = dateTimeFieldSpec{
-			Name:        fs.Name,
-			DataType:    fs.DataType,
-			Format:      fs.Format,
-			Granularity: fs.Granularity,
-			NotNull:     basetypes.NewBoolPointerValue(fs.NotNull),
+			Name:              fs.Name,
+			DataType:          fs.DataType,
+			Format:            fs.Format,
+			Granularity:       fs.Granularity,
+			NotNull:           basetypes.NewBoolPointerValue(fs.NotNull),
+			TransformFunction: types.StringValue(fs.TransformFunction),
 		}
 	}
 

@@ -47,6 +47,7 @@ Optional:
 - `format` (String) The format of the date time.
 - `granularity` (String) The granularity of the date time.
 - `not_null` (Boolean) Whether the dimension is not null.
+- `transform_function` (String) Transform function for specific field.
 
 
 <a id="nestedatt--schemas--dimension_field_specs"></a>
@@ -61,6 +62,7 @@ Optional:
 
 - `not_null` (Boolean) Whether the dimension is not null.
 - `single_value_field` (Boolean) Whether the dimension is a single value field.
+- `transform_function` (String) Transform function for specific field.
 
 
 <a id="nestedatt--schemas--metric_field_specs"></a>
@@ -74,3 +76,4 @@ Required:
 Optional:
 
 - `not_null` (Boolean) Whether the dimension is not null.
+- `transform_function` (String) Transform function for specific field.
