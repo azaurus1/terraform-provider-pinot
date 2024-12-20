@@ -27,13 +27,16 @@ func DimensionFieldSpecsFromFieldSpecs(fieldSpecs []model.FieldSpec) []dimension
 	var dimensionFieldSpecs []dimensionFieldSpec
 
 	for _, fieldSpec := range fieldSpecs {
-		dimensionFieldSpecs = append(dimensionFieldSpecs, dimensionFieldSpec{
-			Name:              fieldSpec.Name,
-			DataType:          fieldSpec.DataType,
-			NotNull:           basetypes.NewBoolPointerValue(fieldSpec.NotNull),
-			SingleValueField:  basetypes.NewBoolPointerValue(fieldSpec.SingleValueField),
-			TransformFunction: types.StringValue(fieldSpec.TransformFunction),
-		})
+		dimensionFieldSpec := dimensionFieldSpec{
+			Name:             fieldSpec.Name,
+			DataType:         fieldSpec.DataType,
+			NotNull:          basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+			SingleValueField: basetypes.NewBoolPointerValue(fieldSpec.SingleValueField),
+		}
+		if fieldSpec.TransformFunction != "" {
+			dimensionFieldSpec.TransformFunction = basetypes.NewStringValue(fieldSpec.TransformFunction)
+		}
+		dimensionFieldSpecs = append(dimensionFieldSpecs, dimensionFieldSpec)
 	}
 
 	return dimensionFieldSpecs
@@ -43,12 +46,15 @@ func MetricFieldSpecsFromFieldSpecs(fieldSpecs []model.FieldSpec) []metricFieldS
 	var metricFieldSpecs []metricFieldSpec
 
 	for _, fieldSpec := range fieldSpecs {
-		metricFieldSpecs = append(metricFieldSpecs, metricFieldSpec{
-			Name:              fieldSpec.Name,
-			DataType:          fieldSpec.DataType,
-			NotNull:           basetypes.NewBoolPointerValue(fieldSpec.NotNull),
-			TransformFunction: types.StringValue(fieldSpec.TransformFunction),
-		})
+		metricFieldSpec := metricFieldSpec{
+			Name:     fieldSpec.Name,
+			DataType: fieldSpec.DataType,
+			NotNull:  basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+		}
+		if fieldSpec.TransformFunction != "" {
+			metricFieldSpec.TransformFunction = basetypes.NewStringValue(fieldSpec.TransformFunction)
+		}
+		metricFieldSpecs = append(metricFieldSpecs, metricFieldSpec)
 	}
 
 	return metricFieldSpecs
@@ -58,14 +64,17 @@ func DateTimeFieldSpecsFromFieldSpecs(fieldSpecs []model.FieldSpec) []dateTimeFi
 	var dateTimeFieldSpecs []dateTimeFieldSpec
 
 	for _, fieldSpec := range fieldSpecs {
-		dateTimeFieldSpecs = append(dateTimeFieldSpecs, dateTimeFieldSpec{
-			Name:              fieldSpec.Name,
-			DataType:          fieldSpec.DataType,
-			NotNull:           basetypes.NewBoolPointerValue(fieldSpec.NotNull),
-			Format:            fieldSpec.Format,
-			Granularity:       fieldSpec.Granularity,
-			TransformFunction: types.StringValue(fieldSpec.TransformFunction),
-		})
+		dateTimeFieldSpec := dateTimeFieldSpec{
+			Name:        fieldSpec.Name,
+			DataType:    fieldSpec.DataType,
+			NotNull:     basetypes.NewBoolPointerValue(fieldSpec.NotNull),
+			Format:      fieldSpec.Format,
+			Granularity: fieldSpec.Granularity,
+		}
+		if fieldSpec.TransformFunction != "" {
+			dateTimeFieldSpec.TransformFunction = basetypes.NewStringValue(fieldSpec.TransformFunction)
+		}
+		dateTimeFieldSpecs = append(dateTimeFieldSpecs, dateTimeFieldSpec)
 	}
 
 	return dateTimeFieldSpecs

@@ -29,27 +29,27 @@ func NewTableSchemaResource() resource.Resource {
 }
 
 type metricFieldSpec struct {
-	Name              string              `tfsdk:"name"`
-	DataType          string              `tfsdk:"data_type"`
-	NotNull           basetypes.BoolValue `tfsdk:"not_null"`
-	TransformFunction types.String        `tfsdk:"transform_function"`
+	Name              string                `tfsdk:"name"`
+	DataType          string                `tfsdk:"data_type"`
+	NotNull           basetypes.BoolValue   `tfsdk:"not_null"`
+	TransformFunction basetypes.StringValue `tfsdk:"transform_function"`
 }
 
 type dimensionFieldSpec struct {
-	Name              string              `tfsdk:"name"`
-	DataType          string              `tfsdk:"data_type"`
-	NotNull           basetypes.BoolValue `tfsdk:"not_null"`
-	SingleValueField  basetypes.BoolValue `tfsdk:"single_value_field"`
-	TransformFunction types.String        `tfsdk:"transform_function"`
+	Name              string                `tfsdk:"name"`
+	DataType          string                `tfsdk:"data_type"`
+	NotNull           basetypes.BoolValue   `tfsdk:"not_null"`
+	SingleValueField  basetypes.BoolValue   `tfsdk:"single_value_field"`
+	TransformFunction basetypes.StringValue `tfsdk:"transform_function"`
 }
 
 type dateTimeFieldSpec struct {
-	Name              string              `tfsdk:"name"`
-	DataType          string              `tfsdk:"data_type"`
-	NotNull           basetypes.BoolValue `tfsdk:"not_null"`
-	Format            string              `tfsdk:"format"`
-	Granularity       string              `tfsdk:"granularity"`
-	TransformFunction types.String        `tfsdk:"transform_function"`
+	Name              string                `tfsdk:"name"`
+	DataType          string                `tfsdk:"data_type"`
+	NotNull           basetypes.BoolValue   `tfsdk:"not_null"`
+	Format            string                `tfsdk:"format"`
+	Granularity       string                `tfsdk:"granularity"`
+	TransformFunction basetypes.StringValue `tfsdk:"transform_function"`
 }
 
 type tableSchemaResourceModel struct {
@@ -377,35 +377,44 @@ func setState(state *tableSchemaResourceModel, schema *model.Schema) {
 
 	dimensionFieldSpecs := make([]dimensionFieldSpec, len(schema.DimensionFieldSpecs))
 	for i, fs := range schema.DimensionFieldSpecs {
-		dimensionFieldSpecs[i] = dimensionFieldSpec{
-			Name:              fs.Name,
-			DataType:          fs.DataType,
-			NotNull:           basetypes.NewBoolPointerValue(fs.NotNull),
-			SingleValueField:  basetypes.NewBoolPointerValue(fs.SingleValueField),
-			TransformFunction: types.StringValue(fs.TransformFunction),
+		dimensionFieldSpec := dimensionFieldSpec{
+			Name:             fs.Name,
+			DataType:         fs.DataType,
+			NotNull:          basetypes.NewBoolPointerValue(fs.NotNull),
+			SingleValueField: basetypes.NewBoolPointerValue(fs.SingleValueField),
 		}
+		if fs.TransformFunction != "" {
+			dimensionFieldSpec.TransformFunction = basetypes.NewStringValue(fs.TransformFunction)
+		}
+		dimensionFieldSpecs[i] = dimensionFieldSpec
 	}
 
 	metricFieldSpecs := make([]metricFieldSpec, len(schema.MetricFieldSpecs))
 	for i, fs := range schema.MetricFieldSpecs {
-		metricFieldSpecs[i] = metricFieldSpec{
-			Name:              fs.Name,
-			DataType:          fs.DataType,
-			NotNull:           basetypes.NewBoolPointerValue(fs.NotNull),
-			TransformFunction: types.StringValue(fs.TransformFunction),
+		metricFieldSpec := metricFieldSpec{
+			Name:     fs.Name,
+			DataType: fs.DataType,
+			NotNull:  basetypes.NewBoolPointerValue(fs.NotNull),
 		}
+		if fs.TransformFunction != "" {
+			metricFieldSpec.TransformFunction = basetypes.NewStringValue(fs.TransformFunction)
+		}
+		metricFieldSpecs[i] = metricFieldSpec
 	}
 
 	dateTimeFieldSpecs := make([]dateTimeFieldSpec, len(schema.DateTimeFieldSpecs))
 	for i, fs := range schema.DateTimeFieldSpecs {
-		dateTimeFieldSpecs[i] = dateTimeFieldSpec{
-			Name:              fs.Name,
-			DataType:          fs.DataType,
-			Format:            fs.Format,
-			Granularity:       fs.Granularity,
-			NotNull:           basetypes.NewBoolPointerValue(fs.NotNull),
-			TransformFunction: types.StringValue(fs.TransformFunction),
+		dateTimeFieldSpec := dateTimeFieldSpec{
+			Name:        fs.Name,
+			DataType:    fs.DataType,
+			Format:      fs.Format,
+			Granularity: fs.Granularity,
+			NotNull:     basetypes.NewBoolPointerValue(fs.NotNull),
 		}
+		if fs.TransformFunction != "" {
+			dateTimeFieldSpec.TransformFunction = basetypes.NewStringValue(fs.TransformFunction)
+		}
+		dateTimeFieldSpecs[i] = dateTimeFieldSpec
 	}
 
 	state.SchemaName = types.StringValue(schema.SchemaName)
