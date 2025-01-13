@@ -30,6 +30,7 @@ description: |-
 - `routing` (Attributes) routing configuration for the table (see [below for nested schema](#nestedatt--routing))
 - `segments_config` (Attributes) The segments configuration for the table. (see [below for nested schema](#nestedatt--segments_config))
 - `table_index_config` (Attributes) The table index configuration for the table. (see [below for nested schema](#nestedatt--table_index_config))
+- `task` (Attributes) (see [below for nested schema](#nestedatt--task))
 - `tenants` (Attributes) The tenants configuration for the table. (see [below for nested schema](#nestedatt--tenants))
 - `tier_configs` (Attributes List) tier configurations for the table (see [below for nested schema](#nestedatt--tier_configs))
 - `upsert_config` (Attributes) The upsert configuration for the table. (see [below for nested schema](#nestedatt--upsert_config))
@@ -136,7 +137,6 @@ Required:
 
 - `replication` (String) The replication count for the segments.
 - `time_column_name` (String) The time column name for the segments.
-- `time_type` (String) The time type for the segments.
 
 Optional:
 
@@ -144,6 +144,8 @@ Optional:
 - `replicas_per_partition` (String) The replicas per partition for the segments.
 - `retention_time_unit` (String) The retention time unit for the segments.
 - `retention_time_value` (String) The retention time value for the segments.
+- `schema_name` (String) The name of the used schema for table
+- `time_type` (String) The time type for the segments.
 
 
 <a id="nestedatt--table_index_config"></a>
@@ -206,6 +208,14 @@ Required:
 
 
 
+<a id="nestedatt--task"></a>
+### Nested Schema for `task`
+
+Optional:
+
+- `task_type_configs_map` (Map of Map of String) The task configs for table
+
+
 <a id="nestedatt--tenants"></a>
 ### Nested Schema for `tenants`
 
@@ -242,7 +252,7 @@ Optional:
 - `hash_function` (String) The hash function for the table.
 - `metadata_manager_class` (String) The metadata manager class name for the table.
 - `metadata_manager_configs` (Map of String) The metadata manager configs for the table.
+- `metadata_ttl` (Number) The metadata ttl for the table.
 - `mode` (String) The upsert mode for the table.
 - `out_of_order_record_column` (String) The out of order record column for the table.
 - `partial_upsert_strategies` (Map of String) The partial upsert strategies for the table.
-- `upsert_ttl` (String) The metadata ttl for the table.
