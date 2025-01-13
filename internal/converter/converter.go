@@ -24,11 +24,11 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		state.IngestionConfig = convertIngestionConfig(table)
 	}
 
-	if state.TierConfigs != nil {
+	if table.TierConfigs != nil {
 		state.TierConfigs = convertTierConfigs(table)
 	}
 
-	if state.Metadata != nil {
+	if table.Metadata != nil {
 		state.Metadata = convertMetadata(table)
 	}
 
@@ -36,6 +36,7 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	if resultDiags.HasError() {
 		diags.Append(resultDiags...)
 	}
+	
 	state.TableIndexConfig = tableIndexConfig
 
 	// Routing Config
