@@ -36,7 +36,7 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 	if resultDiags.HasError() {
 		diags.Append(resultDiags...)
 	}
-
+	
 	state.TableIndexConfig = tableIndexConfig
 
 	// Routing Config
