@@ -42,6 +42,14 @@ func SegmentsConfig() schema.SingleNestedAttribute {
 				Description: "The deleted segments retention period for the segments.",
 				Optional:    true,
 			},
+			"completion_config": schema.SingleNestedAttribute{
+				Optional: true,
+				Attributes: map[string]schema.Attribute{
+					"completion_mode": schema.StringAttribute{
+						Optional: true,
+					},
+				},
+			},
 		},
 	}
 }
@@ -253,10 +261,354 @@ func IngestionConfig() schema.SingleNestedAttribute {
 				Description: "stream ingestion configurations",
 				Optional:    true,
 				Attributes: map[string]schema.Attribute{
-					"stream_config_maps": schema.ListAttribute{
+					"column_major_segment_builder_enabled": schema.BoolAttribute{
+						Optional: true,
+					},
+					"track_filtered_message_offsets": schema.BoolAttribute{
+						Optional: true,
+					},
+					"stream_config_maps": schema.ListNestedAttribute{
 						Description: "stream configuration",
 						Optional:    true,
-						ElementType: types.MapType{ElemType: types.StringType},
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"access_key": schema.StringAttribute{
+									Optional: true,
+								},
+								"authentication_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"key_serializer": schema.StringAttribute{
+									Optional: true,
+								},
+								"max_records_to_fetch": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_commit_timeout_seconds": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_autotune_initial_rows": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_desired_size": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_threshold_rows": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_threshold_time": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_threshold_segment_rows": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_threshold_segment_size": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_flush_threshold_segment_time": schema.StringAttribute{
+									Optional: true,
+								},
+								"realtime_segment_server_upload_to_deep_store": schema.StringAttribute{
+									Optional: true,
+								},
+								"region": schema.StringAttribute{
+									Optional: true,
+								},
+								"sasl_jaas_config": schema.StringAttribute{
+									Optional: true,
+								},
+								"sasl_mechanism": schema.StringAttribute{
+									Optional: true,
+								},
+								"secret_key": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"security_protocol": schema.StringAttribute{
+									Optional: true,
+								},
+								"shard_iterator_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"ssl_key_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"ssl_keystore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"ssl_keystore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"ssl_keystore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"ssl_truststore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"ssl_truststore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"ssl_truststore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_broker_list": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_buffer_size": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_consumer_factory_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_consumer_prop_auto_offset_reset": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_consumer_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_fetch_timeout_millis": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_connection_timeout_millis": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_basic_auth_credentials_source": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_descriptor_file": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_proto_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_format": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_basic_auth_user_info": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_basic_auth_credentials_source": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_rest_url": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_schema_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_keystore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_keystore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_keystore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_truststore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_truststore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_truststore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_decoder_prop_schema_registry_ssl_protocol": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_fetcher_min_bytes": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_fetcher_size": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_hlc_group_id": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_idle_timeout_millis": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_isolation_level": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_metadata_populate": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_schema_registry_url": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_socket_timeout": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_ssl_certificate_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_ssl_client_certificate": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_ssl_client_key": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_ssl_client_key_algorithm": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_ssl_server_certificate": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_topic_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kafka_zk_broker_url": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_consumer_factory_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_consumer_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_fetch_timeout_millis": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_basic_auth_user_info": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_basic_auth_credentials_source": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_rest_url": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_schema_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_keystore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_keystore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_keystore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_truststore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_truststore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_truststore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_decoder_prop_schema_registry_ssl_protocol": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_kinesis_topic_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_audience": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_authentication_token": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_pulsar_bootstrap_servers": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_creds_file_path": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_consumer_factory_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_consumer_prop_auto_offset_reset": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_consumer_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_class_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_fetch_timeout_millis": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_issuer_url": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_metadata_populate": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_metadata_fields": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_basic_auth_user_info": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_basic_auth_credentials_source": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_rest_url": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_schema_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_keystore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_keystore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_keystore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_truststore_location": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_truststore_password": schema.StringAttribute{
+									Optional:  true,
+									Sensitive: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_truststore_type": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_decoder_prop_schema_registry_ssl_protocol": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_tls_trust_certs_file_path": schema.StringAttribute{
+									Optional: true,
+								},
+								"stream_pulsar_topic_name": schema.StringAttribute{
+									Optional: true,
+								},
+								"topic_consumption_rate_limit": schema.StringAttribute{
+									Optional: true,
+								},
+								"value_serializer": schema.StringAttribute{
+									Optional: true,
+								},
+							},
+						},
 					},
 				},
 			},

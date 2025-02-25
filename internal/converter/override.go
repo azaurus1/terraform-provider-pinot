@@ -94,7 +94,7 @@ func ToUpsertConfig(ctx context.Context, stateConfig *models.UpsertConfig) (*mod
 		DeletedKeysTTL:               float64(stateConfig.DeletedKeysTTL.ValueInt64()),
 		HashFunction:                 stateConfig.HashFunction.ValueString(),
 		EnableSnapshot:               stateConfig.EnableSnapshot.ValueBoolPointer(),
-		EnablePreLoad:                stateConfig.EnablePreLoad.ValueBoolPointer(),
+		EnablePreload:                stateConfig.EnablePreLoad.ValueBoolPointer(),
 		DropOutOfOrderRecord:         stateConfig.DropOutOfOrderRecord.ValueBoolPointer(),
 		DefaultPartialUpsertStrategy: stateConfig.DefaultPartialUpsertStrategy.ValueString(),
 		MetadataManagerConfigs:       metadataManagerConfigs,
@@ -318,6 +318,12 @@ func ToSegmentsConfig(plan *models.TableResourceModel) model.TableSegmentsConfig
 		segmentsConfig.DeletedSegmentsRetentionPeriod = plan.SegmentsConfig.DeletedSegmentsRetentionPeriod.ValueString()
 	}
 
+	if plan.SegmentsConfig.CompletionConfig != nil && plan.SegmentsConfig.CompletionConfig.CompletionMode.ValueString() != "" {
+		segmentsConfig.CompletionConfig = &model.CompletionConfig{
+			CompletionMode: plan.SegmentsConfig.CompletionConfig.CompletionMode.ValueString(),
+		}
+	}
+
 	return segmentsConfig
 
 }
@@ -339,12 +345,9 @@ func ToIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionCon
 	}
 
 	ingestionConfig := model.TableIngestionConfig{
-		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBool(),
+		SegmentTimeValueCheck: plan.IngestionConfig.SegmentTimeValueCheck.ValueBoolPointer(),
 		RowTimeValueCheck:     plan.IngestionConfig.RowTimeValueCheck.ValueBool(),
 		ContinueOnError:       plan.IngestionConfig.ContinueOnError.ValueBool(),
-		StreamIngestionConfig: &model.StreamIngestionConfig{
-			StreamConfigMaps: plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps,
-		},
 	}
 
 	if plan.IngestionConfig.TransformConfigs != nil {
@@ -359,6 +362,130 @@ func ToIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionCon
 		}
 
 		ingestionConfig.TransformConfigs = transformConfigs
+	}
+
+	if plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps != nil {
+
+		var streamConfigs []model.StreamConfig
+
+		for _, streamConfig := range plan.IngestionConfig.StreamIngestionConfig.StreamConfigMaps {
+			streamConfigs = append(streamConfigs, model.StreamConfig{
+				AuthenticationType:                                               streamConfig.AuthenticationType.ValueString(),
+				StreamType:                                                       streamConfig.StreamType.ValueString(),
+				SslKeyPassword:                                                   streamConfig.SslKeyPassword.ValueString(),
+				RealtimeSegmentFlushThresholdRows:                                streamConfig.RealtimeSegmentFlushThresholdRows.ValueString(),
+				RealtimeSegmentFlushThresholdTime:                                streamConfig.RealtimeSegmentFlushThresholdTime.ValueString(),
+				RealtimeSegmentFlushThresholdSegmentRows:                         streamConfig.RealtimeSegmentFlushThresholdSegmentRows.ValueString(),
+				RealtimeSegmentFlushThresholdSegmentTime:                         streamConfig.RealtimeSegmentFlushThresholdSegmentTime.ValueString(),
+				RealtimeSegmentServerUploadToDeepStore:                           streamConfig.RealtimeSegmentServerUploadToDeepStore.ValueString(),
+				SecurityProtocol:                                                 streamConfig.SecurityProtocol.ValueString(),
+				SslKeystoreLocation:                                              streamConfig.SslKeystoreLocation.ValueString(),
+				SslKeystorePassword:                                              streamConfig.SslKeyPassword.ValueString(),
+				SslTruststoreLocation:                                            streamConfig.SslTruststoreLocation.ValueString(),
+				SslTruststorePassword:                                            streamConfig.SslTruststorePassword.ValueString(),
+				StreamKafkaBrokerList:                                            streamConfig.StreamKafkaBrokerList.ValueString(),
+				StreamKafkaConsumerFactoryClassName:                              streamConfig.StreamKafkaConsumerFactoryClassName.ValueString(),
+				StreamKafkaConsumerPropAutoOffsetReset:                           streamConfig.StreamKafkaConsumerPropAutoOffsetReset.ValueString(),
+				StreamKafkaConsumerType:                                          streamConfig.StreamKafkaConsumerType.ValueString(),
+				StreamKafkaDecoderClassName:                                      streamConfig.StreamKafkaDecoderClassName.ValueString(),
+				StreamKafkaDecoderPropDescriptorFile:                             streamConfig.StreamKafkaDecoderPropDescriptorFile.ValueString(),
+				StreamKafkaDecoderPropProtoClassName:                             streamConfig.StreamKafkaDecoderPropProtoClassName.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistryRestUrl:                      streamConfig.StreamKafkaDecoderPropSchemaRegistryRestUrl.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySchemaName:                   streamConfig.StreamKafkaDecoderPropSchemaRegistrySchemaName.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslTruststoreLocation:        streamConfig.StreamKafkaDecoderPropSchemaRegistrySslTruststoreLocation.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslTruststorePassword:        streamConfig.StreamKafkaDecoderPropSchemaRegistrySslTruststorePassword.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslTruststoreType:            streamConfig.StreamKafkaDecoderPropSchemaRegistrySslTruststoreType.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslProtocol:                  streamConfig.StreamKafkaDecoderPropSchemaRegistrySslProtocol.ValueString(),
+				StreamKafkaMetadataPopulate:                                      streamConfig.StreamKafkaMetadataPopulate.ValueString(),
+				StreamKafkaTopicName:                                             streamConfig.StreamKafkaTopicName.ValueString(),
+				AccessKey:                                                        streamConfig.AccessKey.ValueString(),
+				KeySerializer:                                                    streamConfig.KeySerializer.ValueString(),
+				MaxRecordsToFetch:                                                streamConfig.MaxRecordsToFetch.ValueString(),
+				RealtimeSegmentCommitTimeoutSeconds:                              streamConfig.RealtimeSegmentCommitTimeoutSeconds.ValueString(),
+				RealtimeSegmentFlushAutotuneInitialRows:                          streamConfig.RealtimeSegmentFlushAutotuneInitialRows.ValueString(),
+				RealtimeSegmentFlushDesiredSize:                                  streamConfig.RealtimeSegmentFlushDesiredSize.ValueString(),
+				RealtimeSegmentFlushThresholdSegmentSize:                         streamConfig.RealtimeSegmentFlushThresholdSegmentSize.ValueString(),
+				Region:                                                           streamConfig.Region.ValueString(),
+				SaslJaasConfig:                                                   streamConfig.SaslJaasConfig.ValueString(),
+				SaslMechanism:                                                    streamConfig.SaslMechanism.ValueString(),
+				SecretKey:                                                        streamConfig.SecretKey.ValueString(),
+				ShardIteratorType:                                                streamConfig.ShardIteratorType.ValueString(),
+				SslKeystoreType:                                                  streamConfig.SslKeystoreType.ValueString(),
+				SslTruststoreType:                                                streamConfig.SslTruststoreType.ValueString(),
+				StreamKafkaBufferSize:                                            streamConfig.StreamKafkaBufferSize.ValueString(),
+				StreamKafkaFetchTimeoutMillis:                                    streamConfig.StreamKafkaFetchTimeoutMillis.ValueString(),
+				StreamKafkaConnectionTimeoutMillis:                               streamConfig.StreamKafkaConnectionTimeoutMillis.ValueString(),
+				StreamKafkaDecoderPropBasicAuthCredentialsSource:                 streamConfig.StreamKafkaDecoderPropBasicAuthCredentialsSource.ValueString(),
+				StreamKafkaDecoderPropFormat:                                     streamConfig.StreamKafkaDecoderPropFormat.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistryBasicAuthUserInfo:            streamConfig.StreamKafkaDecoderPropSchemaRegistryBasicAuthUserInfo.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistryBasicAuthCredentialsSource:   streamConfig.StreamKafkaDecoderPropSchemaRegistryBasicAuthCredentialsSource.ValueString(),
+				StreamKafkaFetcherMinBytes:                                       streamConfig.StreamKafkaFetcherMinBytes.ValueString(),
+				StreamKafkaFetcherSize:                                           streamConfig.StreamKafkaFetcherSize.ValueString(),
+				StreamKafkaHlcGroupId:                                            streamConfig.StreamKafkaHlcGroupId.ValueString(),
+				StreamKafkaIdleTimeoutMillis:                                     streamConfig.StreamKafkaIdleTimeoutMillis.ValueString(),
+				StreamKafkaIsolationLevel:                                        streamConfig.StreamKafkaIsolationLevel.ValueString(),
+				StreamKafkaSchemaRegistryUrl:                                     streamConfig.StreamKafkaSchemaRegistryUrl.ValueString(),
+				StreamKafkaSocketTimeout:                                         streamConfig.StreamKafkaSocketTimeout.ValueString(),
+				StreamKafkaSslCertificateType:                                    streamConfig.StreamKafkaSslCertificateType.ValueString(),
+				StreamKafkaSslClientCertificate:                                  streamConfig.StreamKafkaSslClientCertificate.ValueString(),
+				StreamKafkaSslClientKey:                                          streamConfig.StreamKafkaSslClientKey.ValueString(),
+				StreamKafkaSslClientKeyAlgorithm:                                 streamConfig.StreamKafkaSslClientKeyAlgorithm.ValueString(),
+				StreamKafkaSslServerCertificate:                                  streamConfig.StreamKafkaSslServerCertificate.ValueString(),
+				StreamKinesisConsumerFactoryClassName:                            streamConfig.StreamKinesisConsumerFactoryClassName.ValueString(),
+				StreamKinesisConsumerType:                                        streamConfig.StreamKinesisConsumerType.ValueString(),
+				StreamKinesisDecoderClassName:                                    streamConfig.StreamKinesisDecoderClassName.ValueString(),
+				StreamKinesisFetchTimeoutMillis:                                  streamConfig.StreamKinesisFetchTimeoutMillis.ValueString(),
+				StreamKinesisTopicName:                                           streamConfig.StreamKinesisTopicName.ValueString(),
+				TopicConsumptionRateLimit:                                        streamConfig.TopicConsumptionRateLimit.ValueString(),
+				ValueSerializer:                                                  streamConfig.ValueSerializer.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslKeystoreLocation:          streamConfig.StreamKafkaDecoderPropSchemaRegistrySslKeystoreLocation.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslKeystorePassword:          streamConfig.StreamKafkaDecoderPropSchemaRegistrySslKeystorePassword.ValueString(),
+				StreamKafkaDecoderPropSchemaRegistrySslKeystoreType:              streamConfig.StreamKafkaDecoderPropSchemaRegistrySslKeystoreType.ValueString(),
+				StreamKafkaZkBrokerUrl:                                           streamConfig.StreamKafkaZkBrokerUrl.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistryBasicAuthUserInfo:          streamConfig.StreamKinesisDecoderPropSchemaRegistryBasicAuthUserInfo.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistryBasicAuthCredentialsSource: streamConfig.StreamKinesisDecoderPropSchemaRegistryBasicAuthCredentialsSource.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistryRestUrl:                    streamConfig.StreamKinesisDecoderPropSchemaRegistryRestUrl.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySchemaName:                 streamConfig.StreamKinesisDecoderPropSchemaRegistrySchemaName.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslKeystoreLocation:        streamConfig.StreamKinesisDecoderPropSchemaRegistrySslKeystoreLocation.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslKeystorePassword:        streamConfig.StreamKinesisDecoderPropSchemaRegistrySslKeystorePassword.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslKeystoreType:            streamConfig.StreamKinesisDecoderPropSchemaRegistrySslKeystoreType.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslTruststoreLocation:      streamConfig.StreamKinesisDecoderPropSchemaRegistrySslTruststoreLocation.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslTruststorePassword:      streamConfig.StreamKinesisDecoderPropSchemaRegistrySslTruststorePassword.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslTruststoreType:          streamConfig.StreamKinesisDecoderPropSchemaRegistrySslTruststoreType.ValueString(),
+				StreamKinesisDecoderPropSchemaRegistrySslProtocol:                streamConfig.StreamKinesisDecoderPropSchemaRegistrySslProtocol.ValueString(),
+				StreamPulsarAudience:                                             streamConfig.StreamPulsarAudience.ValueString(),
+				StreamPulsarAuthenticationToken:                                  streamConfig.StreamPulsarAuthenticationToken.ValueString(),
+				StreamPulsarBootstrapServers:                                     streamConfig.StreamPulsarBootstrapServers.ValueString(),
+				StreamPulsarCredsFilePath:                                        streamConfig.StreamPulsarCredsFilePath.ValueString(),
+				StreamPulsarConsumerFactoryClassName:                             streamConfig.StreamPulsarConsumerFactoryClassName.ValueString(),
+				StreamPulsarConsumerPropAutoOffsetReset:                          streamConfig.StreamPulsarConsumerPropAutoOffsetReset.ValueString(),
+				StreamPulsarConsumerType:                                         streamConfig.StreamPulsarConsumerType.ValueString(),
+				StreamPulsarDecoderClassName:                                     streamConfig.StreamPulsarDecoderClassName.ValueString(),
+				StreamPulsarFetchTimeoutMillis:                                   streamConfig.StreamPulsarFetchTimeoutMillis.ValueString(),
+				StreamPulsarIssuerUrl:                                            streamConfig.StreamPulsarIssuerUrl.ValueString(),
+				StreamPulsarMetadataPopulate:                                     streamConfig.StreamPulsarMetadataPopulate.ValueString(),
+				StreamPulsarMetadataFields:                                       streamConfig.StreamPulsarMetadataFields.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistryBasicAuthUserInfo:           streamConfig.StreamPulsarDecoderPropSchemaRegistryBasicAuthUserInfo.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistryBasicAuthCredentialsSource:  streamConfig.StreamPulsarDecoderPropSchemaRegistryBasicAuthCredentialsSource.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistryRestUrl:                     streamConfig.StreamPulsarDecoderPropSchemaRegistryRestUrl.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySchemaName:                  streamConfig.StreamPulsarDecoderPropSchemaRegistrySchemaName.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslKeystoreLocation:         streamConfig.StreamPulsarDecoderPropSchemaRegistrySslKeystoreLocation.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslKeystorePassword:         streamConfig.StreamPulsarDecoderPropSchemaRegistrySslKeystorePassword.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslKeystoreType:             streamConfig.StreamPulsarDecoderPropSchemaRegistrySslKeystoreType.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslTruststoreLocation:       streamConfig.StreamPulsarDecoderPropSchemaRegistrySslTruststoreLocation.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslTruststorePassword:       streamConfig.StreamPulsarDecoderPropSchemaRegistrySslTruststorePassword.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslTruststoreType:           streamConfig.StreamPulsarDecoderPropSchemaRegistrySslTruststoreType.ValueString(),
+				StreamPulsarDecoderPropSchemaRegistrySslProtocol:                 streamConfig.StreamPulsarDecoderPropSchemaRegistrySslProtocol.ValueString(),
+				StreamPulsarTlsTrustCertsFilePath:                                streamConfig.StreamPulsarTlsTrustCertsFilePath.ValueString(),
+				StreamPulsarTopicName:                                            streamConfig.StreamPulsarTopicName.ValueString(),
+			})
+		}
+
+		ingestionConfig.StreamIngestionConfig = &model.StreamIngestionConfig{
+			ColumnMajorSegmentBuilderEnabled: plan.IngestionConfig.StreamIngestionConfig.ColumnMajorSegmentBuilderEnabled.ValueBoolPointer(),
+			TrackFilteredMessageOffsets:      plan.IngestionConfig.StreamIngestionConfig.TrackFilteredMessageOffsets.ValueBoolPointer(),
+			StreamConfigMaps:                 streamConfigs,
+		}
 	}
 
 	if plan.IngestionConfig.FilterConfig != nil {
