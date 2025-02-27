@@ -150,7 +150,7 @@ type StreamIngestionConfig struct {
 
 type StreamConfig struct {
 	AccessKey                                                        types.String `tfsdk:"access_key"`
-	AuthenticationType                                               types.String `tf_sdk:"authentication_type"`
+	AuthenticationType                                               types.String `tfsdk:"authentication_type"`
 	KeySerializer                                                    types.String `tfsdk:"key_serializer"`
 	MaxRecordsToFetch                                                types.String `tfsdk:"max_records_to_fetch"`
 	RealtimeSegmentCommitTimeoutSeconds                              types.String `tfsdk:"realtime_segment_commit_timeout_seconds"`
