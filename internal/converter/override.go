@@ -380,7 +380,7 @@ func ToIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionCon
 				RealtimeSegmentServerUploadToDeepStore:                           streamConfig.RealtimeSegmentServerUploadToDeepStore.ValueString(),
 				SecurityProtocol:                                                 streamConfig.SecurityProtocol.ValueString(),
 				SslKeystoreLocation:                                              streamConfig.SslKeystoreLocation.ValueString(),
-				SslKeystorePassword:                                              streamConfig.SslKeyPassword.ValueString(),
+				SslKeystorePassword:                                              streamConfig.SslKeystorePassword.ValueString(),
 				SslTruststoreLocation:                                            streamConfig.SslTruststoreLocation.ValueString(),
 				SslTruststorePassword:                                            streamConfig.SslTruststorePassword.ValueString(),
 				StreamKafkaBrokerList:                                            streamConfig.StreamKafkaBrokerList.ValueString(),

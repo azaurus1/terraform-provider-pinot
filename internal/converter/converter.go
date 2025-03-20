@@ -127,7 +127,7 @@ func convertIngestionConfig(table *pinot_api.Table) *models.IngestionConfig {
 				RealtimeSegmentServerUploadToDeepStore:                           types.StringValue(streamConfig.RealtimeSegmentServerUploadToDeepStore),
 				SecurityProtocol:                                                 types.StringValue(streamConfig.SecurityProtocol),
 				SslKeystoreLocation:                                              types.StringValue(streamConfig.SslKeystoreLocation),
-				SslKeystorePassword:                                              types.StringValue(streamConfig.SslKeyPassword),
+				SslKeystorePassword:                                              types.StringValue(streamConfig.SslKeystorePassword),
 				SslTruststoreLocation:                                            types.StringValue(streamConfig.SslTruststoreLocation),
 				SslTruststorePassword:                                            types.StringValue(streamConfig.SslTruststorePassword),
 				StreamKafkaBrokerList:                                            types.StringValue(streamConfig.StreamKafkaBrokerList),
