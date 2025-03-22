@@ -42,6 +42,18 @@ func SegmentsConfig() schema.SingleNestedAttribute {
 				Description: "The deleted segments retention period for the segments.",
 				Optional:    true,
 			},
+			"peer_segment_download_scheme": schema.StringAttribute{
+				Description: "",
+				Optional:    true,
+			},
+			"segment_push_type": schema.StringAttribute{
+				Description: "",
+				Optional:    true,
+			},
+			"minimize_data_movement": schema.BoolAttribute{
+				Description: "",
+				Optional:    true,
+			},
 			"completion_config": schema.SingleNestedAttribute{
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
@@ -115,6 +127,10 @@ func TableIndexConfig() schema.SingleNestedAttribute {
 				Description: "The optimize dictionary for metrics for the table.",
 				Optional:    true,
 			},
+			"auto_generated_inverted_index": schema.BoolAttribute{
+				Description: "",
+				Optional:    true,
+			},
 			"no_dictionary_size_ratio_threshold": schema.Float64Attribute{
 				Description: "The no dictionary size ration threshold for the table.",
 				Optional:    true,
@@ -166,6 +182,16 @@ func TableIndexConfig() schema.SingleNestedAttribute {
 			},
 			"bloom_filter_columns": schema.ListAttribute{
 				Description: "The bloom filter columns for the table.",
+				Optional:    true,
+				ElementType: types.StringType,
+			},
+			"inverted_index_columns": schema.ListAttribute{
+				Description: "The inverted index columns for the table.",
+				Optional:    true,
+				ElementType: types.StringType,
+			},
+			"json_index_columns": schema.ListAttribute{
+				Description: "The json index columns for the table.",
 				Optional:    true,
 				ElementType: types.StringType,
 			},
