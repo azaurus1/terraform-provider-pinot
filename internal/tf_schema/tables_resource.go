@@ -79,10 +79,19 @@ func Tenants() schema.SingleNestedAttribute {
 				Description: "The server for the tenants.",
 				Optional:    true,
 			},
-			"tag_override_config": schema.MapAttribute{
+			"tag_override_config": schema.SingleNestedAttribute{
 				Description: "The tag override config for the tenants.",
 				Optional:    true,
-				ElementType: types.StringType,
+				Attributes: map[string]schema.Attribute{
+					"realtime_consuming": schema.StringAttribute{
+						Description: "",
+						Optional:    true,
+					},
+					"realtime_completed": schema.StringAttribute{
+						Description: "",
+						Optional:    true,
+					},
+				},
 			},
 		},
 	}
@@ -846,6 +855,91 @@ func TaskConfig() schema.SingleNestedAttribute {
 				ElementType: types.MapType{
 					ElemType: types.StringType,
 				},
+			},
+		},
+	}
+}
+
+func InstanceAssignmentConfigMap() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "",
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			"consuming": InstanceAssignment(),
+			"completed": InstanceAssignment(),
+			"offline":   InstanceAssignment(),
+		},
+	}
+}
+
+func InstanceAssignment() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "",
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			"tag_pool_config": schema.SingleNestedAttribute{
+				Description: "",
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					"tag": schema.StringAttribute{
+						Description: "",
+						Optional:    true,
+					},
+					"pool_based": schema.BoolAttribute{
+						Description: "",
+						Optional:    true,
+					},
+					"num_pools": schema.Int64Attribute{
+						Description: "",
+						Optional:    true,
+					},
+				},
+			},
+			"replica_group_partition_config": schema.SingleNestedAttribute{
+				Description: "",
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					"replica_group_based": schema.BoolAttribute{
+						Description: "",
+						Optional:    true,
+					},
+					"num_instances": schema.Int64Attribute{
+						Description: "",
+						Optional:    true,
+					},
+					"num_replica_groups": schema.Int64Attribute{
+						Description: "",
+						Optional:    true,
+					},
+					"num_instances_per_replica_group": schema.Int64Attribute{
+						Description: "",
+						Optional:    true,
+					},
+					"num_partitions": schema.Int64Attribute{
+						Description: "",
+						Optional:    true,
+					},
+					"num_instances_per_partition": schema.Int64Attribute{
+						Description: "",
+						Optional:    true,
+					},
+					"partition_column": schema.StringAttribute{
+						Description: "",
+						Optional:    true,
+					},
+					"minimize_data_movement": schema.BoolAttribute{
+						Description: "",
+						Optional:    true,
+					},
+				},
+			},
+			"partition_selector": schema.StringAttribute{
+				Description: "",
+				Optional:    true,
+			},
+			"minimize_data_movement": schema.BoolAttribute{
+				Description: "",
+				Optional:    true,
 			},
 		},
 	}

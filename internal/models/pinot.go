@@ -3,26 +3,32 @@ package models
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
 type TableResourceModel struct {
-	TableName        types.String      `tfsdk:"table_name"`
-	Table            types.String      `tfsdk:"table"`
-	TableType        types.String      `tfsdk:"table_type"`
-	SegmentsConfig   *SegmentsConfig   `tfsdk:"segments_config"`
-	TenantsConfig    *TenantsConfig    `tfsdk:"tenants"`
-	TableIndexConfig *TableIndexConfig `tfsdk:"table_index_config"`
-	UpsertConfig     *UpsertConfig     `tfsdk:"upsert_config"`
-	IngestionConfig  *IngestionConfig  `tfsdk:"ingestion_config"`
-	TierConfigs      []*TierConfig     `tfsdk:"tier_configs"`
-	IsDimTable       types.Bool        `tfsdk:"is_dim_table"`
-	Metadata         *Metadata         `tfsdk:"metadata"`
-	FieldConfigList  []*FieldConfig    `tfsdk:"field_config_list"`
-	Routing          *RoutingConfig    `tfsdk:"routing"`
-	Task             *Task             `tfsdk:"task"`
+	TableName                   types.String                 `tfsdk:"table_name"`
+	Table                       types.String                 `tfsdk:"table"`
+	TableType                   types.String                 `tfsdk:"table_type"`
+	SegmentsConfig              *SegmentsConfig              `tfsdk:"segments_config"`
+	TenantsConfig               *TenantsConfig               `tfsdk:"tenants"`
+	TableIndexConfig            *TableIndexConfig            `tfsdk:"table_index_config"`
+	UpsertConfig                *UpsertConfig                `tfsdk:"upsert_config"`
+	IngestionConfig             *IngestionConfig             `tfsdk:"ingestion_config"`
+	TierConfigs                 []*TierConfig                `tfsdk:"tier_configs"`
+	IsDimTable                  types.Bool                   `tfsdk:"is_dim_table"`
+	Metadata                    *Metadata                    `tfsdk:"metadata"`
+	FieldConfigList             []*FieldConfig               `tfsdk:"field_config_list"`
+	Routing                     *RoutingConfig               `tfsdk:"routing"`
+	Task                        *Task                        `tfsdk:"task"`
+	InstanceAssignmentConfigMap *InstanceAssignmentConfigMap `tfsdk:"instance_assignment_config_map"`
 }
 
 type TenantsConfig struct {
-	Broker            types.String   `tfsdk:"broker"`
-	Server            types.String   `tfsdk:"server"`
-	TagOverrideConfig *types.MapType `tfsdk:"tag_override_config"`
+	Broker            types.String             `tfsdk:"broker"`
+	Server            types.String             `tfsdk:"server"`
+	TagOverrideConfig *TenantTagOverrideConfig `tfsdk:"tag_override_config"`
+}
+
+type TenantTagOverrideConfig struct {
+	RealtimeConsuming types.String `tfsdk:"realtime_consuming"`
+	RealtimeCompleted types.String `tfsdk:"realtime_completed"`
 }
 
 type SegmentsConfig struct {
@@ -279,4 +285,34 @@ type Metadata struct {
 
 type Task struct {
 	TaskTypeConfigsMap map[string]map[string]string `tfsdk:"task_type_configs_map"` // Changed from TaskTypeConfigMap
+}
+
+type InstanceAssignmentConfigMap struct {
+	Consuming *InstanceAssignment `tfsdk:"consuming"`
+	Completed *InstanceAssignment `tfsdk:"completed"`
+	Offline   *InstanceAssignment `tfsdk:"offline"`
+}
+
+type InstanceAssignment struct {
+	TagPoolConfig               *TagPoolConfigInstanceAssignment         `tfsdk:"tag_pool_config"`
+	ReplicaGroupPartitionConfig *ReplicaGroupPartitionInstanceAssignment `tfsdk:"replica_group_partition_config"`
+	PartitionSelector           types.String                             `tfsdk:"partition_selector"`
+	MinimizeDataMovement        types.Bool                               `tfsdk:"minimize_data_movement"`
+}
+
+type TagPoolConfigInstanceAssignment struct {
+	Tag       types.String `tfsdk:"tag"`
+	PoolBased types.Bool   `tfsdk:"pool_based"`
+	NumPools  types.Int64  `tfsdk:"num_pools"`
+}
+
+type ReplicaGroupPartitionInstanceAssignment struct {
+	ReplicaGroupBased           types.Bool   `tfsdk:"replica_group_based"`
+	NumInstances                types.Int64  `tfsdk:"num_instances"`
+	NumReplicaGroups            types.Int64  `tfsdk:"num_replica_groups"`
+	NumInstancesPerReplicaGroup types.Int64  `tfsdk:"num_instances_per_replica_group"`
+	NumPartitions               types.Int64  `tfsdk:"num_partitions"`
+	NumInstancesPerPartitions   types.Int64  `tfsdk:"num_instances_per_partition"`
+	PartitionColumn             types.String `tfsdk:"partition_column"`
+	MinimizeDataMovement        types.Bool   `tfsdk:"minimize_data_movement"`
 }
