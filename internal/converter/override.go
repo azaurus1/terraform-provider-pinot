@@ -67,6 +67,10 @@ func ToTable(plan *models.TableResourceModel) (*model.Table, diag.Diagnostics) {
 		table.Task = ToTask(plan.Task)
 	}
 
+	if plan.InstanceAssignmentConfigMap != nil {
+		table.InstanceAssignmentConfigMap = ToInstanceAssignmentConfigMap(plan.InstanceAssignmentConfigMap)
+	}
+
 	return &table, diags
 }
 
@@ -542,9 +546,19 @@ func ToTierConfigs(plan *models.TableResourceModel) []*model.TierConfig {
 }
 
 func ToTenantsConfig(plan *models.TableResourceModel) model.TableTenant {
+	var tagOverrideConfig *model.TenantTagOverrideConfig
+
+	if plan.TenantsConfig.TagOverrideConfig != nil {
+		tagOverrideConfig = &model.TenantTagOverrideConfig{
+			RealtimeConsuming: plan.TenantsConfig.TagOverrideConfig.RealtimeConsuming.ValueString(),
+			RealtimeCompleted: plan.TenantsConfig.TagOverrideConfig.RealtimeCompleted.ValueString(),
+		}
+	}
+
 	return model.TableTenant{
-		Broker: plan.TenantsConfig.Broker.ValueString(),
-		Server: plan.TenantsConfig.Server.ValueString(),
+		Broker:            plan.TenantsConfig.Broker.ValueString(),
+		Server:            plan.TenantsConfig.Server.ValueString(),
+		TagOverrideConfig: tagOverrideConfig,
 	}
 }
 
@@ -584,4 +598,72 @@ func convertValuesToString(m map[string]types.String) map[string]string {
 		res[k] = v.ValueString()
 	}
 	return res
+}
+
+func ToInstanceAssignmentConfigMap(instance *models.InstanceAssignmentConfigMap) *model.InstanceAssignmentConfigMap {
+
+	if instance == nil {
+		return nil
+	}
+
+	var consumingInstanceAssingment *model.InstanceAssignment
+	if instance.Consuming != nil {
+		consumingInstanceAssingment = &model.InstanceAssignment{
+			TagPoolConfig:               ToTagPoolConfigInstanceAssignment(instance.Consuming),
+			ReplicaGroupPartitionConfig: ToReplicaGroupPartitionConfig(instance.Consuming),
+			PartitionSelector:           instance.Consuming.PartitionSelector.ValueString(),
+			MinimizeDataMovement:        instance.Consuming.MinimizeDataMovement.ValueBool(),
+		}
+	}
+	var completedInstanceAssingment *model.InstanceAssignment
+	if instance.Completed != nil {
+		completedInstanceAssingment = &model.InstanceAssignment{
+			TagPoolConfig:               ToTagPoolConfigInstanceAssignment(instance.Completed),
+			ReplicaGroupPartitionConfig: ToReplicaGroupPartitionConfig(instance.Completed),
+			PartitionSelector:           instance.Completed.PartitionSelector.ValueString(),
+			MinimizeDataMovement:        instance.Completed.MinimizeDataMovement.ValueBool(),
+		}
+	}
+	var offlineInstanceAssingment *model.InstanceAssignment
+	if instance.Offline != nil {
+		offlineInstanceAssingment = &model.InstanceAssignment{
+			TagPoolConfig:               ToTagPoolConfigInstanceAssignment(instance.Offline),
+			ReplicaGroupPartitionConfig: ToReplicaGroupPartitionConfig(instance.Offline),
+			PartitionSelector:           instance.Offline.PartitionSelector.ValueString(),
+			MinimizeDataMovement:        instance.Offline.MinimizeDataMovement.ValueBool(),
+		}
+	}
+
+	return &model.InstanceAssignmentConfigMap{
+		Consuming: consumingInstanceAssingment,
+		Completed: completedInstanceAssingment,
+		Offline:   offlineInstanceAssingment,
+	}
+}
+
+func ToTagPoolConfigInstanceAssignment(instance *models.InstanceAssignment) *model.TagPoolConfigInstanceAssignment {
+	if instance.TagPoolConfig == nil {
+		return nil
+	}
+	return &model.TagPoolConfigInstanceAssignment{
+		Tag:       instance.TagPoolConfig.Tag.ValueString(),
+		NumPools:  instance.TagPoolConfig.NumPools.ValueInt64(),
+		PoolBased: instance.TagPoolConfig.PoolBased.ValueBool(),
+	}
+}
+
+func ToReplicaGroupPartitionConfig(instance *models.InstanceAssignment) *model.ReplicaGroupPartitionInstanceAssignment {
+	if instance.ReplicaGroupPartitionConfig == nil {
+		return nil
+	}
+	return &model.ReplicaGroupPartitionInstanceAssignment{
+		ReplicaGroupBased:           instance.ReplicaGroupPartitionConfig.ReplicaGroupBased.ValueBool(),
+		NumInstances:                instance.ReplicaGroupPartitionConfig.NumInstances.ValueInt64(),
+		NumReplicaGroups:            instance.ReplicaGroupPartitionConfig.NumReplicaGroups.ValueInt64(),
+		NumInstancesPerReplicaGroup: instance.ReplicaGroupPartitionConfig.NumInstancesPerReplicaGroup.ValueInt64(),
+		NumPartitions:               instance.ReplicaGroupPartitionConfig.NumPartitions.ValueInt64(),
+		NumInstancesPerPartitions:   instance.ReplicaGroupPartitionConfig.NumInstancesPerPartitions.ValueInt64(),
+		PartitionColumn:             instance.ReplicaGroupPartitionConfig.PartitionColumn.ValueString(),
+		MinimizeDataMovement:        instance.ReplicaGroupPartitionConfig.MinimizeDataMovement.ValueBool(),
+	}
 }

@@ -62,6 +62,11 @@ func SetStateFromTable(ctx context.Context, state *models.TableResourceModel, ta
 		state.FieldConfigList = convertFieldConfigList(table)
 	}
 
+	// Instance Assignment Config Map
+	if table.InstanceAssignmentConfigMap != nil {
+		state.InstanceAssignmentConfigMap = convertInstanceAssignmentConfigMap(table)
+	}
+
 	if table.Task != nil {
 		state.Task = convertTaskConfig(table)
 	}
@@ -91,9 +96,19 @@ func convertTierConfigs(table *pinot_api.Table) []*models.TierConfig {
 }
 
 func convertTenantConfig(table *pinot_api.Table) *models.TenantsConfig {
+	var tagOverrideConfig *models.TenantTagOverrideConfig
+
+	if table.Tenants.TagOverrideConfig != nil {
+		tagOverrideConfig = &models.TenantTagOverrideConfig{
+			RealtimeConsuming: types.StringValue(table.Tenants.TagOverrideConfig.RealtimeConsuming),
+			RealtimeCompleted: types.StringValue(table.Tenants.TagOverrideConfig.RealtimeCompleted),
+		}
+	}
+
 	return &models.TenantsConfig{
-		Broker: types.StringValue(table.Tenants.Broker),
-		Server: types.StringValue(table.Tenants.Server),
+		Broker:            types.StringValue(table.Tenants.Broker),
+		Server:            types.StringValue(table.Tenants.Server),
+		TagOverrideConfig: tagOverrideConfig,
 	}
 }
 
@@ -507,4 +522,72 @@ func convertFieldConfigList(table *pinot_api.Table) []*models.FieldConfig {
 		fieldConfigs = append(fieldConfigs, fc)
 	}
 	return fieldConfigs
+}
+
+func convertInstanceAssignmentConfigMap(table *pinot_api.Table) *models.InstanceAssignmentConfigMap {
+
+	if table.InstanceAssignmentConfigMap == nil {
+		return nil
+	}
+
+	var consumingInstanceAssingment *models.InstanceAssignment
+	if table.InstanceAssignmentConfigMap.Consuming != nil {
+		consumingInstanceAssingment = &models.InstanceAssignment{
+			TagPoolConfig:               convertTagPoolConfigInstanceAssignment(table.InstanceAssignmentConfigMap.Consuming),
+			ReplicaGroupPartitionConfig: convertReplicaGroupPartitionConfig(table.InstanceAssignmentConfigMap.Consuming),
+			PartitionSelector:           types.StringValue(table.InstanceAssignmentConfigMap.Consuming.PartitionSelector),
+			MinimizeDataMovement:        types.BoolValue(table.InstanceAssignmentConfigMap.Consuming.MinimizeDataMovement),
+		}
+	}
+	var completedInstanceAssingment *models.InstanceAssignment
+	if table.InstanceAssignmentConfigMap.Completed != nil {
+		completedInstanceAssingment = &models.InstanceAssignment{
+			TagPoolConfig:               convertTagPoolConfigInstanceAssignment(table.InstanceAssignmentConfigMap.Completed),
+			ReplicaGroupPartitionConfig: convertReplicaGroupPartitionConfig(table.InstanceAssignmentConfigMap.Completed),
+			PartitionSelector:           types.StringValue(table.InstanceAssignmentConfigMap.Completed.PartitionSelector),
+			MinimizeDataMovement:        types.BoolValue(table.InstanceAssignmentConfigMap.Completed.MinimizeDataMovement),
+		}
+	}
+	var offlineInstanceAssingment *models.InstanceAssignment
+	if table.InstanceAssignmentConfigMap.Offline != nil {
+		offlineInstanceAssingment = &models.InstanceAssignment{
+			TagPoolConfig:               convertTagPoolConfigInstanceAssignment(table.InstanceAssignmentConfigMap.Offline),
+			ReplicaGroupPartitionConfig: convertReplicaGroupPartitionConfig(table.InstanceAssignmentConfigMap.Offline),
+			PartitionSelector:           types.StringValue(table.InstanceAssignmentConfigMap.Offline.PartitionSelector),
+			MinimizeDataMovement:        types.BoolValue(table.InstanceAssignmentConfigMap.Offline.MinimizeDataMovement),
+		}
+	}
+
+	return &models.InstanceAssignmentConfigMap{
+		Consuming: consumingInstanceAssingment,
+		Completed: completedInstanceAssingment,
+		Offline:   offlineInstanceAssingment,
+	}
+}
+
+func convertTagPoolConfigInstanceAssignment(instance *pinot_api.InstanceAssignment) *models.TagPoolConfigInstanceAssignment {
+	if instance.TagPoolConfig == nil {
+		return nil
+	}
+	return &models.TagPoolConfigInstanceAssignment{
+		Tag:       types.StringValue(instance.TagPoolConfig.Tag),
+		NumPools:  types.Int64Value(instance.TagPoolConfig.NumPools),
+		PoolBased: types.BoolValue(instance.TagPoolConfig.PoolBased),
+	}
+}
+
+func convertReplicaGroupPartitionConfig(instance *pinot_api.InstanceAssignment) *models.ReplicaGroupPartitionInstanceAssignment {
+	if instance.ReplicaGroupPartitionConfig == nil {
+		return nil
+	}
+	return &models.ReplicaGroupPartitionInstanceAssignment{
+		ReplicaGroupBased:           types.BoolValue(instance.ReplicaGroupPartitionConfig.ReplicaGroupBased),
+		NumInstances:                types.Int64Value(instance.ReplicaGroupPartitionConfig.NumInstances),
+		NumReplicaGroups:            types.Int64Value(instance.ReplicaGroupPartitionConfig.NumReplicaGroups),
+		NumInstancesPerReplicaGroup: types.Int64Value(instance.ReplicaGroupPartitionConfig.NumInstancesPerReplicaGroup),
+		NumPartitions:               types.Int64Value(instance.ReplicaGroupPartitionConfig.NumPartitions),
+		NumInstancesPerPartitions:   types.Int64Value(instance.ReplicaGroupPartitionConfig.NumInstancesPerPartitions),
+		PartitionColumn:             types.StringValue(instance.ReplicaGroupPartitionConfig.PartitionColumn),
+		MinimizeDataMovement:        types.BoolValue(instance.ReplicaGroupPartitionConfig.MinimizeDataMovement),
+	}
 }
