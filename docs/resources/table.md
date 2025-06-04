@@ -40,11 +40,11 @@ description: |-
 Required:
 
 - `encoding_type` (String) encoding type
-- `index_type` (String) index type
 - `name` (String) name of the field
 
 Optional:
 
+- `index_type` (String) index type
 - `index_types` (List of String) index types
 - `indexes` (Attributes) indexes (see [below for nested schema](#nestedatt--field_config_list--indexes))
 - `timestamp_config` (Attributes) timestamp configuration (see [below for nested schema](#nestedatt--field_config_list--timestamp_config))
