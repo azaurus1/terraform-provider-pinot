@@ -724,7 +724,7 @@ func FieldConfigList() schema.ListNestedAttribute {
 				},
 				"index_type": schema.StringAttribute{
 					Description: "index type",
-					Required:    true,
+					Optional:    true,
 				},
 				"index_types": schema.ListAttribute{
 					Description: "index types",
