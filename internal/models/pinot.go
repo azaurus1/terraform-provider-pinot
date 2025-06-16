@@ -74,12 +74,71 @@ type TimestampConfig struct {
 	Granularities []string `tfsdk:"granularities"`
 }
 
-type FiendIndexInverted struct {
+type FieldIndexes struct {
+	Inverted   *FieldIndexInverted   `tfsdk:"inverted"`
+	Bloom      *FieldIndexBloom      `tfsdk:"bloom"`
+	Forward    *FieldIndexForward    `tfsdk:"forward"`
+	Dictionary *FieldIndexDictionary `tfsdk:"dictionary"`
+	Fst        *FieldIndexFst        `tfsdk:"fst"`
+	H3         *FieldIndexH3         `tfsdk:"h3"`
+	Json       *FieldIndexJson       `tfsdk:"json"`
+	Range      *FieldIndexRange      `tfsdk:"range"`
+	Text       *FieldIndexText       `tfsdk:"text"`
+	Vector     *FieldIndexVector     `tfsdk:"vector"`
+}
+
+type FieldIndexInverted struct {
 	Enabled types.String `tfsdk:"enabled"`
 }
 
-type FieldIndexes struct {
-	Inverted *FiendIndexInverted `tfsdk:"inverted"`
+type FieldIndexBloom struct {
+	Fpp            types.String `tfsdk:"fpp"`
+	MaxSizeInBytes types.String `tfsdk:"maxsizeinbytes"`
+	LoadOnHeap     types.String `tfsdk:"loadonheap"`
+}
+
+type FieldIndexForward struct {
+	CompressionCodec      types.String `tfsdk:"compressioncodec"`
+	DeriveNumDocsPerChunk types.String `tfsdk:"derivenumdocsperchunk"`
+	RawIndexWriterVersion types.String `tfsdk:"rawindexwriterversion"`
+}
+
+type FieldIndexDictionary struct {
+	Disabled types.Bool `tfsdk:"disabled"`
+}
+
+type FieldIndexFst struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+type FieldIndexH3 struct {
+	Resolutions []int `tfsdk:"resolutions"`
+}
+
+type FieldIndexJson struct {
+	MaxLevels               types.String `tfsdk:"maxlevels"`
+	ExcludeArray            types.Bool   `tfsdk:"excludearray"`
+	DisableCrossArrayUnnest types.Bool   `tfsdk:"disablecrossarrayunnest"`
+	IncludePaths            types.String `tfsdk:"includepaths"`
+	ExcludePaths            types.String `tfsdk:"excludepaths"`
+	ExcludeFields           types.String `tfsdk:"excludefields"`
+	IndexPaths              types.String `tfsdk:"indexpaths"`
+}
+
+type FieldIndexRange struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+type FieldIndexText struct {
+	StopWordInclude []string `tfsdk:"stopwordinclude"`
+	StopWordExclude []string `tfsdk:"stopwordexclude"`
+}
+
+type FieldIndexVector struct {
+	VectorIndexType        types.String `tfsdk:"vectorindextype"`
+	VectorDimension        types.String `tfsdk:"vectordimension"`
+	VectorDistanceFunction types.String `tfsdk:"vectordistancefunction"`
+	Version                types.String `tfsdk:"version"`
 }
 
 type FieldConfig struct {

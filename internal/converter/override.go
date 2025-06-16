@@ -160,7 +160,7 @@ func ToFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
 
 		if fieldConfig.Indexes != nil {
 			fc.Indexes = &model.FieldIndexes{
-				Inverted: &model.FiendIndexInverted{
+				Inverted: &model.FieldIndexInverted{
 					Enabled: fieldConfig.Indexes.Inverted.Enabled.ValueString(),
 				},
 			}
@@ -600,6 +600,10 @@ func convertValuesToString(m map[string]types.String) map[string]string {
 	return res
 }
 
+func boolPtr(b bool) *bool {
+	return &b
+}
+
 func ToInstanceAssignmentConfigMap(instance *models.InstanceAssignmentConfigMap) *model.InstanceAssignmentConfigMap {
 
 	if instance == nil {
@@ -612,7 +616,7 @@ func ToInstanceAssignmentConfigMap(instance *models.InstanceAssignmentConfigMap)
 			TagPoolConfig:               ToTagPoolConfigInstanceAssignment(instance.Consuming),
 			ReplicaGroupPartitionConfig: ToReplicaGroupPartitionConfig(instance.Consuming),
 			PartitionSelector:           instance.Consuming.PartitionSelector.ValueString(),
-			MinimizeDataMovement:        instance.Consuming.MinimizeDataMovement.ValueBool(),
+			MinimizeDataMovement:        boolPtr(instance.Consuming.MinimizeDataMovement.ValueBool()),
 		}
 	}
 	var completedInstanceAssingment *model.InstanceAssignment
@@ -621,7 +625,7 @@ func ToInstanceAssignmentConfigMap(instance *models.InstanceAssignmentConfigMap)
 			TagPoolConfig:               ToTagPoolConfigInstanceAssignment(instance.Completed),
 			ReplicaGroupPartitionConfig: ToReplicaGroupPartitionConfig(instance.Completed),
 			PartitionSelector:           instance.Completed.PartitionSelector.ValueString(),
-			MinimizeDataMovement:        instance.Completed.MinimizeDataMovement.ValueBool(),
+			MinimizeDataMovement:        boolPtr(instance.Completed.MinimizeDataMovement.ValueBool()),
 		}
 	}
 	var offlineInstanceAssingment *model.InstanceAssignment
@@ -630,7 +634,7 @@ func ToInstanceAssignmentConfigMap(instance *models.InstanceAssignmentConfigMap)
 			TagPoolConfig:               ToTagPoolConfigInstanceAssignment(instance.Offline),
 			ReplicaGroupPartitionConfig: ToReplicaGroupPartitionConfig(instance.Offline),
 			PartitionSelector:           instance.Offline.PartitionSelector.ValueString(),
-			MinimizeDataMovement:        instance.Offline.MinimizeDataMovement.ValueBool(),
+			MinimizeDataMovement:        boolPtr(instance.Offline.MinimizeDataMovement.ValueBool()),
 		}
 	}
 
@@ -648,7 +652,7 @@ func ToTagPoolConfigInstanceAssignment(instance *models.InstanceAssignment) *mod
 	return &model.TagPoolConfigInstanceAssignment{
 		Tag:       instance.TagPoolConfig.Tag.ValueString(),
 		NumPools:  instance.TagPoolConfig.NumPools.ValueInt64(),
-		PoolBased: instance.TagPoolConfig.PoolBased.ValueBool(),
+		PoolBased: boolPtr(instance.TagPoolConfig.PoolBased.ValueBool()),
 	}
 }
 
@@ -657,13 +661,13 @@ func ToReplicaGroupPartitionConfig(instance *models.InstanceAssignment) *model.R
 		return nil
 	}
 	return &model.ReplicaGroupPartitionInstanceAssignment{
-		ReplicaGroupBased:           instance.ReplicaGroupPartitionConfig.ReplicaGroupBased.ValueBool(),
+		ReplicaGroupBased:           boolPtr(instance.ReplicaGroupPartitionConfig.ReplicaGroupBased.ValueBool()),
 		NumInstances:                instance.ReplicaGroupPartitionConfig.NumInstances.ValueInt64(),
 		NumReplicaGroups:            instance.ReplicaGroupPartitionConfig.NumReplicaGroups.ValueInt64(),
 		NumInstancesPerReplicaGroup: instance.ReplicaGroupPartitionConfig.NumInstancesPerReplicaGroup.ValueInt64(),
 		NumPartitions:               instance.ReplicaGroupPartitionConfig.NumPartitions.ValueInt64(),
 		NumInstancesPerPartitions:   instance.ReplicaGroupPartitionConfig.NumInstancesPerPartitions.ValueInt64(),
 		PartitionColumn:             instance.ReplicaGroupPartitionConfig.PartitionColumn.ValueString(),
-		MinimizeDataMovement:        instance.ReplicaGroupPartitionConfig.MinimizeDataMovement.ValueBool(),
+		MinimizeDataMovement:        boolPtr(instance.ReplicaGroupPartitionConfig.MinimizeDataMovement.ValueBool()),
 	}
 }

@@ -752,7 +752,156 @@ func FieldConfigList() schema.ListNestedAttribute {
 							Attributes: map[string]schema.Attribute{
 								"enabled": schema.StringAttribute{
 									Description: "enabled",
-									Required:    true,
+									Optional:    true,
+								},
+							},
+						},
+						"bloom": schema.SingleNestedAttribute{
+							Description: "bloom filter",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"fpp": schema.StringAttribute{
+									Description: "false positive probability",
+									Optional:    true,
+								},
+								"maxsizeinbytes": schema.StringAttribute{
+									Description: "max size in bytes",
+									Optional:    true,
+								},
+								"loadonheap": schema.StringAttribute{
+									Description: "load on heap",
+									Optional:    true,
+								},
+							},
+						},
+						"forward": schema.SingleNestedAttribute{
+							Description: "forward index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"compressioncodec": schema.StringAttribute{
+									Description: "compression codec",
+									Optional:    true,
+								},
+								"derivenumdocsperchunk": schema.StringAttribute{
+									Description: "derive num docs per chunk",
+									Optional:    true,
+								},
+								"rawindexwriterversion": schema.StringAttribute{
+									Description: "raw index writer version",
+									Optional:    true,
+								},
+							},
+						},
+						"dictionary": schema.SingleNestedAttribute{
+							Description: "dictionary index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"disabled": schema.BoolAttribute{
+									Description: "disabled",
+									Optional:    true,
+								},
+							},
+						},
+						"fst": schema.SingleNestedAttribute{
+							Description: "fst index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"enabled": schema.BoolAttribute{
+									Description: "enabled",
+									Optional:    true,
+								},
+							},
+						},
+						"h3": schema.SingleNestedAttribute{
+							Description: "geospatial index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"resolutions": schema.ListAttribute{
+									Description: "resolutions",
+									Optional:    true,
+									ElementType: types.Int64Type,
+								},
+							},
+						},
+						"json": schema.SingleNestedAttribute{
+							Description: "json index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"maxlevels": schema.StringAttribute{
+									Description: "max levels",
+									Optional:    true,
+								},
+								"excludearray": schema.BoolAttribute{
+									Description: "exclude array",
+									Optional:    true,
+								},
+								"disablecrossarrayunnest": schema.BoolAttribute{
+									Description: "disable cross array unnest",
+									Optional:    true,
+								},
+								"includepaths": schema.StringAttribute{
+									Description: "include paths",
+									Optional:    true,
+								},
+								"excludepaths": schema.StringAttribute{
+									Description: "exclude paths",
+									Optional:    true,
+								},
+								"excludefields": schema.StringAttribute{
+									Description: "exclude fields",
+									Optional:    true,
+								},
+								"indexpaths": schema.StringAttribute{
+									Description: "index paths",
+									Optional:    true,
+								},
+							},
+						},
+						"range": schema.SingleNestedAttribute{
+							Description: "range index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"enabled": schema.BoolAttribute{
+									Description: "enabled",
+									Optional:    true,
+								},
+							},
+						},
+						"text": schema.SingleNestedAttribute{
+							Description: "text search support",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"stopwordinclude": schema.ListAttribute{
+									Description: "stop word include",
+									Optional:    true,
+									ElementType: types.StringType,
+								},
+								"stopwordexclude": schema.ListAttribute{
+									Description: "stop word exclude",
+									Optional:    true,
+									ElementType: types.StringType,
+								},
+							},
+						},
+						"vector": schema.SingleNestedAttribute{
+							Description: "vector index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"vectorindextype": schema.StringAttribute{
+									Description: "vector index type",
+									Optional:    true,
+								},
+								"vectordimension": schema.StringAttribute{
+									Description: "vector dimension",
+									Optional:    true,
+								},
+								"vectordistancefunction": schema.StringAttribute{
+									Description: "vector distance function",
+									Optional:    true,
+								},
+								"version": schema.StringAttribute{
+									Description: "version",
+									Optional:    true,
 								},
 							},
 						},

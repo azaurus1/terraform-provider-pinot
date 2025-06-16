@@ -25,11 +25,13 @@ description: |-
 
 - `field_config_list` (Attributes List) field configurations for the table (see [below for nested schema](#nestedatt--field_config_list))
 - `ingestion_config` (Attributes) ingestion configuration for the table i.e kafka (see [below for nested schema](#nestedatt--ingestion_config))
+- `instance_assignment_config_map` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map))
 - `is_dim_table` (Boolean) is dimension table
 - `metadata` (Attributes) metadata for the table (see [below for nested schema](#nestedatt--metadata))
 - `routing` (Attributes) routing configuration for the table (see [below for nested schema](#nestedatt--routing))
 - `segments_config` (Attributes) The segments configuration for the table. (see [below for nested schema](#nestedatt--segments_config))
 - `table_index_config` (Attributes) The table index configuration for the table. (see [below for nested schema](#nestedatt--table_index_config))
+- `task` (Attributes) (see [below for nested schema](#nestedatt--task))
 - `tenants` (Attributes) The tenants configuration for the table. (see [below for nested schema](#nestedatt--tenants))
 - `tier_configs` (Attributes List) tier configurations for the table (see [below for nested schema](#nestedatt--tier_configs))
 - `upsert_config` (Attributes) The upsert configuration for the table. (see [below for nested schema](#nestedatt--upsert_config))
@@ -54,14 +56,109 @@ Optional:
 
 Optional:
 
+- `bloom` (Attributes) bloom filter (see [below for nested schema](#nestedatt--field_config_list--indexes--bloom))
+- `dictionary` (Attributes) dictionary index (see [below for nested schema](#nestedatt--field_config_list--indexes--dictionary))
+- `forward` (Attributes) forward index (see [below for nested schema](#nestedatt--field_config_list--indexes--forward))
+- `fst` (Attributes) fst index (see [below for nested schema](#nestedatt--field_config_list--indexes--fst))
+- `h3` (Attributes) geospatial index (see [below for nested schema](#nestedatt--field_config_list--indexes--h3))
 - `inverted` (Attributes) inverted (see [below for nested schema](#nestedatt--field_config_list--indexes--inverted))
+- `json` (Attributes) json index (see [below for nested schema](#nestedatt--field_config_list--indexes--json))
+- `range` (Attributes) range index (see [below for nested schema](#nestedatt--field_config_list--indexes--range))
+- `text` (Attributes) text search support (see [below for nested schema](#nestedatt--field_config_list--indexes--text))
+- `vector` (Attributes) vector index (see [below for nested schema](#nestedatt--field_config_list--indexes--vector))
+
+<a id="nestedatt--field_config_list--indexes--bloom"></a>
+### Nested Schema for `field_config_list.indexes.bloom`
+
+Optional:
+
+- `fpp` (String) false positive probability
+- `loadonheap` (String) load on heap
+- `maxsizeinbytes` (String) max size in bytes
+
+
+<a id="nestedatt--field_config_list--indexes--dictionary"></a>
+### Nested Schema for `field_config_list.indexes.dictionary`
+
+Optional:
+
+- `disabled` (Boolean) disabled
+
+
+<a id="nestedatt--field_config_list--indexes--forward"></a>
+### Nested Schema for `field_config_list.indexes.forward`
+
+Optional:
+
+- `compressioncodec` (String) compression codec
+- `derivenumdocsperchunk` (String) derive num docs per chunk
+- `rawindexwriterversion` (String) raw index writer version
+
+
+<a id="nestedatt--field_config_list--indexes--fst"></a>
+### Nested Schema for `field_config_list.indexes.fst`
+
+Optional:
+
+- `enabled` (Boolean) enabled
+
+
+<a id="nestedatt--field_config_list--indexes--h3"></a>
+### Nested Schema for `field_config_list.indexes.h3`
+
+Optional:
+
+- `resolutions` (List of Number) resolutions
+
 
 <a id="nestedatt--field_config_list--indexes--inverted"></a>
 ### Nested Schema for `field_config_list.indexes.inverted`
 
-Required:
+Optional:
 
 - `enabled` (String) enabled
+
+
+<a id="nestedatt--field_config_list--indexes--json"></a>
+### Nested Schema for `field_config_list.indexes.json`
+
+Optional:
+
+- `disablecrossarrayunnest` (Boolean) disable cross array unnest
+- `excludearray` (Boolean) exclude array
+- `excludefields` (String) exclude fields
+- `excludepaths` (String) exclude paths
+- `includepaths` (String) include paths
+- `indexpaths` (String) index paths
+- `maxlevels` (String) max levels
+
+
+<a id="nestedatt--field_config_list--indexes--range"></a>
+### Nested Schema for `field_config_list.indexes.range`
+
+Optional:
+
+- `enabled` (Boolean) enabled
+
+
+<a id="nestedatt--field_config_list--indexes--text"></a>
+### Nested Schema for `field_config_list.indexes.text`
+
+Optional:
+
+- `stopwordexclude` (List of String) stop word exclude
+- `stopwordinclude` (List of String) stop word include
+
+
+<a id="nestedatt--field_config_list--indexes--vector"></a>
+### Nested Schema for `field_config_list.indexes.vector`
+
+Optional:
+
+- `vectordimension` (String) vector dimension
+- `vectordistancefunction` (String) vector distance function
+- `vectorindextype` (String) vector index type
+- `version` (String) version
 
 
 
@@ -99,7 +196,124 @@ Optional:
 
 Optional:
 
-- `stream_config_maps` (List of Map of String) stream configuration
+- `column_major_segment_builder_enabled` (Boolean)
+- `stream_config_maps` (Attributes List) stream configuration (see [below for nested schema](#nestedatt--ingestion_config--stream_ingestion_config--stream_config_maps))
+- `track_filtered_message_offsets` (Boolean)
+
+<a id="nestedatt--ingestion_config--stream_ingestion_config--stream_config_maps"></a>
+### Nested Schema for `ingestion_config.stream_ingestion_config.stream_config_maps`
+
+Optional:
+
+- `access_key` (String)
+- `authentication_type` (String)
+- `key_serializer` (String)
+- `max_records_to_fetch` (String)
+- `realtime_segment_commit_timeout_seconds` (String)
+- `realtime_segment_flush_autotune_initial_rows` (String)
+- `realtime_segment_flush_desired_size` (String)
+- `realtime_segment_flush_threshold_rows` (String)
+- `realtime_segment_flush_threshold_segment_rows` (String)
+- `realtime_segment_flush_threshold_segment_size` (String)
+- `realtime_segment_flush_threshold_segment_time` (String)
+- `realtime_segment_flush_threshold_time` (String)
+- `realtime_segment_server_upload_to_deep_store` (String)
+- `region` (String)
+- `sasl_jaas_config` (String)
+- `sasl_mechanism` (String)
+- `secret_key` (String, Sensitive)
+- `security_protocol` (String)
+- `shard_iterator_type` (String)
+- `ssl_key_password` (String, Sensitive)
+- `ssl_keystore_location` (String)
+- `ssl_keystore_password` (String, Sensitive)
+- `ssl_keystore_type` (String)
+- `ssl_truststore_location` (String)
+- `ssl_truststore_password` (String, Sensitive)
+- `ssl_truststore_type` (String)
+- `stream_kafka_broker_list` (String)
+- `stream_kafka_buffer_size` (String)
+- `stream_kafka_connection_timeout_millis` (String)
+- `stream_kafka_consumer_factory_class_name` (String)
+- `stream_kafka_consumer_prop_auto_offset_reset` (String)
+- `stream_kafka_consumer_type` (String)
+- `stream_kafka_decoder_class_name` (String)
+- `stream_kafka_decoder_prop_basic_auth_credentials_source` (String)
+- `stream_kafka_decoder_prop_descriptor_file` (String)
+- `stream_kafka_decoder_prop_format` (String)
+- `stream_kafka_decoder_prop_proto_class_name` (String)
+- `stream_kafka_decoder_prop_schema_registry_basic_auth_credentials_source` (String)
+- `stream_kafka_decoder_prop_schema_registry_basic_auth_user_info` (String)
+- `stream_kafka_decoder_prop_schema_registry_rest_url` (String)
+- `stream_kafka_decoder_prop_schema_registry_schema_name` (String)
+- `stream_kafka_decoder_prop_schema_registry_ssl_keystore_location` (String)
+- `stream_kafka_decoder_prop_schema_registry_ssl_keystore_password` (String, Sensitive)
+- `stream_kafka_decoder_prop_schema_registry_ssl_keystore_type` (String)
+- `stream_kafka_decoder_prop_schema_registry_ssl_protocol` (String)
+- `stream_kafka_decoder_prop_schema_registry_ssl_truststore_location` (String)
+- `stream_kafka_decoder_prop_schema_registry_ssl_truststore_password` (String, Sensitive)
+- `stream_kafka_decoder_prop_schema_registry_ssl_truststore_type` (String)
+- `stream_kafka_fetch_timeout_millis` (String)
+- `stream_kafka_fetcher_min_bytes` (String)
+- `stream_kafka_fetcher_size` (String)
+- `stream_kafka_hlc_group_id` (String)
+- `stream_kafka_idle_timeout_millis` (String)
+- `stream_kafka_isolation_level` (String)
+- `stream_kafka_metadata_populate` (String)
+- `stream_kafka_schema_registry_url` (String)
+- `stream_kafka_socket_timeout` (String)
+- `stream_kafka_ssl_certificate_type` (String)
+- `stream_kafka_ssl_client_certificate` (String)
+- `stream_kafka_ssl_client_key` (String)
+- `stream_kafka_ssl_client_key_algorithm` (String)
+- `stream_kafka_ssl_server_certificate` (String)
+- `stream_kafka_topic_name` (String)
+- `stream_kafka_zk_broker_url` (String)
+- `stream_kinesis_consumer_factory_class_name` (String)
+- `stream_kinesis_consumer_type` (String)
+- `stream_kinesis_decoder_class_name` (String)
+- `stream_kinesis_decoder_prop_schema_registry_basic_auth_credentials_source` (String)
+- `stream_kinesis_decoder_prop_schema_registry_basic_auth_user_info` (String)
+- `stream_kinesis_decoder_prop_schema_registry_rest_url` (String)
+- `stream_kinesis_decoder_prop_schema_registry_schema_name` (String)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_keystore_location` (String)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_keystore_password` (String, Sensitive)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_keystore_type` (String)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_protocol` (String)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_truststore_location` (String)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_truststore_password` (String, Sensitive)
+- `stream_kinesis_decoder_prop_schema_registry_ssl_truststore_type` (String)
+- `stream_kinesis_fetch_timeout_millis` (String)
+- `stream_kinesis_topic_name` (String)
+- `stream_pulsar_audience` (String)
+- `stream_pulsar_authentication_token` (String, Sensitive)
+- `stream_pulsar_bootstrap_servers` (String)
+- `stream_pulsar_consumer_factory_class_name` (String)
+- `stream_pulsar_consumer_prop_auto_offset_reset` (String)
+- `stream_pulsar_consumer_type` (String)
+- `stream_pulsar_creds_file_path` (String)
+- `stream_pulsar_decoder_class_name` (String)
+- `stream_pulsar_decoder_prop_schema_registry_basic_auth_credentials_source` (String)
+- `stream_pulsar_decoder_prop_schema_registry_basic_auth_user_info` (String)
+- `stream_pulsar_decoder_prop_schema_registry_rest_url` (String)
+- `stream_pulsar_decoder_prop_schema_registry_schema_name` (String)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_keystore_location` (String)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_keystore_password` (String, Sensitive)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_keystore_type` (String)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_protocol` (String)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_truststore_location` (String)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_truststore_password` (String, Sensitive)
+- `stream_pulsar_decoder_prop_schema_registry_ssl_truststore_type` (String)
+- `stream_pulsar_fetch_timeout_millis` (String)
+- `stream_pulsar_issuer_url` (String)
+- `stream_pulsar_metadata_fields` (String)
+- `stream_pulsar_metadata_populate` (String)
+- `stream_pulsar_tls_trust_certs_file_path` (String)
+- `stream_pulsar_topic_name` (String)
+- `stream_type` (String)
+- `topic_consumption_rate_limit` (String)
+- `value_serializer` (String)
+
 
 
 <a id="nestedatt--ingestion_config--transform_configs"></a>
@@ -109,6 +323,124 @@ Required:
 
 - `column_name` (String) column name
 - `transform_function` (String) transform function
+
+
+
+<a id="nestedatt--instance_assignment_config_map"></a>
+### Nested Schema for `instance_assignment_config_map`
+
+Optional:
+
+- `completed` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--completed))
+- `consuming` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--consuming))
+- `offline` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--offline))
+
+<a id="nestedatt--instance_assignment_config_map--completed"></a>
+### Nested Schema for `instance_assignment_config_map.completed`
+
+Optional:
+
+- `minimize_data_movement` (Boolean)
+- `partition_selector` (String)
+- `replica_group_partition_config` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--completed--replica_group_partition_config))
+- `tag_pool_config` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--completed--tag_pool_config))
+
+<a id="nestedatt--instance_assignment_config_map--completed--replica_group_partition_config"></a>
+### Nested Schema for `instance_assignment_config_map.completed.replica_group_partition_config`
+
+Optional:
+
+- `minimize_data_movement` (Boolean)
+- `num_instances` (Number)
+- `num_instances_per_partition` (Number)
+- `num_instances_per_replica_group` (Number)
+- `num_partitions` (Number)
+- `num_replica_groups` (Number)
+- `partition_column` (String)
+- `replica_group_based` (Boolean)
+
+
+<a id="nestedatt--instance_assignment_config_map--completed--tag_pool_config"></a>
+### Nested Schema for `instance_assignment_config_map.completed.tag_pool_config`
+
+Optional:
+
+- `num_pools` (Number)
+- `pool_based` (Boolean)
+- `tag` (String)
+
+
+
+<a id="nestedatt--instance_assignment_config_map--consuming"></a>
+### Nested Schema for `instance_assignment_config_map.consuming`
+
+Optional:
+
+- `minimize_data_movement` (Boolean)
+- `partition_selector` (String)
+- `replica_group_partition_config` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--consuming--replica_group_partition_config))
+- `tag_pool_config` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--consuming--tag_pool_config))
+
+<a id="nestedatt--instance_assignment_config_map--consuming--replica_group_partition_config"></a>
+### Nested Schema for `instance_assignment_config_map.consuming.replica_group_partition_config`
+
+Optional:
+
+- `minimize_data_movement` (Boolean)
+- `num_instances` (Number)
+- `num_instances_per_partition` (Number)
+- `num_instances_per_replica_group` (Number)
+- `num_partitions` (Number)
+- `num_replica_groups` (Number)
+- `partition_column` (String)
+- `replica_group_based` (Boolean)
+
+
+<a id="nestedatt--instance_assignment_config_map--consuming--tag_pool_config"></a>
+### Nested Schema for `instance_assignment_config_map.consuming.tag_pool_config`
+
+Optional:
+
+- `num_pools` (Number)
+- `pool_based` (Boolean)
+- `tag` (String)
+
+
+
+<a id="nestedatt--instance_assignment_config_map--offline"></a>
+### Nested Schema for `instance_assignment_config_map.offline`
+
+Optional:
+
+- `minimize_data_movement` (Boolean)
+- `partition_selector` (String)
+- `replica_group_partition_config` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--offline--replica_group_partition_config))
+- `tag_pool_config` (Attributes) (see [below for nested schema](#nestedatt--instance_assignment_config_map--offline--tag_pool_config))
+
+<a id="nestedatt--instance_assignment_config_map--offline--replica_group_partition_config"></a>
+### Nested Schema for `instance_assignment_config_map.offline.replica_group_partition_config`
+
+Optional:
+
+- `minimize_data_movement` (Boolean)
+- `num_instances` (Number)
+- `num_instances_per_partition` (Number)
+- `num_instances_per_replica_group` (Number)
+- `num_partitions` (Number)
+- `num_replica_groups` (Number)
+- `partition_column` (String)
+- `replica_group_based` (Boolean)
+
+
+<a id="nestedatt--instance_assignment_config_map--offline--tag_pool_config"></a>
+### Nested Schema for `instance_assignment_config_map.offline.tag_pool_config`
+
+Optional:
+
+- `num_pools` (Number)
+- `pool_based` (Boolean)
+- `tag` (String)
+
 
 
 
@@ -136,14 +468,27 @@ Required:
 
 - `replication` (String) The replication count for the segments.
 - `time_column_name` (String) The time column name for the segments.
-- `time_type` (String) The time type for the segments.
 
 Optional:
 
+- `completion_config` (Attributes) (see [below for nested schema](#nestedatt--segments_config--completion_config))
 - `deleted_segments_retention_period` (String) The deleted segments retention period for the segments.
+- `minimize_data_movement` (Boolean)
+- `peer_segment_download_scheme` (String)
 - `replicas_per_partition` (String) The replicas per partition for the segments.
 - `retention_time_unit` (String) The retention time unit for the segments.
 - `retention_time_value` (String) The retention time value for the segments.
+- `schema_name` (String) The name of the used schema for table
+- `segment_push_type` (String)
+- `time_type` (String) The time type for the segments.
+
+<a id="nestedatt--segments_config--completion_config"></a>
+### Nested Schema for `segments_config.completion_config`
+
+Optional:
+
+- `completion_mode` (String)
+
 
 
 <a id="nestedatt--table_index_config"></a>
@@ -152,11 +497,14 @@ Optional:
 Optional:
 
 - `aggregate_metrics` (Boolean) The aggregate metrics for the table.
+- `auto_generated_inverted_index` (Boolean)
 - `bloom_filter_columns` (List of String) The bloom filter columns for the table.
 - `column_min_max_value_generator_mode` (String) The column min max value generator mode for the table.
 - `create_inverted_index_during_segment_generation` (Boolean) The create inverted index during segment generation for the table.
 - `enable_default_star_tree` (Boolean) The enable default star tree for the table.
 - `enable_dynamic_star_tree` (Boolean) The enable dynamic star tree for the table.
+- `inverted_index_columns` (List of String) The inverted index columns for the table.
+- `json_index_columns` (List of String) The json index columns for the table.
 - `load_mode` (String) The load mode for the table.
 - `no_dictionary_columns` (List of String) The no dictionary columns for the table.
 - `no_dictionary_size_ratio_threshold` (Number) The no dictionary size ration threshold for the table.
@@ -206,6 +554,14 @@ Required:
 
 
 
+<a id="nestedatt--task"></a>
+### Nested Schema for `task`
+
+Optional:
+
+- `task_type_configs_map` (Map of Map of String) The task configs for table
+
+
 <a id="nestedatt--tenants"></a>
 ### Nested Schema for `tenants`
 
@@ -213,7 +569,16 @@ Optional:
 
 - `broker` (String) The broker for the tenants.
 - `server` (String) The server for the tenants.
-- `tag_override_config` (Map of String) The tag override config for the tenants.
+- `tag_override_config` (Attributes) The tag override config for the tenants. (see [below for nested schema](#nestedatt--tenants--tag_override_config))
+
+<a id="nestedatt--tenants--tag_override_config"></a>
+### Nested Schema for `tenants.tag_override_config`
+
+Optional:
+
+- `realtime_completed` (String)
+- `realtime_consuming` (String)
+
 
 
 <a id="nestedatt--tier_configs"></a>
@@ -242,7 +607,7 @@ Optional:
 - `hash_function` (String) The hash function for the table.
 - `metadata_manager_class` (String) The metadata manager class name for the table.
 - `metadata_manager_configs` (Map of String) The metadata manager configs for the table.
+- `metadata_ttl` (Number) The metadata ttl for the table.
 - `mode` (String) The upsert mode for the table.
 - `out_of_order_record_column` (String) The out of order record column for the table.
 - `partial_upsert_strategies` (Map of String) The partial upsert strategies for the table.
-- `upsert_ttl` (String) The metadata ttl for the table.
