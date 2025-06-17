@@ -80,6 +80,13 @@ func convertMetadata(table *pinot_api.Table) *models.Metadata {
 	}
 }
 
+func boolPtrValue(ptr *bool) bool {
+	if ptr == nil {
+		return false
+	}
+	return *ptr
+}
+
 func convertTierConfigs(table *pinot_api.Table) []*models.TierConfig {
 	var tierConfigs []*models.TierConfig
 	for _, tierConfig := range table.TierConfigs {
@@ -512,10 +519,80 @@ func convertFieldConfigList(table *pinot_api.Table) []*models.FieldConfig {
 		}
 
 		if fieldConfig.Indexes != nil {
-			fc.Indexes = &models.FieldIndexes{
-				Inverted: &models.FiendIndexInverted{
+			fc.Indexes = &models.FieldIndexes{}
+
+			if fieldConfig.Indexes.Inverted != nil {
+				fc.Indexes.Inverted = &models.FieldIndexInverted{
 					Enabled: types.StringValue(fieldConfig.Indexes.Inverted.Enabled),
-				},
+				}
+			}
+
+			if fieldConfig.Indexes.Bloom != nil {
+				fc.Indexes.Bloom = &models.FieldIndexBloom{
+					Fpp:            types.StringValue(fieldConfig.Indexes.Bloom.Fpp),
+					MaxSizeInBytes: types.StringValue(fieldConfig.Indexes.Bloom.MaxSizeInBytes),
+					LoadOnHeap:     types.StringValue(fieldConfig.Indexes.Bloom.LoadOnHeap),
+				}
+			}
+
+			if fieldConfig.Indexes.Forward != nil {
+				fc.Indexes.Forward = &models.FieldIndexForward{
+					CompressionCodec:      types.StringValue(fieldConfig.Indexes.Forward.CompressionCodec),
+					DeriveNumDocsPerChunk: types.StringValue(fieldConfig.Indexes.Forward.DeriveNumDocsPerChunk),
+					RawIndexWriterVersion: types.StringValue(fieldConfig.Indexes.Forward.RawIndexWriterVersion),
+				}
+			}
+
+			if fieldConfig.Indexes.Dictionary != nil {
+				fc.Indexes.Dictionary = &models.FieldIndexDictionary{
+					Disabled: types.BoolValue(fieldConfig.Indexes.Dictionary.Disabled),
+				}
+			}
+
+			if fieldConfig.Indexes.Fst != nil {
+				fc.Indexes.Fst = &models.FieldIndexFst{
+					Enabled: types.BoolValue(fieldConfig.Indexes.Fst.Enabled),
+				}
+			}
+
+			if fieldConfig.Indexes.H3 != nil {
+				fc.Indexes.H3 = &models.FieldIndexH3{
+					Resolutions: fieldConfig.Indexes.H3.Resolutions,
+				}
+			}
+
+			if fieldConfig.Indexes.Json != nil {
+				fc.Indexes.Json = &models.FieldIndexJson{
+					MaxLevels:               types.StringValue(fieldConfig.Indexes.Json.MaxLevels),
+					ExcludeArray:            types.BoolValue(fieldConfig.Indexes.Json.ExcludeArray),
+					DisableCrossArrayUnnest: types.BoolValue(fieldConfig.Indexes.Json.DisableCrossArrayUnnest),
+					IncludePaths:            types.StringValue(fieldConfig.Indexes.Json.IncludePaths),
+					ExcludePaths:            types.StringValue(fieldConfig.Indexes.Json.ExcludePaths),
+					ExcludeFields:           types.StringValue(fieldConfig.Indexes.Json.ExcludeFields),
+					IndexPaths:              types.StringValue(fieldConfig.Indexes.Json.IndexPaths),
+				}
+			}
+
+			if fieldConfig.Indexes.Range != nil {
+				fc.Indexes.Range = &models.FieldIndexRange{
+					Enabled: types.BoolValue(fieldConfig.Indexes.Range.Enabled),
+				}
+			}
+
+			if fieldConfig.Indexes.Text != nil {
+				fc.Indexes.Text = &models.FieldIndexText{
+					StopWordInclude: fieldConfig.Indexes.Text.StopWordInclude, // []string
+					StopWordExclude: fieldConfig.Indexes.Text.StopWordExclude, // []string
+				}
+			}
+
+			if fieldConfig.Indexes.Vector != nil {
+				fc.Indexes.Vector = &models.FieldIndexVector{
+					VectorIndexType:        types.StringValue(fieldConfig.Indexes.Vector.VectorIndexType),
+					VectorDimension:        types.StringValue(fieldConfig.Indexes.Vector.VectorDimension),
+					VectorDistanceFunction: types.StringValue(fieldConfig.Indexes.Vector.VectorDistanceFunction),
+					Version:                types.StringValue(fieldConfig.Indexes.Vector.Version),
+				}
 			}
 		}
 
@@ -536,7 +613,7 @@ func convertInstanceAssignmentConfigMap(table *pinot_api.Table) *models.Instance
 			TagPoolConfig:               convertTagPoolConfigInstanceAssignment(table.InstanceAssignmentConfigMap.Consuming),
 			ReplicaGroupPartitionConfig: convertReplicaGroupPartitionConfig(table.InstanceAssignmentConfigMap.Consuming),
 			PartitionSelector:           types.StringValue(table.InstanceAssignmentConfigMap.Consuming.PartitionSelector),
-			MinimizeDataMovement:        types.BoolValue(table.InstanceAssignmentConfigMap.Consuming.MinimizeDataMovement),
+			MinimizeDataMovement:        types.BoolValue(boolPtrValue(table.InstanceAssignmentConfigMap.Consuming.MinimizeDataMovement)),
 		}
 	}
 	var completedInstanceAssingment *models.InstanceAssignment
@@ -545,7 +622,7 @@ func convertInstanceAssignmentConfigMap(table *pinot_api.Table) *models.Instance
 			TagPoolConfig:               convertTagPoolConfigInstanceAssignment(table.InstanceAssignmentConfigMap.Completed),
 			ReplicaGroupPartitionConfig: convertReplicaGroupPartitionConfig(table.InstanceAssignmentConfigMap.Completed),
 			PartitionSelector:           types.StringValue(table.InstanceAssignmentConfigMap.Completed.PartitionSelector),
-			MinimizeDataMovement:        types.BoolValue(table.InstanceAssignmentConfigMap.Completed.MinimizeDataMovement),
+			MinimizeDataMovement:        types.BoolValue(boolPtrValue(table.InstanceAssignmentConfigMap.Completed.MinimizeDataMovement)),
 		}
 	}
 	var offlineInstanceAssingment *models.InstanceAssignment
@@ -554,7 +631,7 @@ func convertInstanceAssignmentConfigMap(table *pinot_api.Table) *models.Instance
 			TagPoolConfig:               convertTagPoolConfigInstanceAssignment(table.InstanceAssignmentConfigMap.Offline),
 			ReplicaGroupPartitionConfig: convertReplicaGroupPartitionConfig(table.InstanceAssignmentConfigMap.Offline),
 			PartitionSelector:           types.StringValue(table.InstanceAssignmentConfigMap.Offline.PartitionSelector),
-			MinimizeDataMovement:        types.BoolValue(table.InstanceAssignmentConfigMap.Offline.MinimizeDataMovement),
+			MinimizeDataMovement:        types.BoolValue(boolPtrValue(table.InstanceAssignmentConfigMap.Offline.MinimizeDataMovement)),
 		}
 	}
 
@@ -572,7 +649,7 @@ func convertTagPoolConfigInstanceAssignment(instance *pinot_api.InstanceAssignme
 	return &models.TagPoolConfigInstanceAssignment{
 		Tag:       types.StringValue(instance.TagPoolConfig.Tag),
 		NumPools:  types.Int64Value(instance.TagPoolConfig.NumPools),
-		PoolBased: types.BoolValue(instance.TagPoolConfig.PoolBased),
+		PoolBased: types.BoolValue(boolPtrValue(instance.TagPoolConfig.PoolBased)),
 	}
 }
 
@@ -581,13 +658,13 @@ func convertReplicaGroupPartitionConfig(instance *pinot_api.InstanceAssignment) 
 		return nil
 	}
 	return &models.ReplicaGroupPartitionInstanceAssignment{
-		ReplicaGroupBased:           types.BoolValue(instance.ReplicaGroupPartitionConfig.ReplicaGroupBased),
+		ReplicaGroupBased:           types.BoolValue(boolPtrValue(instance.ReplicaGroupPartitionConfig.ReplicaGroupBased)),
 		NumInstances:                types.Int64Value(instance.ReplicaGroupPartitionConfig.NumInstances),
 		NumReplicaGroups:            types.Int64Value(instance.ReplicaGroupPartitionConfig.NumReplicaGroups),
 		NumInstancesPerReplicaGroup: types.Int64Value(instance.ReplicaGroupPartitionConfig.NumInstancesPerReplicaGroup),
 		NumPartitions:               types.Int64Value(instance.ReplicaGroupPartitionConfig.NumPartitions),
 		NumInstancesPerPartitions:   types.Int64Value(instance.ReplicaGroupPartitionConfig.NumInstancesPerPartitions),
 		PartitionColumn:             types.StringValue(instance.ReplicaGroupPartitionConfig.PartitionColumn),
-		MinimizeDataMovement:        types.BoolValue(instance.ReplicaGroupPartitionConfig.MinimizeDataMovement),
+		MinimizeDataMovement:        types.BoolValue(boolPtrValue(instance.ReplicaGroupPartitionConfig.MinimizeDataMovement)),
 	}
 }

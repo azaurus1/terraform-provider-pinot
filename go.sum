@@ -37,6 +37,10 @@ github.com/azaurus1/go-pinot-api v0.7.1 h1:lsj4hUO7Jp/fzPgfYR54npeq49RUGnENSHaI7
 github.com/azaurus1/go-pinot-api v0.7.1/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
 github.com/azaurus1/go-pinot-api v0.7.2 h1:wTrupAfKF6GmX18PLaDxcNSDGWvzfyp32f9ZYUhij+s=
 github.com/azaurus1/go-pinot-api v0.7.2/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
+github.com/azaurus1/go-pinot-api v0.7.3 h1:+jI1Gni6VqCFXwY6dx74C1HU2hzjxQphWfOPKWo9Dtc=
+github.com/azaurus1/go-pinot-api v0.7.3/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
+github.com/azaurus1/go-pinot-api v0.7.4 h1:yFrrtH3Y68/wlLiV85RVQyV5+/+w50CsONnIaCsFR34=
+github.com/azaurus1/go-pinot-api v0.7.4/go.mod h1:uSL8T9cQCVP5U0MKBKCYuntMpIqjvZRgGk/epgSAQgw=
 github.com/azaurus1/pinot-testContainer v0.0.0-20240404234650-a51c8dc650eb h1:yJ1dM1j32OfgXVK8Zb6RiP3arspus5yordrJd/mod0Q=
 github.com/azaurus1/pinot-testContainer v0.0.0-20240404234650-a51c8dc650eb/go.mod h1:SG7Smj9VxxeB5xy90nHOjAqUVS1D4cWMOwgph2NPQqg=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
