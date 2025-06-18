@@ -52,7 +52,61 @@ Read-Only:
 
 Read-Only:
 
+- `bloom` (Attributes List) The bloom index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--bloom))
+- `dictionary` (Attributes List) The dictionary index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--dictionary))
+- `forward` (Attributes List) The forward index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--forward))
+- `fst` (Attributes List) The FST index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--fst))
+- `h3` (Attributes List) The H3 index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--h3))
 - `inverted` (Attributes List) The inverted index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--inverted))
+- `json` (Attributes List) The JSON index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--json))
+- `range` (Attributes List) The range index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--range))
+- `text` (Attributes List) The text index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--text))
+- `timestamp` (Attributes List) The timestamp index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--timestamp))
+- `vector` (Attributes List) The vector index of the field. (see [below for nested schema](#nestedatt--tables--field_config_list--indexes--vector))
+
+<a id="nestedatt--tables--field_config_list--indexes--bloom"></a>
+### Nested Schema for `tables.field_config_list.indexes.bloom`
+
+Read-Only:
+
+- `fpp` (String) The false positive probability of the bloom index.
+- `load_on_heap` (String) Whether to load bloom index on heap.
+- `max_size_in_bytes` (String) The maximum size in bytes of the bloom index.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--dictionary"></a>
+### Nested Schema for `tables.field_config_list.indexes.dictionary`
+
+Read-Only:
+
+- `disabled` (Boolean) Whether the dictionary index is disabled.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--forward"></a>
+### Nested Schema for `tables.field_config_list.indexes.forward`
+
+Read-Only:
+
+- `compression_codec` (String) The compression codec of the forward index.
+- `derive_num_docs_per_chunk` (String) The number of docs per chunk for the forward index.
+- `raw_index_writer_version` (String) The raw index writer version of the forward index.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--fst"></a>
+### Nested Schema for `tables.field_config_list.indexes.fst`
+
+Read-Only:
+
+- `enabled` (Boolean) Whether the FST index is enabled.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--h3"></a>
+### Nested Schema for `tables.field_config_list.indexes.h3`
+
+Read-Only:
+
+- `resolutions` (List of Number) The resolutions of the H3 index.
+
 
 <a id="nestedatt--tables--field_config_list--indexes--inverted"></a>
 ### Nested Schema for `tables.field_config_list.indexes.inverted`
@@ -60,6 +114,56 @@ Read-Only:
 Read-Only:
 
 - `enabled` (String) The enabled of the inverted index.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--json"></a>
+### Nested Schema for `tables.field_config_list.indexes.json`
+
+Read-Only:
+
+- `disable_cross_array_unnest` (Boolean) Whether to disable cross array unnest in the JSON index.
+- `exclude_array` (Boolean) Whether to exclude arrays in the JSON index.
+- `exclude_fields` (String) The exclude fields of the JSON index.
+- `exclude_paths` (String) The exclude paths of the JSON index.
+- `include_paths` (String) The include paths of the JSON index.
+- `index_paths` (String) The index paths of the JSON index.
+- `max_levels` (String) The maximum levels of the JSON index.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--range"></a>
+### Nested Schema for `tables.field_config_list.indexes.range`
+
+Read-Only:
+
+- `enabled` (Boolean) Whether the range index is enabled.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--text"></a>
+### Nested Schema for `tables.field_config_list.indexes.text`
+
+Read-Only:
+
+- `stop_word_exclude` (List of String) The stop words to exclude from the text index.
+- `stop_word_include` (List of String) The stop words to include in the text index.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--timestamp"></a>
+### Nested Schema for `tables.field_config_list.indexes.timestamp`
+
+Read-Only:
+
+- `enabled` (Boolean) Whether the timestamp index is enabled.
+
+
+<a id="nestedatt--tables--field_config_list--indexes--vector"></a>
+### Nested Schema for `tables.field_config_list.indexes.vector`
+
+Read-Only:
+
+- `vector_dimension` (String) The vector dimension.
+- `vector_distance_function` (String) The vector distance function.
+- `vector_index_type` (String) The vector index type.
+- `version` (String) The version of the vector index.
 
 
 
