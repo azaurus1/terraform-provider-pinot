@@ -159,10 +159,86 @@ func ToFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
 		}
 
 		if fieldConfig.Indexes != nil {
-			fc.Indexes = &model.FieldIndexes{
-				Inverted: &model.FieldIndexInverted{
+			fc.Indexes = &model.FieldIndexes{}
+
+			if fieldConfig.Indexes.Inverted != nil {
+				fc.Indexes.Inverted = &model.FieldIndexInverted{
 					Enabled: fieldConfig.Indexes.Inverted.Enabled.ValueString(),
-				},
+				}
+			}
+
+			if fieldConfig.Indexes.Bloom != nil {
+				fc.Indexes.Bloom = &model.FieldIndexBloom{
+					Fpp:            fieldConfig.Indexes.Bloom.Fpp.ValueString(),
+					MaxSizeInBytes: fieldConfig.Indexes.Bloom.MaxSizeInBytes.ValueString(),
+					LoadOnHeap:     fieldConfig.Indexes.Bloom.LoadOnHeap.ValueString(),
+				}
+			}
+
+			if fieldConfig.Indexes.Forward != nil {
+				fc.Indexes.Forward = &model.FieldIndexForward{
+					CompressionCodec:      fieldConfig.Indexes.Forward.CompressionCodec.ValueString(),
+					DeriveNumDocsPerChunk: fieldConfig.Indexes.Forward.DeriveNumDocsPerChunk.ValueString(),
+					RawIndexWriterVersion: fieldConfig.Indexes.Forward.RawIndexWriterVersion.ValueString(),
+				}
+			}
+
+			if fieldConfig.Indexes.Dictionary != nil {
+				fc.Indexes.Dictionary = &model.FieldIndexDictionary{
+					Disabled: fieldConfig.Indexes.Dictionary.Disabled.ValueBool(),
+				}
+			}
+
+			if fieldConfig.Indexes.Fst != nil {
+				fc.Indexes.Fst = &model.FieldIndexFst{
+					Enabled: fieldConfig.Indexes.Fst.Enabled.ValueBool(),
+				}
+			}
+
+			if fieldConfig.Indexes.H3 != nil {
+				fc.Indexes.H3 = &model.FieldIndexH3{
+					Resolutions: fieldConfig.Indexes.H3.Resolutions,
+				}
+			}
+
+			if fieldConfig.Indexes.Json != nil {
+				fc.Indexes.Json = &model.FieldIndexJson{
+					MaxLevels:               fieldConfig.Indexes.Json.MaxLevels.ValueString(),
+					ExcludeArray:            fieldConfig.Indexes.Json.ExcludeArray.ValueBool(),
+					DisableCrossArrayUnnest: fieldConfig.Indexes.Json.DisableCrossArrayUnnest.ValueBool(),
+					IncludePaths:            fieldConfig.Indexes.Json.IncludePaths.ValueString(),
+					ExcludePaths:            fieldConfig.Indexes.Json.ExcludePaths.ValueString(),
+					ExcludeFields:           fieldConfig.Indexes.Json.ExcludeFields.ValueString(),
+					IndexPaths:              fieldConfig.Indexes.Json.IndexPaths.ValueString(),
+				}
+			}
+
+			if fieldConfig.Indexes.Range != nil {
+				fc.Indexes.Range = &model.FieldIndexRange{
+					Enabled: fieldConfig.Indexes.Range.Enabled.ValueBool(),
+				}
+			}
+
+			if fieldConfig.Indexes.Text != nil {
+				fc.Indexes.Text = &model.FieldIndexText{
+					StopWordInclude: fieldConfig.Indexes.Text.StopWordInclude, // []string
+					StopWordExclude: fieldConfig.Indexes.Text.StopWordExclude, // []string
+				}
+			}
+
+			if fieldConfig.Indexes.Vector != nil {
+				fc.Indexes.Vector = &model.FieldIndexVector{
+					VectorIndexType:        fieldConfig.Indexes.Vector.VectorIndexType.ValueString(),
+					VectorDimension:        fieldConfig.Indexes.Vector.VectorDimension.ValueString(),
+					VectorDistanceFunction: fieldConfig.Indexes.Vector.VectorDistanceFunction.ValueString(),
+					Version:                fieldConfig.Indexes.Vector.Version.ValueString(),
+				}
+			}
+
+			if fieldConfig.Indexes.Timestamp != nil {
+				fc.Indexes.Timestamp = &model.FieldIndexTimestamp{
+					Enabled: fieldConfig.Indexes.Timestamp.Enabled.ValueBool(),
+				}
 			}
 		}
 

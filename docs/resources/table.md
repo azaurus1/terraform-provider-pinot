@@ -65,6 +65,7 @@ Optional:
 - `json` (Attributes) json index (see [below for nested schema](#nestedatt--field_config_list--indexes--json))
 - `range` (Attributes) range index (see [below for nested schema](#nestedatt--field_config_list--indexes--range))
 - `text` (Attributes) text search support (see [below for nested schema](#nestedatt--field_config_list--indexes--text))
+- `timestamp` (Attributes) timestamp index (see [below for nested schema](#nestedatt--field_config_list--indexes--timestamp))
 - `vector` (Attributes) vector index (see [below for nested schema](#nestedatt--field_config_list--indexes--vector))
 
 <a id="nestedatt--field_config_list--indexes--bloom"></a>
@@ -148,6 +149,14 @@ Optional:
 
 - `stopwordexclude` (List of String) stop word exclude
 - `stopwordinclude` (List of String) stop word include
+
+
+<a id="nestedatt--field_config_list--indexes--timestamp"></a>
+### Nested Schema for `field_config_list.indexes.timestamp`
+
+Optional:
+
+- `enabled` (Boolean) enabled
 
 
 <a id="nestedatt--field_config_list--indexes--vector"></a>

@@ -458,6 +458,185 @@ func (d *tablesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 														},
 													},
 												},
+												"bloom": schema.ListNestedAttribute{
+													Description: "The bloom index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"fpp": schema.StringAttribute{
+																Description: "The false positive probability of the bloom index.",
+																Computed:    true,
+															},
+															"max_size_in_bytes": schema.StringAttribute{
+																Description: "The maximum size in bytes of the bloom index.",
+																Computed:    true,
+															},
+															"load_on_heap": schema.StringAttribute{
+																Description: "Whether to load bloom index on heap.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"forward": schema.ListNestedAttribute{
+													Description: "The forward index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"compression_codec": schema.StringAttribute{
+																Description: "The compression codec of the forward index.",
+																Computed:    true,
+															},
+															"derive_num_docs_per_chunk": schema.StringAttribute{
+																Description: "The number of docs per chunk for the forward index.",
+																Computed:    true,
+															},
+															"raw_index_writer_version": schema.StringAttribute{
+																Description: "The raw index writer version of the forward index.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"dictionary": schema.ListNestedAttribute{
+													Description: "The dictionary index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"disabled": schema.BoolAttribute{
+																Description: "Whether the dictionary index is disabled.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"fst": schema.ListNestedAttribute{
+													Description: "The FST index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"enabled": schema.BoolAttribute{
+																Description: "Whether the FST index is enabled.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"h3": schema.ListNestedAttribute{
+													Description: "The H3 index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"resolutions": schema.ListAttribute{
+																Description: "The resolutions of the H3 index.",
+																Computed:    true,
+																ElementType: types.Int64Type,
+															},
+														},
+													},
+												},
+												"json": schema.ListNestedAttribute{
+													Description: "The JSON index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"max_levels": schema.StringAttribute{
+																Description: "The maximum levels of the JSON index.",
+																Computed:    true,
+															},
+															"exclude_array": schema.BoolAttribute{
+																Description: "Whether to exclude arrays in the JSON index.",
+																Computed:    true,
+															},
+															"disable_cross_array_unnest": schema.BoolAttribute{
+																Description: "Whether to disable cross array unnest in the JSON index.",
+																Computed:    true,
+															},
+															"include_paths": schema.StringAttribute{
+																Description: "The include paths of the JSON index.",
+																Computed:    true,
+															},
+															"exclude_paths": schema.StringAttribute{
+																Description: "The exclude paths of the JSON index.",
+																Computed:    true,
+															},
+															"exclude_fields": schema.StringAttribute{
+																Description: "The exclude fields of the JSON index.",
+																Computed:    true,
+															},
+															"index_paths": schema.StringAttribute{
+																Description: "The index paths of the JSON index.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"range": schema.ListNestedAttribute{
+													Description: "The range index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"enabled": schema.BoolAttribute{
+																Description: "Whether the range index is enabled.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"text": schema.ListNestedAttribute{
+													Description: "The text index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"stop_word_include": schema.ListAttribute{
+																Description: "The stop words to include in the text index.",
+																Computed:    true,
+																ElementType: types.StringType,
+															},
+															"stop_word_exclude": schema.ListAttribute{
+																Description: "The stop words to exclude from the text index.",
+																Computed:    true,
+																ElementType: types.StringType,
+															},
+														},
+													},
+												},
+												"vector": schema.ListNestedAttribute{
+													Description: "The vector index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"vector_index_type": schema.StringAttribute{
+																Description: "The vector index type.",
+																Computed:    true,
+															},
+															"vector_dimension": schema.StringAttribute{
+																Description: "The vector dimension.",
+																Computed:    true,
+															},
+															"vector_distance_function": schema.StringAttribute{
+																Description: "The vector distance function.",
+																Computed:    true,
+															},
+															"version": schema.StringAttribute{
+																Description: "The version of the vector index.",
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"timestamp": schema.ListNestedAttribute{
+													Description: "The timestamp index of the field.",
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"enabled": schema.BoolAttribute{
+																Description: "Whether the timestamp index is enabled.",
+																Computed:    true,
+															},
+														},
+													},
+												},
 											},
 										},
 									},

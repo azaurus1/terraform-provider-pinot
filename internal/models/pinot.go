@@ -85,6 +85,7 @@ type FieldIndexes struct {
 	Range      *FieldIndexRange      `tfsdk:"range"`
 	Text       *FieldIndexText       `tfsdk:"text"`
 	Vector     *FieldIndexVector     `tfsdk:"vector"`
+	Timestamp  *FieldIndexTimestamp  `tfsdk:"timestamp"`
 }
 
 type FieldIndexInverted struct {
@@ -139,6 +140,10 @@ type FieldIndexVector struct {
 	VectorDimension        types.String `tfsdk:"vectordimension"`
 	VectorDistanceFunction types.String `tfsdk:"vectordistancefunction"`
 	Version                types.String `tfsdk:"version"`
+}
+
+type FieldIndexTimestamp struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type FieldConfig struct {

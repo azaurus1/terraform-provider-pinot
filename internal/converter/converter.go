@@ -594,6 +594,13 @@ func convertFieldConfigList(table *pinot_api.Table) []*models.FieldConfig {
 					Version:                types.StringValue(fieldConfig.Indexes.Vector.Version),
 				}
 			}
+
+			if fieldConfig.Indexes.Timestamp != nil {
+				fc.Indexes.Timestamp = &models.FieldIndexTimestamp{
+					Enabled: types.BoolValue(fieldConfig.Indexes.Timestamp.Enabled),
+				}
+			}
+
 		}
 
 		fieldConfigs = append(fieldConfigs, fc)

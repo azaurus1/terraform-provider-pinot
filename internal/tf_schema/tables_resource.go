@@ -905,6 +905,16 @@ func FieldConfigList() schema.ListNestedAttribute {
 								},
 							},
 						},
+						"timestamp": schema.SingleNestedAttribute{
+							Description: "timestamp index",
+							Optional:    true,
+							Attributes: map[string]schema.Attribute{
+								"enabled": schema.BoolAttribute{
+									Description: "enabled",
+									Optional:    true,
+								},
+							},
+						},
 					},
 				},
 			},
