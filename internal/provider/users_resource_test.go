@@ -23,28 +23,28 @@ func TestAccUsersResource(t *testing.T) {
 	// fmt.Println(pinot.URI)
 
 	providerConfig := fmt.Sprintf(`
-provider "pinot" {
-	controller_url = "http://%s"
-	auth_token = "YWRtaW46dmVyeXNlY3JldA"
-}
-`, pinot.URI)
+	provider "pinot" {
+		controller_url = "http://%s"
+		auth_token = "YWRtaW46dmVyeXNlY3JldA"
+	}
+	`, pinot.URI)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: providerConfig + `
-resource "pinot_user" "test" {
-	username  = "user"
-	password  = "password"
-	component = "BROKER"
-	role      = "USER"
-				  
-	lifecycle {
-		ignore_changes = [password]
-		}
-}
-`,
+				resource "pinot_user" "test" {
+					username  = "user"
+					password  = "password"
+					component = "BROKER"
+					role      = "USER"
+								
+					lifecycle {
+						ignore_changes = [password]
+						}
+				}
+				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("pinot_user.test", "username", "user"),
 					resource.TestCheckResourceAttr("pinot_user.test", "password", "password"),
@@ -61,17 +61,17 @@ resource "pinot_user" "test" {
 			// Update and Read testing
 			{
 				Config: providerConfig + `
-resource "pinot_user" "test" {
-	username  = "user"
-	password  = "password"
-	component = "BROKER"
-	role      = "ADMIN"
+				resource "pinot_user" "test" {
+					username  = "user"
+					password  = "password"
+					component = "BROKER"
+					role      = "ADMIN"
 
-	lifecycle {
-		ignore_changes = [password]
-		}
-}
-`,
+					lifecycle {
+						ignore_changes = [password]
+						}
+				}
+				`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("pinot_user.test", "username", "user"),
 					// resource.TestCheckResourceAttr("pinot_user.test", "password", "password"), // This is ignored because it returns the salted and hashed password AGAIN
