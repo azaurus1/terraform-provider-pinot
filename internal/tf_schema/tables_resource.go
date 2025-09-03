@@ -790,6 +790,14 @@ func FieldConfigList() schema.ListNestedAttribute {
 									Description: "raw index writer version",
 									Optional:    true,
 								},
+								"targetdocsperchunk": schema.StringAttribute{
+									Description: "The target number of docs per chunk",
+									Optional:    true,
+								},
+								"targetmaxchunksize": schema.StringAttribute{
+									Description: "The target max chunk size",
+									Optional:    true,
+								},
 							},
 						},
 						"dictionary": schema.SingleNestedAttribute{

@@ -22,11 +22,11 @@ func TestAccUsersDataSource(t *testing.T) {
 	// fmt.Println(pinot.URI)
 
 	providerConfig := fmt.Sprintf(`
-provider "pinot" {
-	controller_url = "http://%s"
-	auth_token = "YWRtaW46dmVyeXNlY3JldA"
-}
-`, pinot.URI)
+	provider "pinot" {
+		controller_url = "http://%s"
+		auth_token = "YWRtaW46dmVyeXNlY3JldA"
+	}
+	`, pinot.URI)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

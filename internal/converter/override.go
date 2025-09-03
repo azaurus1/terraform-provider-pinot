@@ -180,6 +180,8 @@ func ToFieldConfigList(plan *models.TableResourceModel) []model.FieldConfig {
 					CompressionCodec:      fieldConfig.Indexes.Forward.CompressionCodec.ValueString(),
 					DeriveNumDocsPerChunk: fieldConfig.Indexes.Forward.DeriveNumDocsPerChunk.ValueString(),
 					RawIndexWriterVersion: fieldConfig.Indexes.Forward.RawIndexWriterVersion.ValueString(),
+					TargetDocsPerChunk:    fieldConfig.Indexes.Forward.TargetDocsPerChunk.ValueString(),
+					TargetMaxChunkSize:    fieldConfig.Indexes.Forward.TargetMaxChunkSize.ValueString(),
 				}
 			}
 

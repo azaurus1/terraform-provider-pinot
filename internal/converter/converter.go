@@ -540,6 +540,8 @@ func convertFieldConfigList(table *pinot_api.Table) []*models.FieldConfig {
 					CompressionCodec:      types.StringValue(fieldConfig.Indexes.Forward.CompressionCodec),
 					DeriveNumDocsPerChunk: types.StringValue(fieldConfig.Indexes.Forward.DeriveNumDocsPerChunk),
 					RawIndexWriterVersion: types.StringValue(fieldConfig.Indexes.Forward.RawIndexWriterVersion),
+					TargetDocsPerChunk:    types.StringValue(fieldConfig.Indexes.Forward.TargetDocsPerChunk),
+					TargetMaxChunkSize:    types.StringValue(fieldConfig.Indexes.Forward.TargetMaxChunkSize),
 				}
 			}
 
