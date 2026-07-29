@@ -250,6 +250,7 @@ type StreamConfig struct {
 	RealtimeSegmentFlushThresholdSegmentTime                         types.String `tfsdk:"realtime_segment_flush_threshold_segment_time"`
 	RealtimeSegmentServerUploadToDeepStore                           types.String `tfsdk:"realtime_segment_server_upload_to_deep_store"`
 	Region                                                           types.String `tfsdk:"region"`
+	SaslClientCallbackHandlerClass                                   types.String `tfsdk:"sasl_client_callback_handler_class"`
 	SaslJaasConfig                                                   types.String `tfsdk:"sasl_jaas_config"`
 	SaslMechanism                                                    types.String `tfsdk:"sasl_mechanism"`
 	SecretKey                                                        types.String `tfsdk:"secret_key"`

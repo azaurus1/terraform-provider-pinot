@@ -188,6 +188,7 @@ func convertIngestionConfig(table *pinot_api.Table) *models.IngestionConfig {
 				RealtimeSegmentFlushDesiredSize:                                  types.StringValue(streamConfig.RealtimeSegmentFlushDesiredSize),
 				RealtimeSegmentFlushThresholdSegmentSize:                         types.StringValue(streamConfig.RealtimeSegmentFlushThresholdSegmentSize),
 				Region:                                                           types.StringValue(streamConfig.Region),
+				SaslClientCallbackHandlerClass:                                   types.StringValue(streamConfig.SaslClientCallbackHandlerClass),
 				SaslJaasConfig:                                                   types.StringValue(streamConfig.SaslJaasConfig),
 				SaslMechanism:                                                    types.StringValue(streamConfig.SaslMechanism),
 				SecretKey:                                                        types.StringValue(streamConfig.SecretKey),

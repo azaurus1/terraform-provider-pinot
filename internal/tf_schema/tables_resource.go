@@ -374,6 +374,9 @@ func IngestionConfig() schema.SingleNestedAttribute {
 								"region": schema.StringAttribute{
 									Optional: true,
 								},
+								"sasl_client_callback_handler_class": schema.StringAttribute{
+									Optional: true,
+								},
 								"sasl_jaas_config": schema.StringAttribute{
 									Optional: true,
 								},

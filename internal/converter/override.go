@@ -537,6 +537,7 @@ func ToIngestionConfig(plan *models.TableResourceModel) *model.TableIngestionCon
 				RealtimeSegmentFlushDesiredSize:                                  streamConfig.RealtimeSegmentFlushDesiredSize.ValueString(),
 				RealtimeSegmentFlushThresholdSegmentSize:                         streamConfig.RealtimeSegmentFlushThresholdSegmentSize.ValueString(),
 				Region:                                                           streamConfig.Region.ValueString(),
+				SaslClientCallbackHandlerClass:                                   streamConfig.SaslClientCallbackHandlerClass.ValueString(),
 				SaslJaasConfig:                                                   streamConfig.SaslJaasConfig.ValueString(),
 				SaslMechanism:                                                    streamConfig.SaslMechanism.ValueString(),
 				SecretKey:                                                        streamConfig.SecretKey.ValueString(),
